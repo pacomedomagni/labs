@@ -1,0 +1,100 @@
+<mat-card appearance="outlined" class="pb-3xs">
+    <div class="flex justify-center">
+        <div [formGroup]="emailForm" class="flex flex-row items-center">
+            <mat-form-field class="w-[300px]" appearance="outline" hideRequiredMarker="true">
+                <mat-label>Email Address</mat-label>
+                <input
+                    #emailAddressInput
+                    formControlName="emailAddress"
+                    matInput
+                    (keydown.enter)="onSubmitClicked()"
+                />
+                @if (
+                    emailForm.get('emailAddress')?.hasError('required') &&
+                    emailForm.get('emailAddress')?.touched
+                ) {
+                    <mat-error>Email address is required</mat-error>
+                }
+                @if (
+                    emailForm.get('emailAddress')?.hasError('validEmail') &&
+                    emailForm.get('emailAddress')?.touched
+                ) {
+                    <mat-error>Please enter a valid email address</mat-error>
+                }
+            </mat-form-field>
+            <button
+                mat-flat-button
+                color="primary"
+                class="ml-3xs mb-mat-error-offset"
+                aria-label="Submit new user email address"
+                [disabled]="emailForm.invalid || enrollmentState()"
+                (click)="onSubmitClicked()"
+            >
+                Submit
+            </button>
+        </div>
+    </div>
+</mat-card>
+<mat-card appearance="outlined" class="mt-xxs" role="region" aria-live="polite" aria-atomic="true">
+    @if (initialState()) {
+        <cui-empty-state
+            icon="people"
+            primaryText="Enroll New User"
+            secondaryText="Please enter a valid email address to begin the enrollment process"
+        >
+        </cui-empty-state>
+        <!-- Screen reader announcement for initial state -->
+        <div class="visuallyhidden" role="status">
+            @if (initialState() && shouldAnnounceInitialState()) {
+                <span
+                    >Enroll New User. Please enter a valid email address to begin the enrollment
+                    process</span
+                >
+            }
+        </div>
+    } @else if (userAlreadyExistsState()) {
+        <cui-empty-state
+            role="status"
+            icon="ubi_sadcone"
+            [isSvgIcon]="true"
+            primaryText="Customer is already enrolled"
+            [secondaryText]="submittedEmailAddress() + ' is already enrolled in TMX Labs'"
+            actionText="View Customer"
+            actionButtonType="primary"
+            (actionTriggered)="viewCustomer()"
+        ></cui-empty-state>
+    } @else if (enrollmentState()) {
+        <h2 class="visuallyhidden">User Enrollment Form</h2>
+        <tmx-user-enrollment-stepper
+            aria-live="off"
+            (submitted)="onStepperSubmitted($event)"
+            (firstStepBackClicked)="onStepperBackedOut()"
+        ></tmx-user-enrollment-stepper>
+    } @else if (enrollmentCompleteState()) {
+        <cui-empty-state
+            role="status"
+            icon="check_circle"
+            primaryText="Enrollment Successful"
+            [secondaryText]="newUserFullName() + ' was successfully enrolled in TMX Labs'"
+        >
+            <div class="flex flex-row gap-8">
+                <button
+                    mat-flat-button
+                    color="primary"
+                    aria-label="View Customer"
+                    (click)="viewCustomer()"
+                >
+                    View Customer
+                </button>
+                <button
+                    mat-flat-button
+                    color="primary"
+                    aria-label="Assign Device"
+                    (click)="assignDevice()"
+                >
+                    Assign Device
+                </button>
+            </div>
+        </cui-empty-state>
+    }
+</mat-card>

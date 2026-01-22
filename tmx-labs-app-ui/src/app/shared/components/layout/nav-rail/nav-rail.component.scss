@@ -1,0 +1,44 @@
+@use 'base/variables' as base-vars;
+$icon-size: 2.4rem;
+$navbar-width: 9rem;
+$sidenav-width: calc(#{base-vars.$side-sheet-width} - #{$navbar-width});
+
+:host {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  left: 0;
+  position: fixed;
+  top: 0;
+  z-index: 2;
+
+  .mat-icon {
+    font-size: $icon-size;
+    height: $icon-size;
+    line-height: $icon-size;
+    width: $icon-size;
+  }
+}
+
+.nav-rail {
+  display: flex;
+  flex-direction: column;
+  width: $navbar-width;
+}
+
+.nav-rail-link {
+  border-radius: 0;
+  height: 9rem !important;
+  text-decoration: inherit;
+  transition: all 0.2s;
+  width: 100% !important;
+
+  &-label {
+    font-size: 1.3rem;
+    font-weight: 400;
+    line-height: 1;
+    white-space: break-spaces;
+    text-transform: capitalize;
+  }
+}

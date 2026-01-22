@@ -1,0 +1,15 @@
+.app-main {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
+
+.app-main__header {
+	flex: 0 0 auto;
+}
+
+.app-main__content {
+	flex: 1 1 auto;
+	overflow: auto;
+}

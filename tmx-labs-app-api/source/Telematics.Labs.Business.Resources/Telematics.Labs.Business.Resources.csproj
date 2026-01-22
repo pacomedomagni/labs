@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifiers>linux-arm64</RuntimeIdentifiers>
+    <AssemblyName>Progressive.Telematics.Labs.Business.Resources</AssemblyName>
+    <RootNamespace>Progressive.Telematics.Labs.Business.Resources</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Remove="C:\Users\jsouthw1\.nuget\packages\typeliteplus.dotnetscript\2.1.0\contentFiles\any\netstandard2.0\TypeLite.csx" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection.Libraries" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.5" />
+    <PackageReference Include="TypeLitePlus" Version="2.1.0" />
+    <PackageReference Include="TypeLitePlus.DotNetScript" Version="2.1.0" />
+    <PackageReference Include="Tmx.EditorConfig" Version="1.4.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Telematics.Labs.Shared\Telematics.Labs.Shared.csproj" />
+  </ItemGroup>
+</Project>

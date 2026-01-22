@@ -1,0 +1,54 @@
+{
+  "global": {
+    "APP_NAME": "tmx-labs-app",
+    "APP_PLATFORM": "pro",
+    "APP_TYPE": "dotnet",
+    "OPENSHIFT_PREFIX": "pro-tmx-labs-app-api"
+  },
+  "build": {
+    "default": {
+      "ENABLE_KERBSIDECAR": true,
+      "APP_BUILD_PATH": "./tmx-labs-app/tmx-labs-app-api/source",
+      "APP_DOCKERFILE": "${APP_BASE_PATH}/tmx-labs-app-api/Dockerfile"
+    }
+  },
+  "deploy": {
+    "dev": {
+      "ASPNETCORE_ENVIRONMENT": "dev",
+      "ENABLE_KERBSIDECAR": true,
+      "KERBSIDECAR_ZID_NAME": "zclst03d",
+      "KERBSIDECAR_ZID_REALM": "proghszq.com",
+      "KERBSIDECAR_ZID_VAULT_ROLE": "pro-nonprod-r",
+      "KERBSIDECAR_ZID_VAULT_PATH": "active-directory/pro/nonprod/proghszq/zclst03d",
+      "PGR_PROXY_BYPASS": "d-ubi-homebase-services, d-ubi-labs-services, d-ubi-support-services, d-ubi-myrate-services, intr-d-vin, intr-q-vin, intr-a-cssvin"
+    },
+    "test": {
+      "ASPNETCORE_ENVIRONMENT": "test",
+      "ENABLE_KERBSIDECAR": true,
+      "KERBSIDECAR_ZID_NAME": "zclst03q",
+      "KERBSIDECAR_ZID_REALM": "proghszq.com",
+      "KERBSIDECAR_ZID_VAULT_ROLE": "pro-nonprod-r",
+      "KERBSIDECAR_ZID_VAULT_PATH": "active-directory/pro/nonprod/proghszq/zclst03q",
+      "PGR_PROXY_BYPASS": "t-ubi-homebase-services, t-ubi-labs-services, t-ubi-support-services, t-ubi-myrate-services, intr-d-vin, intr-q-vin, intr-a-cssvin"
+    },
+    "qa": {
+      "ASPNETCORE_ENVIRONMENT": "qa",
+      "ENABLE_KERBSIDECAR": true,
+      "KERBSIDECAR_ZID_NAME": "zclst03q",
+      "KERBSIDECAR_ZID_REALM": "proghszq.com",
+      "KERBSIDECAR_ZID_VAULT_ROLE": "pro-nonprod-r",
+      "KERBSIDECAR_ZID_VAULT_PATH": "active-directory/pro/nonprod/proghszq/zclst03q",
+      "PGR_PROXY_BYPASS": "q-ubi-homebase-services, q-ubi-labs-services, q-ubi-support-services, q-ubi-myrate-services, intr-d-vin, intr-q-vin, intr-a-cssvin"
+    },
+    "stress": {},
+    "prod": {
+      "ASPNETCORE_ENVIRONMENT": "prod",
+      "KERBSIDECAR_ZID_NAME": "zclst03p",
+      "KERBSIDECAR_ZID_REALM": "proghszq.com",
+      "KERBSIDECAR_ZID_VAULT_ROLE": "pro-prod-r",
+      "KERBSIDECAR_ZID_VAULT_PATH": "active-directory/pro/prod/proghszq/zclst03p",
+      "PGR_PROXY_BYPASS": "p-ubi-homebase-services, p-ubi-labs-services, p-ubi-support-services, p-ubi-myrate-services, intr-d-vin, intr-q-vin, intr-a-cssvin",
+      "OPENSHIFT_GTM_ROUTE_URL": "${OPENSHIFT_PROJECT}.${OPENSHIFT_GTM_DOMAIN}"
+    }
+  }
+}

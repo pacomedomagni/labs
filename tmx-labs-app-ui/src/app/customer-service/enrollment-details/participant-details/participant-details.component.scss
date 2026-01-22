@@ -1,0 +1,79 @@
+@use '../../../../styles/variables' as vars;
+
+:host {
+  display: block;
+}
+
+cui-accordion-header {
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+
+  tmx-menu-button-group {
+    margin-left: auto;
+    flex: 0 0 auto;
+  }
+}
+
+
+cui-accordion-item {
+  align-items: center;
+  gap: 1.6rem;
+}
+
+.device-icon{
+  width: 5rem;
+  height: 5rem;
+  margin-right: 0.8rem;
+}
+
+.participant-name {
+    font-size: 16px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex: 0 0 auto;
+    margin-right: 1rem;
+}
+
+.vehicle-description {
+  font-weight: 600;
+  font-size: 16px;
+  color: inherit;
+  margin-top: 0;
+  margin-bottom: 0;
+  display: block;
+  text-align: left;
+  flex: 1 1 18rem;
+  padding-left: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  align-self: center;
+}
+
+@media (min-width: 64rem) {
+  cui-accordion-header {
+    flex-wrap: nowrap;
+  }
+
+  .vehicle-description {
+    flex: 1 1 auto;
+    padding-left: 15%;
+  }
+}
+
+.participant-section {
+  padding: 1.6rem 0;
+}
+
+.section-heading {
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  font-size: 0.75rem;
+  border-bottom: 1px solid var(--cui-color-border-subtle, #dfe3e8);
+  color: var(--cui-color-text-muted, #5f6b7d);
+}
+

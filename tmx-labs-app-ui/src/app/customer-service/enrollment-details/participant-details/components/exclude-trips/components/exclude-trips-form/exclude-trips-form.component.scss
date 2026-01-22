@@ -1,0 +1,12 @@
+.form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 12px;
+}
+
+.control {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}

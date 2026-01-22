@@ -1,0 +1,56 @@
+@use 'base/variables';
+//@import '@angular/material/theming';
+
+.cui-ubi-table {
+   // @include mat-elevation(2);
+    border-collapse: collapse;
+    border-radius: variables.$border-radius;
+    border-spacing: 0;
+    font-size: 14px;
+    margin-bottom: 6rem;
+    table-layout: auto;
+    width: 100%;
+  
+    th,
+    td {
+      padding-bottom: 2rem;
+      padding-top: 2rem;
+    }
+  
+    thead {
+      tr {
+        height: 5.6rem;
+      }
+  
+      th {
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+        color: variables.$dark-gray;
+        font-size: 12px;
+        font-weight: 400;
+        padding-right: 2.4rem;
+        text-align: left;
+  
+        &:first-of-type {
+          padding-left: 2.4rem;
+        }
+      }
+    }
+  
+    tbody {
+      tr {
+        height: 4.8rem;
+      }
+    }
+  
+    td {
+      border-bottom-style: solid;
+      border-bottom-width: 1px;
+      padding-right: 2.4rem;
+      vertical-align: middle;
+  
+      &:first-of-type {
+        padding-left: 2.4rem;
+      }
+    }
+  }

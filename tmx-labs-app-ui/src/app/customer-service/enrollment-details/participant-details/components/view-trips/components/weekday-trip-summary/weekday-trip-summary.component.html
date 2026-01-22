@@ -1,0 +1,75 @@
+@if (hasData()) {
+    <div class="weekday-trip-summary">
+        <table mat-table [dataSource]="dataSource()">
+            <!-- Day of Week Column -->
+            <ng-container matColumnDef="dayOfWeek">
+                <th mat-header-cell *matHeaderCellDef>Weekday</th>
+                <td mat-cell *matCellDef="let element">
+                    {{ element.dayOfWeek }}
+                </td>
+                <td mat-footer-cell *matFooterCellDef class="font-bold">Total</td>
+            </ng-container>
+
+            <!-- Trips Column -->
+            <ng-container matColumnDef="trips">
+                <th class="text-right" mat-header-cell *matHeaderCellDef>Trips</th>
+                <td class="text-right" mat-cell *matCellDef="let element">
+                    {{ element.trips }}
+                </td>
+                <td class="text-right" mat-footer-cell *matFooterCellDef>{{ totals().trips }}</td>
+            </ng-container>
+
+            <!-- Duration Column -->
+            <ng-container matColumnDef="duration">
+                <th class="text-right" mat-header-cell *matHeaderCellDef>Duration</th>
+                <td class="text-right" mat-cell *matCellDef="let element">
+                    {{ formattedDuration(element.duration) }}
+                </td>
+                <td class="text-right" mat-footer-cell *matFooterCellDef>{{ formattedTotalDuration() }}</td>
+            </ng-container>
+
+            <!-- Mileage Column -->
+            <ng-container matColumnDef="mileage">
+                <th class="text-right" mat-header-cell *matHeaderCellDef>Mileage</th>
+                <td class="text-right" mat-cell *matCellDef="let element">
+                    {{ element.mileage | number: '1.2-2' }}
+                </td>
+                <td class="text-right" mat-footer-cell *matFooterCellDef>{{ totals().mileage | number: '1.2-2' }}</td>
+            </ng-container>
+
+            <!-- Hard Brakes Column -->
+            <ng-container matColumnDef="hardBrakes">
+                <th class="text-right" mat-header-cell *matHeaderCellDef>Hard Brakes</th>
+                <td class="text-right" mat-cell *matCellDef="let element">
+                    {{ element.hardBrakes }}
+                </td>
+                <td class="text-right" mat-footer-cell *matFooterCellDef>{{ totals().hardBrakes }}</td>
+            </ng-container>
+
+            <!-- Hard Accels Column -->
+            <ng-container matColumnDef="hardAccels">
+                <th class="text-right" mat-header-cell *matHeaderCellDef>Hard Accels</th>
+                <td class="text-right" mat-cell *matCellDef="let element">
+                    {{ element.hardAccels }}
+                </td>
+                <td class="text-right" mat-footer-cell *matFooterCellDef>{{ totals().hardAccels }}</td>
+            </ng-container>
+
+            <!-- High Risk Seconds Column -->
+            <ng-container matColumnDef="highRiskSeconds">
+                <th class="text-right" mat-header-cell *matHeaderCellDef>High Risk Seconds</th>
+                <td class="text-right" mat-cell *matCellDef="let element">
+                    {{ element.highRiskSeconds }}
+                </td>
+                <td class="text-right" mat-footer-cell *matFooterCellDef>{{ totals().highRiskSeconds }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
+            <tr mat-footer-row *matFooterRowDef="columnsToDisplay" class="font-bold"></tr>
+        </table>
+    </div>
+} @else {
+    <cui-empty-state icon="calendar_view_week" primaryText="Weekday Trip Summary" secondaryText="No weekday trip data found">
+    </cui-empty-state>
+}

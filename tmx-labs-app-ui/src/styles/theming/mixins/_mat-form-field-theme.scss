@@ -1,0 +1,25 @@
+@use 'sass:map';
+@use 'theming/palettes';
+@use '@angular/material' as mat;
+@use '../../variables' as base-vars;
+
+@mixin mat-form-field-theme($theme) {
+    $color-config: mat.m2-get-color-config($theme);
+    $is-light: map.get($color-config, 'is-light');
+
+    .mat-mdc-form-field {
+        // Placeholder text color
+        .mat-mdc-input-element::placeholder {
+            @if $is-light {
+                color: base-vars.$placeholder-gray !important;
+            }
+        }
+
+        // Select placeholder
+        .mat-mdc-select-placeholder {
+            @if $is-light {
+                color: base-vars.$placeholder-gray !important;
+            }
+        }
+    }
+}

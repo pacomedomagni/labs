@@ -1,0 +1,40 @@
+<ng-template>
+  <tr [ngClass]="rowClass()">
+    <td
+      [style.width.%]="labelSpan() ?? undefined"
+      class="font-bold pr-bl-2 relative"
+      [ngClass]="colClass()"
+    >
+      @if (decoratorIcon()) {
+        <div>
+          <span class="screen-reader-only">{{ screenReaderLabel() }}</span>
+          <mat-icon
+            class="decorator-icon"
+            [class]="decoratorIconClass() ?? ''"
+            >{{ decoratorIcon() }}</mat-icon
+          >
+        </div>
+      }
+      @if (label()) {
+        <span>
+          {{ label() }}
+          @if (labelHelpKey()) {
+            <tmx-help-text [helpKey]="labelHelpKey()"></tmx-help-text>
+          }
+        </span>
+      }
+      <ng-content select="[list-item-label]"></ng-content>
+    </td>
+    <td>
+      <div class="flex">
+        <ng-content></ng-content>
+        @if (contentHelpKey()) {
+          <tmx-help-text
+            class="ml-bl-3 my-auto"
+            [helpKey]="contentHelpKey()"
+          ></tmx-help-text>
+        }
+      </div>
+    </td>
+  </tr>
+</ng-template>

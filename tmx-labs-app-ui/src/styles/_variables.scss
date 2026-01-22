@@ -1,0 +1,7 @@
+@use 'base/variables';
+
+$navbar-width: 9rem;
+$sidenav-width: calc(#{variables.$side-sheet-width} - #{$navbar-width});
+
+$placeholder-gray: #757575;
+$white: #FFFFFF;

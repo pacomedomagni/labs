@@ -1,0 +1,56 @@
+\<cui-vertical-stepper linear="true">
+    <cui-step [stepControl]="contactDetailsFormGroup" [summary]="getContactDetailsSummary()" aria-label="Step 1 of 3: Contact Details">
+        <form [formGroup]="contactDetailsFormGroup">
+            <ng-template matStepLabel>Contact Details</ng-template>
+            <tmx-contact-details-form formControlName="contactDetails"></tmx-contact-details-form>
+            <div class="flex justify-end max-w-xl space-x-8">
+                <button mat-stroked-button (click)="firstStepBackClicked.emit()" color="primary">
+                    <mat-icon>arrow_back</mat-icon>
+                    <span>Back</span>
+                </button>
+                <button
+                    mat-flat-button
+                    matStepperNext
+                    [disabled]="!contactDetails?.valid"
+                    color="primary"
+                >
+                    <mat-icon>arrow_forward</mat-icon>
+                    <span>Next</span>
+                </button>
+            </div>
+        </form>
+    </cui-step>
+    <cui-step [stepControl]="vehicleDetailsFormGroup" [summary]="getVehicleSummary()" aria-label="Step 2 of 3: Vehicle Details">
+        <form [formGroup]="vehicleDetailsFormGroup" class="max-w-[650px]">
+            <ng-template matStepLabel>Vehicle Details</ng-template>
+            <tmx-vehicle-details formControlName="vehicleDetails"></tmx-vehicle-details>
+            <div class="flex w-full justify-end space-x-8">
+                <button mat-stroked-button matStepperPrevious color="primary">
+                    <mat-icon>arrow_back</mat-icon>
+                    <span>Back</span>
+                </button>
+                <button mat-flat-button matStepperNext color="primary" [disabled]="!vehicleDetails?.valid">
+                    <mat-icon>arrow_forward</mat-icon>
+                    <span>Next</span>
+                </button>
+            </div>
+        </form>
+    </cui-step>
+    <cui-step [stepControl]="reviewFormGroup" aria-label="Step 3 of 3: Review">
+        <ng-template matStepLabel>Review</ng-template>
+        <div class="w-full">
+            <p class="py-8 px-4">
+                Please review the details and if you wish to proceed click SUBMIT.
+            </p>
+            <div class="flex w-full justify-center space-x-8">
+                <button mat-stroked-button matStepperPrevious color="primary">
+                    <mat-icon>arrow_back</mat-icon>
+                    <span>Back</span>
+                </button>
+                <button mat-flat-button matStepperNext color="primary" (click)="submit()">
+                    <span>Submit</span>
+                </button>
+            </div>
+        </div>
+    </cui-step>
+</cui-vertical-stepper>

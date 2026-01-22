@@ -1,0 +1,47 @@
+<div class="trip-insights-container">
+    @if(isLoading) {
+        <div class="loading-state">
+            <p>Loading trip data...</p>
+        </div>
+    } @else if(error) {
+        <div class="error-state">
+            <p>{{ error }}</p>
+        </div>
+    } @else if(tripDetails && tripDetails.length > 0) {
+        <div class="charts-wrapper">
+            <div class="chart-section">
+                <canvas #tripSpeedChart></canvas>
+            </div>
+        </div>
+        <div class="legend-section">
+            <div class="legend-title">Risk Times</div>
+            <div class="legend-content">
+                <div class="legend-item">
+                    <div class="legend-color low-risk"></div>
+                    <div class="legend-text">
+                        <strong>Low Risk Times</strong>
+                        <p>Weekdays: 9 AM - 3 PM, 6 PM - 9 PM</p>
+                        <p>Weekends: 6 AM - 9 PM</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color medium-risk"></div>
+                    <div class="legend-text">
+                        <strong>Medium Risk Times</strong>
+                        <p>Weekdays: 4 AM - 9 AM, 3 PM - 6 PM, 9 PM - 12 AM</p>
+                        <p>Weekends: 4 AM - 6 AM, 9 PM - 12 AM</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color high-risk"></div>
+                    <div class="legend-text">
+                        <strong>High Risk Times</strong>
+                        <p>All days: 12 AM - 4 AM</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    } @else {
+       <cui-empty-state icon="edit_road" primaryText="Trip Insights" secondaryText="No detailed trip data found"></cui-empty-state>
+    }
+</div>

@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+.swap-devices__container {
+  display: flex;
+  flex-direction: column;
+  padding: var(--cui-spacing-xs, 0.75rem);
+  padding-bottom: 0;
+}
+
+.swap-devices__field {
+  width: 100%;
+}
+
+.swap-devices__trigger,
+.swap-devices__option {
+  display: flex;
+  flex-direction: column;
+}
+
+.swap-devices__trigger-primary,
+.swap-devices__option-primary {
+  font-weight: 600;
+}
+
+.swap-devices__trigger-secondary,
+.swap-devices__option-secondary {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  color: var(--cui-color-neutral-600, #4b5563);
+}
+
+.swap-devices__trigger-secondary {
+  margin-top: 0.125rem;
+}
+
+.swap-devices__option-secondary {
+  margin-top: 0.125rem;
+}

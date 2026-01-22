@@ -1,0 +1,31 @@
+mat-icon {
+	vertical-align: middle;
+	height: 20px;
+	width: 20px;
+	font-size: 20px;
+	// Needed due to: https://github.com/google/material-design-icons/issues/648
+	transform: rotate(0.03deg);
+}
+
+.cursor-help {
+	cursor: help;
+}
+
+.cursor-pointer {
+	cursor: pointer;
+}
+
+.help-icon-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:focus {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+    }
+}

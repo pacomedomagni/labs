@@ -1,0 +1,30 @@
+{
+	"environment": {
+		"name": "local",
+		"isProduction": false,
+		"prefix": "d"
+	},
+	"build": {
+		"version": "1",
+		"buildId": "1.0.0",
+		"buildNumber": "1.0.0",
+		"branch": "local"
+	},
+	"auth": {
+		"issuer": "dev-tokenservice.proghszq.com",
+		"discoveryDoc": "/oidc.discovery.json",
+		"redirectUri": "/oauth_sso",
+		"clientId": "ubi-ui-smarthub",
+		"responseType": "code",
+		"scope": "openid",
+		"skipIssuerCheck": true,
+		"strictDiscoveryDocumentValidation": false,
+		"showDebugInformation": true
+	},
+	"apiKeys": {
+		"googleMaps": "AIzaSyDhPPbW0jMFZN7S6NruSVloEyRRCRPtoXw"
+	},
+	"connections": {
+		"apiUrl": "https://localhost:44313/Api"
+	}
+}

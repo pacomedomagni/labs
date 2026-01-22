@@ -1,0 +1,46 @@
+  <table mat-table [dataSource]="dataSource" class="cui-table" aria-label="Customer search results">
+    <!-- Full Name Column -->
+    <ng-container matColumnDef="fullName">
+      <th mat-header-cell class="cui-cell-12" *matHeaderCellDef>Customer Name</th>
+      <td mat-cell class="cui-cell-12" *matCellDef="let element">
+        {{ element.user.lastName }}, {{ element.user.firstName }}
+      </td>
+    </ng-container>
+    <!-- Email Column -->
+    <ng-container matColumnDef="email">
+      <th mat-header-cell class="cui-cell-12" *matHeaderCellDef>Email Address</th>
+      <td mat-cell class="cui-cell-12" *matCellDef="let element">
+        {{ element.user.email }}
+      </td>
+    </ng-container>
+    <!-- Action Column -->
+    <ng-container matColumnDef="actions" stickyEnd>
+      <th mat-header-cell class="cui-cell-6 lg:cui-cell-8 cui-cell-actions" *matHeaderCellDef>
+        <span class="screen-reader-only">Actions</span>
+      </th>
+      <td
+        mat-cell
+        class="py-0 cui-cell-4 px-bl-2 lg:cui-cell-border-left visible text-center"
+        *matCellDef="let element"
+      >
+        <button
+          mat-flat-button
+          color="primary"
+          class="inline-block"
+          (click)="viewParticipant.emit(element)"
+          [aria-label]="'View ' + element.user.fullName"
+        >
+          Open
+        </button>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr
+      mat-row
+      *matRowDef="let row; columns: displayedColumns"
+    ></tr>
+  </table>
+  <mat-paginator
+    [pageSizeOptions]="[10]"
+    showFirstLastButtons
+  ></mat-paginator>

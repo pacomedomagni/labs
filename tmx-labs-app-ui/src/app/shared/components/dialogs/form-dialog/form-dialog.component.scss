@@ -1,0 +1,38 @@
+:host {
+    ::ng-deep {
+        .dialog-footer {
+            justify-content: flex-end !important;
+        }
+
+        tmx-help-text mat-icon {
+            font-size: 24px;
+            height: 24px;
+            width: 24px;
+        }
+
+        tmx-help-text {
+            margin-top: 0px !important;
+        }
+
+        .mat-mdc-dialog-title {
+            margin-top: 20px;
+        }
+
+        /* Ensure dialog subtitle/content wraps and breaks long words to avoid horizontal scrolling */
+        .dialog-sub-header,
+        .dialog-sub-header .notification-banner,
+        .dialog-sub-header .notification-banner span {
+            white-space: normal !important;
+            word-break: break-word !important;
+            overflow-wrap: anywhere !important;
+        }
+
+        button.dialog-header-close-button:focus {
+            outline-color: white !important;
+        }
+
+        button.mat-mdc-tooltip-trigger:focus {
+            outline-color: white !important;
+        }
+    }
+}

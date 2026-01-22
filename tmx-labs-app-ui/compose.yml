@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: ./tmx-labs-app-ui
+      dockerfile: ../Dockerfile
+      secrets:
+        - PGRCONFIG_TOKEN
+      args:
+        - APP_NAME=${APP_NAME}
+        - PGR_PROXY_CACHE=${PGR_PROXY_CACHE}
+        - PGR_PROXY_BYPASS=${PGR_PROXY_BYPASS}
+    ports:
+      - 8080:8080
+    env_file:
+      - .env 
+      
+secrets:
+  PGRCONFIG_TOKEN:
+    environment: PGRCONFIG_TOKEN

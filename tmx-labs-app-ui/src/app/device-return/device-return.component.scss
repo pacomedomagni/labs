@@ -1,0 +1,55 @@
+@use 'base/variables';
+@use '@angular/material';
+
+
+:host {
+	height: inherit;
+
+	::ng-deep {
+		.mat-mdc-card-title {
+			font-size: 3rem !important;
+		}
+	}
+}
+
+.card-container {
+	@include material.elevation(2);
+	align-items: center;
+	border-radius: variables.$border-radius;
+	color: inherit;
+	cursor: pointer;
+	display: inline-flex;
+	padding: 2rem;
+	padding-right: 6rem;
+	position: relative;
+	text-decoration: none;
+	transition: box-shadow .2s ease;
+	width: 350px;
+	height: 140px;
+
+	.material-icons-icon {
+		font-size: 3.6rem;
+		height: 3.6rem;
+		line-height: 3.6rem;
+		width: 3.6rem;
+		min-width: 36px;
+	}
+
+	.external-link-icon {
+		font-size: 1.8rem;
+		height: 1.8rem;
+		line-height: 1.8rem;
+		position: absolute;
+		right: 1rem;
+		top: 1rem;
+		width: 1.8rem;
+	}
+
+	&:hover {
+		@include material.elevation(4);
+	}
+
+	&:active {
+		@include material.elevation(2);
+	}
+}

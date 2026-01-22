@@ -1,0 +1,22 @@
+@for (notification of notifications(); track notification.id) {
+    <cui-notification-banner
+        [dismissable]="notification.dismissable"
+        [type]="notification.type"
+        scrollToFocusOnRender="true"
+        (dismiss)="dismissNotification(notification.id)"
+        (mouseenter)="pauseTimer(notification.id)"
+        (mouseleave)="resumeTimer(notification.id)"
+    >
+        <div [innerHTML]="notification.message"></div>
+    </cui-notification-banner>
+    @if (notification.duration && notification.duration > 0) {
+        <div class="notification-timer-container">
+            <div
+                class="notification-timer-bar"
+                [class]="'notification-timer-bar--' + notification.type"
+                [style.animation-duration.ms]="notification.duration"
+                [style.animation-play-state]="getTimerState(notification.id)"
+            ></div>
+        </div>
+    }
+}

@@ -1,0 +1,15 @@
+@if (hasData()) {
+    <tmx-view-trip-table
+        [paginator]="paginator()"
+        class="px-8"
+        (dateRangeClicked)="openTripInsights($event)"
+        (mapClicked)="openTripMap($event)"
+        [data]="trips()"
+        [speedDistanceUnit]="'Miles'"
+    ></tmx-view-trip-table>
+} @else {
+    <div class="flex h-full justify-center items-center">
+        <cui-empty-state icon="edit_road" primaryText="View Trips" secondaryText="No trip data found">
+        </cui-empty-state>
+    </div>
+}

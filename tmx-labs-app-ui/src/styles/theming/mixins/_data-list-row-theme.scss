@@ -1,0 +1,16 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+
+@mixin data-list-row-theme($theme) {
+	$color-config: mat.m2-get-color-config($theme);
+	$accent: map.get($color-config, 'accent');
+	$foreground: map.get($color-config, 'foreground');
+
+	ubi-data-list td {
+		border-bottom-color: mat.m2-get-color-from-palette($foreground, divider);
+	}
+
+	ul.cui-ubi-list li::before {
+		color: mat.m2-get-color-from-palette($accent);
+	}
+}

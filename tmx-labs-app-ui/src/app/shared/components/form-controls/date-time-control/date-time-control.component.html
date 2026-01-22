@@ -1,0 +1,39 @@
+<div class="date-time-control">
+    <div class="inputs">
+        <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+            <mat-label>{{ label || 'Date' }}</mat-label>
+            <input
+                matInput
+                [matDatepicker]="datePicker"
+                [disabled]="isDisabled"
+                [id]="id + '-date'"
+                [max]="max"
+                [min]="min"
+                [name]="name ? name + '-date' : id + '-date'"
+                [required]="isRequired"
+                [(ngModel)]="dateValue"
+                (dateChange)="onDateChange($event.value)"
+            />
+            <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+            <mat-datepicker #datePicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+            <mat-label>Time</mat-label>
+            <input
+                matInput
+                [matTimepicker]="timePicker"
+                [disabled]="isDisabled"
+                [id]="id + '-time'"
+                [name]="name ? name + '-time' : id + '-time'"
+                [required]="isRequired"
+                [(ngModel)]="timeInput"
+                (ngModelChange)="onTimeInputChange($event)"
+            />
+            <mat-timepicker-toggle matSuffix [for]="timePicker"></mat-timepicker-toggle>
+            <mat-timepicker #timePicker interval="1min" (selected)="onTimeSelected($event)"></mat-timepicker>
+        </mat-form-field>
+    </div>
+
+    <mat-error *ngIf="displayError && errorMessage">{{ errorMessage }}</mat-error>
+</div>

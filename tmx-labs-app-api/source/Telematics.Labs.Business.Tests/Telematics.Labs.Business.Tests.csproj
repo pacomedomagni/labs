@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifiers>linux-arm64</RuntimeIdentifiers>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Progressive.Telematics.Labs.Business.Tests</AssemblyName>
+    <RootNamespace>Progressive.Telematics.Labs.Business.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="microsoft.aspnetcore.http" Version="2.2.2" />
+    <PackageReference Include="Tmx.EditorConfig" Version="1.4.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <PackageReference Include="Moq" Version="4.18.2" />
+    <PackageReference Include="coverlet.collector" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="system.security.cryptography.pkcs" Version="8.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Telematics.Labs.Business.Resources\Telematics.Labs.Business.Resources.csproj" />
+    <ProjectReference Include="..\Telematics.Labs.Business\Telematics.Labs.Business.csproj" />
+    <ProjectReference Include="..\Telematics.Labs.Services\Telematics.Labs.Services.csproj" />
+    <ProjectReference Include="..\Telematics.Labs.Shared\Telematics.Labs.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="TestData\ExternalPolicy.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Tools\" />
+  </ItemGroup>
+</Project>

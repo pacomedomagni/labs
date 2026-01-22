@@ -1,0 +1,15 @@
+<h3 class="flex justify-between py-6 px-10 tmx-dialog-content font-normal">
+    <div class="flex justify-start items-center">
+        <mat-icon class="mr-6">info</mat-icon>
+        <div [innerHTML]="leftContent()"></div>
+    </div>
+    @if (rightText()) {
+        @if (rightTextIsAction()) {
+            <button class="cui-link p-0 m-0" (click)="rightTextClicked.emit()">
+                {{ rightText() }}
+            </button>
+        } @else {
+            <div>{{ rightText() }}</div>
+        }
+    }
+</h3>

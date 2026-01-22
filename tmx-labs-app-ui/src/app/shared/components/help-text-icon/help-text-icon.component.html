@@ -1,0 +1,10 @@
+<button
+    type="button"
+    class="help-icon-button"
+    [ngClass]="this.type !== 'notification' ? 'cursor-pointer' : 'cursor-help'"
+    [attr.aria-label]="type + '-info'"
+    (click)="openHelpText()"
+    [matTooltip]="tooltip"
+    matTooltipPosition="above">
+    <mat-icon [color]="color" aria-hidden="true">{{ icon.toString() }}</mat-icon>
+</button>

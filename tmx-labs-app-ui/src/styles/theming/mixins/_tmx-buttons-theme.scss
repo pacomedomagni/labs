@@ -1,0 +1,27 @@
+@use "../../variables";
+@use "@angular/material" as mat;
+@use "sass:map";
+@use "sass:color";
+
+@mixin tmx-buttons-theme($theme) {
+	$color-config: mat.m2-get-color-config($theme);
+	$accent: map.get($color-config, 'accent');
+	$primary: map.get($color-config, 'primary');
+	$is-dark: map.get($color-config, 'is-dark');
+
+    // Fixed button styling
+    .mdc-button.mdc-button--unelevated.mat-mdc-unelevated-button.mat-primary.mat-mdc-button-base:not(
+            .mat-mdc-button-disabled
+        ) {
+        background-color: #{mat.m2-get-color-from-palette($primary)};
+        color: #fff;
+        border-color: #767676;
+        --mat-button-filled-ripple-color: #{color.scale(mat.m2-get-color-from-palette($primary, darker), $lightness: -18%)};
+        
+        &:hover,
+        &:focus,
+        &:active {
+            background-color: #{mat.m2-get-color-from-palette($primary, darker)};
+        }
+    }
+}

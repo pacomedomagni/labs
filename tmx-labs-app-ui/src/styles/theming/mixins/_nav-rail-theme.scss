@@ -1,0 +1,38 @@
+@use 'base/variables' as variables2;
+@use 'theming/palettes';
+
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+@mixin nav-rail-theme($theme) {
+  $color-config: mat.m2-get-color-config($theme);
+  $accent: map.get($color-config, 'accent');
+  $primary: map.get($color-config, 'primary');
+  $foreground: map.get($color-config, 'foreground');
+  $is-dark: map.get($color-config, 'is-dark');
+  $gray: mat.m2-define-palette(palettes.$cui-gray);
+
+  tmx-nav-rail {
+    background-color: mat.m2-get-color-from-palette($primary, darker);
+    color: mat.m2-get-color-from-palette($primary, darker-contrast);
+
+    .mat-mdc-icon-button {
+      color: mat.m2-get-color-from-palette($primary, darker-contrast);
+
+      &.active {
+        box-shadow: inset -1px 0px 5px 0px rgb(0 0 0 / 20%);
+        background-color: mat.m2-get-color-from-palette($primary);
+      }
+    }
+
+    cui-hidden-focus-switch-button {
+      .mdc-button.mat-mdc-outlined-button.hidden-focus-switch-button {
+        &:focus {
+          @if $is-dark {
+            background-color: rgb(44,44,44) !important;
+          }
+        }
+      }
+    }
+  }
+}

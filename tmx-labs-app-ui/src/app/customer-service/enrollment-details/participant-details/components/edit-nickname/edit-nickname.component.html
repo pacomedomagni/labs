@@ -1,0 +1,29 @@
+<div class="flex flex-col p-xs pb-0">
+  <tmx-data-list>
+    <tmx-data-list-row labelSpan="40" label="Current Nickname">
+      <span>{{ resolvedCurrentNickname }}</span>
+    </tmx-data-list-row>
+  </tmx-data-list>
+
+  <mat-form-field appearance="outline" class="nickname-field" [hideRequiredMarker]="true">
+    <mat-label>New Nickname</mat-label>
+    <input
+      matInput
+      name="newNickname"
+      placeholder="New Nickname"
+      required
+      autocomplete="off"
+      [(ngModel)]="formModel.newNickname"
+      [pattern]="nonWhitespacePattern"
+      [maxlength]="maxLength"
+      #newNickname="ngModel"
+    />
+    <mat-hint align="end">{{ (formModel.newNickname?.length ?? 0) }} / {{ maxLength }}</mat-hint>
+    <mat-error *ngIf="newNickname.hasError('required') || newNickname.hasError('pattern')">
+      New Nickname must be provided.
+    </mat-error>
+    <mat-error *ngIf="newNickname.hasError('maxlength')">
+      New Nickname cannot exceed {{ maxLength }} characters.
+    </mat-error>
+  </mat-form-field>
+</div>

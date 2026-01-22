@@ -1,0 +1,13 @@
+.actions__trigger {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+.actions__trigger mat-icon {
+  margin-left: 0.4rem;
+}
+
+.actions__trigger--placeholder {
+  visibility: hidden;
+}

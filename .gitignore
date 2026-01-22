@@ -1,0 +1,57 @@
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Coverage directory used by testing tools
+coverage/
+
+# Angular specific files
+dist/
+tmp/
+out-tsc/
+
+# Temporary files
+*.tmp
+*.swp
+
+# MacOS files
+.DS_Store
+
+# IDE specific files
+.vscode/
+.idea/
+.vs/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Angular CLI specific
+.angular/
+
+# Optional cache directory for npm
+src/src/.npm/_cacache/

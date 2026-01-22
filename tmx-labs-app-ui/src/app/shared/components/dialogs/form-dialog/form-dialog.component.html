@@ -1,0 +1,48 @@
+<cui-dialog
+    closeButtonLabel="Close Dialog"
+    [showClose]="true"
+    [showFooter]="!data.manualSubmission"
+    (close)="onClose()"
+>
+    <div mat-dialog-title dialog-header class="flex space-x-4">
+        <span>{{ data.title }}</span>
+        @if (data.helpKey) {
+            <tmx-help-text
+                class="content-center items-center"
+                [helpKey]="data.helpKey"
+            ></tmx-help-text>
+        }
+    </div>
+    @if (shouldDisplaySubtitle()) {
+        <tmx-dialog-subtitle 
+            [leftContent]="data.subtitle" 
+            dialog-sub-header>
+        </tmx-dialog-subtitle>
+    }
+    <div mat-dialog-content dialog-content class="mt-xxs" id="dialog-content" aria-labelledby="dialog-subtitle">
+        <form #dialogForm="ngForm">
+            @if (loaded) {
+                <div>
+                    <ng-container
+                        *ngComponentOutlet="data.component; injector: contentInjector"
+                    ></ng-container>
+                </div>
+            }
+        </form>
+    </div>
+    <ng-container dialog-footer>
+        <button
+            mat-flat-button
+            color="primary"
+            class="mr-xxs"
+            id="btn-confirm"
+            (click)="onConfirm()"
+            [disabled]="dialogForm.invalid"
+        >
+            {{ data.confirmText }}
+        </button>
+        <button mat-stroked-button color="primary" id="btn-cancel" (click)="onCancel()">
+            {{ data.cancelText }}
+        </button>
+    </ng-container>
+</cui-dialog>

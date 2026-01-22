@@ -1,0 +1,38 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+@use "theming/themes/light-green";
+@use "../mixins/app-theme";
+@use "../../variables";
+@use "theming/palettes";
+
+$color-config: mat.m2-get-color-config(light-green.$theme);
+$primary: map.get(light-green.$color-config, 'primary');
+$background: map.get(light-green.$color-config, 'background');
+$background: map.merge($background, (background: variables.$white));
+$theme: map.merge(light-green.$theme, (background: $background));
+
+$theme-extensions: (
+	is-green: true,
+	is-light: false
+);
+$modified-theme: map.merge(light-green.$theme, light-green.$theme-extensions);
+
+@include app-theme.labs-theme($modified-theme);
+
+.cui-tmx-content,
+.mat-drawer,
+.mat-drawer.mat-drawer-push {
+	background-color: mat.m2-get-color-from-palette(palettes.$cui-grey, 100);
+}
+
+:root {
+  --mat-form-field-outlined-focus-label-text-color: #{mat.m2-get-color-from-palette($primary, 900)};
+}
+
+.mat-drawer-container {
+	background-color: variables.$white;
+}
+
+.app-logo {
+	content: url("../../../../public/assets/logo-green.png");
+}

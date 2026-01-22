@@ -1,0 +1,15 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.participant-accordion {
+  flex-grow: 1;
+  padding-left: 50px;
+}
+
+@media (max-width: 1024px) {
+  .participant-accordion {
+    padding-left: 0;
+  }
+}

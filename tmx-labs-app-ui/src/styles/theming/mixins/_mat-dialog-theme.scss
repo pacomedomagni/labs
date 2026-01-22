@@ -1,0 +1,62 @@
+@use "theming/palettes";
+
+@use "sass:map";
+@use "@angular/material" as mat;
+@use '../../variables' as variables;
+
+@mixin mat-dialog-theme($theme) {
+	$color-config: mat.m2-get-color-config($theme);
+	$primary: map.get($color-config, 'primary');
+	$is-dark: map.get($color-config, 'is-dark');
+	$is-light: map.get($color-config, 'is-light');
+	$is-green: map.get($color-config, 'is-green');
+	$green: mat.m2-define-palette(palettes.$cui-green);
+	$blue: mat.m2-define-palette(palettes.$cui-blue);
+	$orange: mat.m2-define-palette(palettes.$cui-orange);
+
+	.mat-toolbar.dialog-header {
+		
+		@if $is-dark {
+			background-color: mat.m2-get-color-from-palette($blue, 900);
+		}
+
+		@if $is-green {
+			background-color: mat.m2-get-color-from-palette($green, 900);
+		}
+
+		.mat-icon {
+			color: mat.m2-get-color-from-palette($primary, darker-contrast);
+		}
+	}
+
+	.dialog-sub-header .notification-banner {
+		&--info {
+
+			@if $is-dark {
+				background-color: mat.m2-get-color-from-palette($blue, 800);
+			}
+
+			@if $is-green {
+				background-color: mat.m2-get-color-from-palette($green, 50);
+				color: mat.m2-get-color-from-palette($green, 900);
+			}
+		}
+	}
+
+	tmx-dialog-subtitle h3.tmx-dialog-content {
+      background-color: mat.m2-get-color-from-palette(
+        $blue,
+        if($is-dark, 700, 50)
+      );
+
+	  div, button {
+			color: if(
+				$is-dark,
+				variables.$white,
+				mat.m2-get-color-from-palette($blue, 900)
+			);
+			font-size: 1.6rem;
+			line-height: 24px;
+	  }
+	}
+}

@@ -1,0 +1,72 @@
+﻿{
+  "ProviderId": "Microsoft.VisualStudio.ConnectedService.Wcf",
+  "Version": "15.0.40203.910",
+  "ExtendedData": {
+    "inputs": [
+      "http://t-ubi-homebase-services/HomeBaseServices/Services/DeviceActivityService.svc"
+    ],
+    "collectionTypes": [
+      "System.Array",
+      "System.Collections.Generic.Dictionary`2"
+    ],
+    "namespaceMappings": [
+      "*, WcfDeviceActivityService"
+    ],
+    "references": [
+      "AutoMapper, {AutoMapper, 10.1.1}",
+      "AutoMapper.Extensions.Microsoft.DependencyInjection, {AutoMapper.Extensions.Microsoft.DependencyInjection, 8.1.1}",
+      "Microsoft.Extensions.Configuration, {Microsoft.Extensions.Configuration, 5.0.0}",
+      "Microsoft.Extensions.Configuration.Abstractions, {Microsoft.Extensions.Configuration.Abstractions, 5.0.0}",
+      "Microsoft.Extensions.Configuration.Binder, {Microsoft.Extensions.Configuration.Binder, 5.0.0}",
+      "Microsoft.Extensions.Configuration.CommandLine, {Microsoft.Extensions.Configuration.CommandLine, 5.0.0}",
+      "Microsoft.Extensions.Configuration.EnvironmentVariables, {Microsoft.Extensions.Configuration.EnvironmentVariables, 5.0.0}",
+      "Microsoft.Extensions.Configuration.FileExtensions, {Microsoft.Extensions.Configuration.FileExtensions, 5.0.0}",
+      "Microsoft.Extensions.Configuration.Json, {Microsoft.Extensions.Configuration.Json, 5.0.0}",
+      "Microsoft.Extensions.Configuration.UserSecrets, {Microsoft.Extensions.Configuration.UserSecrets, 5.0.0}",
+      "Microsoft.Extensions.DependencyInjection, {Microsoft.Extensions.DependencyInjection, 5.0.0}",
+      "Microsoft.Extensions.DependencyInjection.Abstractions, {Microsoft.Extensions.DependencyInjection.Abstractions, 5.0.0}",
+      "Microsoft.Extensions.FileProviders.Abstractions, {Microsoft.Extensions.FileProviders.Abstractions, 5.0.0}",
+      "Microsoft.Extensions.FileProviders.Physical, {Microsoft.Extensions.FileProviders.Physical, 5.0.0}",
+      "Microsoft.Extensions.FileSystemGlobbing, {Microsoft.Extensions.FileSystemGlobbing, 5.0.0}",
+      "Microsoft.Extensions.Hosting, {Microsoft.Extensions.Hosting, 5.0.0}",
+      "Microsoft.Extensions.Hosting.Abstractions, {Microsoft.Extensions.Hosting.Abstractions, 5.0.0}",
+      "Microsoft.Extensions.Logging, {Microsoft.Extensions.Logging, 5.0.0}",
+      "Microsoft.Extensions.Logging.Abstractions, {Microsoft.Extensions.Logging.Abstractions, 5.0.0}",
+      "Microsoft.Extensions.Logging.Configuration, {Microsoft.Extensions.Logging.Configuration, 5.0.0}",
+      "Microsoft.Extensions.Logging.Console, {Microsoft.Extensions.Logging.Console, 5.0.0}",
+      "Microsoft.Extensions.Logging.Debug, {Microsoft.Extensions.Logging.Debug, 5.0.0}",
+      "Microsoft.Extensions.Logging.EventLog, {Microsoft.Extensions.Logging.EventLog, 5.0.0}",
+      "Microsoft.Extensions.Logging.EventSource, {Microsoft.Extensions.Logging.EventSource, 5.0.0}",
+      "Microsoft.Extensions.Options, {Microsoft.Extensions.Options, 5.0.0}",
+      "Microsoft.Extensions.Options.ConfigurationExtensions, {Microsoft.Extensions.Options.ConfigurationExtensions, 5.0.0}",
+      "Microsoft.Extensions.Primitives, {Microsoft.Extensions.Primitives, 5.0.0}",
+      "Microsoft.IO.RecyclableMemoryStream, {Microsoft.IO.RecyclableMemoryStream, 1.4.0}",
+      "Newtonsoft.Json, {Newtonsoft.Json, 13.0.3}",
+      "NLog, {NLog, 4.7.6}",
+      "NLog.Extensions.Logging, {NLog.Extensions.Logging, 1.7.0}",
+      "NLog.Web.AspNetCore, {NLog.Web.AspNetCore, 4.10.0}",
+      "Progressive.WAM.TokenCacher.Core, {Progressive.WAM.TokenCacher.Core, 1.0.0.14}",
+      "Progressive.WAM.TokenCacher.Std, {Progressive.WAM.TokenCacher.Std.Jwt, 1.0.436632}",
+      "Progressive.WAM.Webguard.Client.Core, {Progressive.WAM.Webguard.Client.Core, 1.0.0.30}",
+      "System.Data.SqlClient, {System.Data.SqlClient, 4.8.5}",
+      "System.Diagnostics.DiagnosticSource, {System.Diagnostics.DiagnosticSource, 5.0.0}",
+      "System.Diagnostics.EventLog, {System.Diagnostics.EventLog, 5.0.0}",
+      "System.Reflection.DispatchProxy, {System.Reflection.DispatchProxy, 4.5.0}",
+      "System.Security.AccessControl, {System.Security.AccessControl, 5.0.0}",
+      "System.Security.Cryptography.Xml, {System.Security.Cryptography.Xml, 4.5.0}",
+      "System.Security.Permissions, {System.Security.Permissions, 4.5.0}",
+      "System.Security.Principal.Windows, {System.Security.Principal.Windows, 5.0.0}",
+      "System.ServiceModel, {System.ServiceModel.Primitives, 4.7.0}",
+      "System.ServiceModel.Duplex, {System.ServiceModel.Duplex, 4.7.0}",
+      "System.ServiceModel.Http, {System.ServiceModel.Http, 4.7.0}",
+      "System.ServiceModel.NetTcp, {System.ServiceModel.NetTcp, 4.7.0}",
+      "System.ServiceModel.Primitives, {System.ServiceModel.Primitives, 4.7.0}",
+      "System.ServiceModel.Security, {System.ServiceModel.Security, 4.7.0}",
+      "System.Text.Json, {System.Text.Json, 5.0.0}",
+      "TimeZoneConverter, {TimeZoneConverter, 3.3.0}",
+      "TypeLitePlus.Core, {TypeLitePlus.Core, 2.1.0}"
+    ],
+    "targetFramework": "netcoreapp3.1",
+    "typeReuseMode": "All"
+  }
+}

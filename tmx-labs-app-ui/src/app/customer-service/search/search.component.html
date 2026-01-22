@@ -1,0 +1,55 @@
+<h1 class="screen-reader-only" aria-label="Customer Search">Customer Search</h1>
+<mat-card appearance="outlined" class="mb-xxs">
+    <div class="flex flex-wrap justify-center">
+        <div>
+            <cui-search
+                #searchBox
+                [searchTypes]="searchTypes"
+                (searchSubmitted)="onSearchSubmitted($event)"
+                (searchTypeChanged)="onSearchTypeChanged($event)"
+                [dynamicSearchByWidth]="true"
+            ></cui-search>
+        </div>
+    </div>
+</mat-card>
+<div role="region" aria-live="polite" aria-atomic="true">
+    @if (!searchComplete()) {
+        <mat-card appearance="outlined" class="mb-xxs">
+            <cui-empty-state
+                tabindex="0"
+                icon="search"
+                primaryText="Search for a user"
+                secondaryText="Please select a search type and enter a search term to begin."
+            >
+            </cui-empty-state>
+            <!-- Screen reader announcement for initial state -->
+            <div class="visuallyhidden" role="status" aria-live="polite" aria-atomic="true">
+                @if (!searchComplete() && shouldAnnounceInitialStatus()) {
+                    <span
+                        >Search for a user. Please select a search type and enter a search term to
+                        begin.</span
+                    >
+                }
+            </div>
+        </mat-card>
+    } @else if (searchComplete() && recordCount() === 0) {
+        <mat-card appearance="outlined" class="mb-xxs">
+            <cui-empty-state
+                tabindex="0"
+                icon="ubi_sadcone"
+                [isSvgIcon]="true"
+                primaryText="Uh oh..."
+                secondaryText="Enrollment not found. Please try another search."
+            >
+            </cui-empty-state>
+        </mat-card>
+    } @else {
+        <!-- Announce search results for screen readers -->
+        <div class="visuallyhidden" role="status" aria-live="polite" aria-atomic="true">
+            <span>{{ recordCount() }} {{ recordCount() === 1 ? 'result' : 'results' }} found.</span>
+        </div>
+        <tmx-enrollment-results
+            [dataArray]="customerResults()"
+        ></tmx-enrollment-results>
+    }
+</div>

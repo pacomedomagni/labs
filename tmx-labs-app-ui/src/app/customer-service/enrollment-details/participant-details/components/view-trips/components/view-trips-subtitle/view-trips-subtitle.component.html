@@ -1,0 +1,6 @@
+<tmx-dialog-subtitle
+    [leftContent]="vehicleDisplay()"
+    [rightText]="weekdayTripSummaryVisible ? 'Weekday Trip Summary' : null"
+    [rightTextIsAction]="true"
+    (rightTextClicked)="openWeekDayTripSummary()"
+></tmx-dialog-subtitle>

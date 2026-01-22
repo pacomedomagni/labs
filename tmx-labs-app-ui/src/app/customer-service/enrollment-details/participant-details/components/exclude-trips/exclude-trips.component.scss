@@ -1,0 +1,57 @@
+:host {
+    display: block;
+    height: 100%;
+}
+
+.exclude-trips-container {
+    display: flex;
+    height: 100%;
+    padding: 24px;
+}
+
+.loading-state {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.table-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.exclude-table {
+    width: 100%;
+}
+
+.exclude-table .mat-mdc-header-cell {
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.exclude-table .mat-mdc-cell {
+    vertical-align: middle;
+}
+
+.actions-cell {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.add-button-row {
+    display: flex;
+    padding-left: 16px;
+}
+
+.add-button-row button {
+    min-width: 120px;
+}
+
+.no-data-row td {
+    height: 48px;
+    padding: 0;
+}

@@ -1,0 +1,33 @@
+@use "base/variables" as variables2;
+@use "theming/palettes";
+
+@use "sass:map";
+@use "@angular/material" as mat;
+
+@mixin table-theme($theme) {
+	$color-config: mat.m2-get-color-config($theme);
+	$background: map.get($color-config, 'background');
+	$is-light: map.get($color-config, 'is-light');
+	$is-green: map.get($color-config, 'is-green');
+	$gray: mat.m2-define-palette(palettes.$cui-gray);
+
+	.table-actions {
+		background: mat.m2-get-color-from-palette($background, 'card');
+	}
+
+	@if $is-light or $is-green {
+		.table-accordion {
+			.mat-mdc-header-row {
+				background-color: variables2.$white;
+			}
+
+			.mat-expansion-panel-content {
+				background-color: mat.m2-get-color-from-palette($gray, 100);
+			}
+
+			.normal .mat-expansion-panel-content {
+				background-color: variables2.$white;
+			}
+		}
+	}
+}

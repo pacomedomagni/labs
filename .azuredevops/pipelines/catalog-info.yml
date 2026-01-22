@@ -1,0 +1,22 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "tmx-labs-app"
+  description: "Internal developer and R&D tools for telematics products"
+  appPlatform: "pro"
+  openshiftProjectName: "tmx-labs-app"
+  supportGroupEmail: "UBI_Dev_Team@Progressive.com"
+  tags:
+    - cdp
+    - openshift
+    - container
+    - angular
+  annotations:
+    dev.azure.com/host-org: tfsprod.prci.com/tfs/PROGAPPS
+    dev.azure.com/project-repo: pro/tmx-labs-app
+    dev.azure.com/build-definition: tmx-labs-app
+    dev.azure.com/project: pro
+spec:
+  type: service
+  owner: "Telematics Product Support"
+  lifecycle: production

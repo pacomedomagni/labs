@@ -1,0 +1,17 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+@use '../../variables';
+@use "base/variables" as variables2;
+@use "theming/palettes";
+
+
+@mixin home-theme($theme) {
+	$color-config: mat.m2-get-color-config($theme);
+	$is-dark: map.get($color-config, 'is-dark');
+	$gray: mat.m2-define-palette(palettes.$cui-gray);
+
+	.card-container {
+		background-color: variables2.$white;
+	}
+
+}

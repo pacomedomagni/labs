@@ -1,0 +1,37 @@
+:host {
+    ::ng-deep {
+        .dialog-footer {
+            justify-content: flex-end !important;
+        }
+
+        tmx-help-text mat-icon {
+            font-size: 24px;
+            height: 24px;
+            width: 24px;
+        }
+
+        tmx-help-text {
+            margin-top: 0px !important;
+        }
+
+        .mat-mdc-dialog-title {
+            margin-top: 20px;
+        }
+
+        button.dialog-header-close-button:focus {
+            outline-color: white !important;
+        }
+
+        mat-icon.mat-mdc-tooltip-trigger:focus {
+            outline-color: white !important;
+        }
+    }
+
+    mat-paginator.mat-mdc-paginator {
+        border-top-style: 0px none !important;
+    }
+}
+
+mat-paginator.mat-mdc-paginator {
+    border-top-style: 0px none !important;
+}

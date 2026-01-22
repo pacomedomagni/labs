@@ -1,0 +1,54 @@
+<table mat-table [dataSource]="dataSource" class="cui-table">
+    <ng-container matColumnDef="year">
+        <th mat-header-cell *matHeaderCellDef>Year</th>
+        <td mat-cell *matCellDef="let element">
+            {{ element.year }}
+        </td>
+    </ng-container>
+    <ng-container matColumnDef="make">
+        <th mat-header-cell *matHeaderCellDef>Make</th>
+        <td mat-cell *matCellDef="let element">
+            {{ element.make }}
+        </td>
+    </ng-container>
+    <ng-container matColumnDef="model">
+        <th mat-header-cell *matHeaderCellDef>Model</th>
+        <td mat-cell *matCellDef="let element">
+            {{ element.model }}
+        </td>
+    </ng-container>
+    <ng-container matColumnDef="scoring_algo">
+        <th mat-header-cell *matHeaderCellDef class="cui-cell-18">Scoring Algorithm</th>
+        <td mat-cell *matCellDef="let element">
+            {{ element.scoringAlgorithm.description }}
+        </td>
+    </ng-container>
+    <ng-container matColumnDef="actions" stickyEnd>
+        <th mat-header-cell class="cui-cell-12 lg:cui-cell-8 cui-cell-actions" *matHeaderCellDef>
+            <span class="screen-reader-only">Actions</span>
+        </th>
+        <td
+            mat-cell
+            *matCellDef="let element"
+            class="py-0 px-bl-2 cui-cell-actions cui-cell-border-left visible"
+        >
+            <button mat-icon-button (click)="onRowEdit(element)" aria-label="Edit row">
+                <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="onRowDelete(element)" aria-label="Delete row">
+                <mat-icon>delete</mat-icon>
+            </button>
+        </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>
+<button
+    class="w-48 ml-8 mt-4"
+    mat-flat-button
+    color="primary"
+    (click)="addVehicle()"
+    [disabled]="disabled"
+>
+    Add Vehicle
+</button>

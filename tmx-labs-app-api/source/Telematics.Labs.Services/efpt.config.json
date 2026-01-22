@@ -1,0 +1,845 @@
+{
+   "CodeGenerationMode": 2,
+   "ContextClassName": "CLContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "Models\/ClTables",
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "Progressive.Telematics.Labs.Services",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[dbo].[BadTrip]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[BadTripReason]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ConfigValues]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceEvent]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceEventType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceExperienceType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceOrder]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceOrderDetail]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceOrderStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceReturn]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeviceReturnReason]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ExcludedDateRange]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Participant]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ParticipantHistory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ParticipantStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Policy]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SummarizationMethod]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Trip]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TripDetail_SmoothingAudit]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TripDetail_SmoothingAuditType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TripEvent]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TripEventType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UnreasonableTrip]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UnreasonableTripEvent]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UnreasonableTripEventCode]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Vehicle]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[VehicleProtocol]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[sp_hvr_check_article]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_hvr_check_publication]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_hvr_dblog]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_hvr_repldone]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_hvr_repltrans]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[TruncatePartition]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[TruncateTable]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_BadTrip_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_BadTrip_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_BadTrip_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_BadTrip_SelectByParticipantSeqID]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_BadTrip_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_BadTrip_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_BadTripReason_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_BadTripReason_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_BadTripReason_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_BadTripReason_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_BadTripReason_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_CodeTables_Get]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ConfigValues_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ConfigValues_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ConfigValues_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ConfigValues_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ConfigValues_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEvent_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEvent_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEvent_PurgeUsingTempTable]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEvent_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEvent_SelectAllByParticipantSeqId]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEvent_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEvent_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEventType_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEventType_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEventType_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEventType_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceEventType_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrder_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrder_GetSummariesByStatus]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrder_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrder_InsertWithDetail]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrder_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrder_SelectByOrderStatus]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrder_SelectByPolicyNumber]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrder_SelectByPolicySeqID]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrder_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrder_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrderDetail_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrderDetail_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrderDetail_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrderDetail_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrderDetail_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrderDetails_SelectByDeviceOrder]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrderStatus_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrderStatus_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrderStatus_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrderStatus_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceOrderStatus_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturn_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturn_GetRecoverableDevices]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturn_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturn_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturn_SelectByDevice]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturn_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturn_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturnReason_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturnReason_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturnReason_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturnReason_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_DeviceReturnReason_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ErrorHandling_RaiseError]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ExcludedDateRange_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ExcludedDateRange_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ExcludedDateRange_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ExcludedDateRange_SelectByParticipant]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ExcludedDateRange_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ExcludedDateRange_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ExcludedDateRange_UpdateForParticipant]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_HealthMonitor_IsDBAlive]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Participant_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Participant_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Participant_Policy_SelectByDeviceSeqId]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Participant_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Participant_SelectByDeviceSeqID]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Participant_SelectByParticipantID]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Participant_SelectByPolicyNumber]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Participant_SelectByPolicySeqID]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Participant_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Participant_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantData_SelectByParticipantSeqID]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantData_SelectByPolicy]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantHistory_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantHistory_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantHistory_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantHistory_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantHistory_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantStatus_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantStatus_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantStatus_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantStatus_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_ParticipantStatus_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Policy_DeleteByPolicyNumber]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Policy_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Policy_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Policy_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Policy_SelectByPolicyNumber]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Policy_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Policy_UpdateByPolicyNumber]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Policy_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Reports_TripAverages]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Reports_TripsAllDataByParticipantSeqId]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Reports_TripsAllDataV2]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_SummarizationMethod_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_SummarizationMethod_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_SummarizationMethod_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_SummarizationMethod_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_SummarizationMethod_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Trip_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Trip_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Trip_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Trip_SelectByDateRange_ExcludeFlag]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Trip_SelectByDeviceSeqID]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Trip_SelectByExternalTripId]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Trip_SelectByParticipantID]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Trip_SelectByParticipantSeqIdAndDates]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Trip_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Trip_SelectTripDatesForParticipant]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Trip_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripData_PurgeUsingTempTable]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripDetail_SmoothingAudit_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripDetail_SmoothingAudit_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripDetail_SmoothingAudit_InsertBulk_V2]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripDetail_SmoothingAudit_InsertBulk]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripDetail_SmoothingAudit_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripDetail_SmoothingAudit_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripDetail_SmoothingAudit_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEvent_BulkInsert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEvent_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEvent_DeleteByTripSeqID]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEvent_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEvent_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEvent_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEvent_SelectByTripSeqID]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEvent_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEventType_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEventType_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEventType_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEventType_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_TripEventType_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTrip_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTrip_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTrip_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTrip_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTrip_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEvent_BulkInsert_V2]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEvent_BulkInsert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEvent_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEvent_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEvent_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEvent_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEvent_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEventCode_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEventCode_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEventCode_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEventCode_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_UnreasonableTripEventCode_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Vehicle_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Vehicle_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Vehicle_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Vehicle_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_Vehicle_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_VehicleProtocol_DeleteByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_VehicleProtocol_Insert]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_VehicleProtocol_SelectAll]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_VehicleProtocol_SelectByPrimaryKey]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[usp_VehicleProtocol_UpdateByPrimaryKey]",
+         "ObjectType": 1
+      }
+   ],
+   "UiHint": "SCMSSTAAA1.UBICL",
+   "UncountableWords": null,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDateOnlyTimeOnly": false,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSchemaFolders": false,
+   "UseSpatial": false,
+   "UseT4": false
+}

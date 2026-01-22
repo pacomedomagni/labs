@@ -1,0 +1,36 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+@use "mixins/theming/cui-theme";
+
+@use "body-theme";
+@use "breadcrumb-theme";
+@use "data-list-row-theme";
+@use "home-theme";
+@use "mat-dialog-theme";
+@use "nav-rail-theme";
+@use "page-header-theme";
+@use "preloader-theme";
+@use "snackbar-theme";
+@use "tab-theme";
+@use "table-theme";
+@use "tmx-buttons-theme";
+@use "mat-form-field-theme";
+@use "notification-banner-theme";
+
+@mixin labs-theme($theme) {
+	@include cui-theme.cui-theme($theme);
+	@include body-theme.body-theme($theme);
+	@include breadcrumb-theme.breadcrumb-theme($theme);
+	@include data-list-row-theme.data-list-row-theme($theme);
+	@include home-theme.home-theme($theme);
+	@include mat-dialog-theme.mat-dialog-theme($theme);
+	@include nav-rail-theme.nav-rail-theme($theme);
+	@include page-header-theme.page-header-theme($theme);
+	@include preloader-theme.pre-loader-theme($theme);
+	@include snackbar-theme.snackbar-theme($theme);
+	@include tab-theme.tab-theme($theme);
+	@include table-theme.table-theme($theme);
+	@include tmx-buttons-theme.tmx-buttons-theme($theme);
+	@include mat-form-field-theme.mat-form-field-theme($theme);
+	@include notification-banner-theme.notification-banner-theme($theme);
+}

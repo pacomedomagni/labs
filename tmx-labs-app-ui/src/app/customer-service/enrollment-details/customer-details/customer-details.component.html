@@ -1,0 +1,86 @@
+<cui-accordion>
+    <cui-accordion-item [expanded]="true">
+        <cui-accordion-header [rightAlignToggle]="rightAlignToggle">
+            <div class="customer-details">Customer Details</div>
+            <tmx-menu-button-group
+                class="ml-auto my-auto"
+                [actions]="actions"
+                (actionClicked)="actionButtonClicked($event)"
+            ></tmx-menu-button-group>
+        </cui-accordion-header>
+        <cui-accordion-body>
+            <div class="customer-section">
+                <div>
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl">
+                        <div class="col-span-2 font-semibold">
+                            Name
+                        </div>
+                        <div class="col-span-3">
+                            {{ customer().user?.fullName | tmxFallbackValue }}
+                        </div>
+                    </div>
+                    <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2">
+                    
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl">
+                        <div class="col-span-2 font-semibold">
+                            Email Address
+                        </div>
+                        <div class="col-span-3">
+                            {{ customer().user?.email | tmxFallbackValue }}
+                        </div>
+                    </div>
+                    <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2">
+                    
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl">
+                        <div class="col-span-2 font-semibold">
+                            Address
+                        </div>
+                        <div class="col-span-3">
+                            {{ customer().user?.address | tmxFallbackValue }}
+                        </div>
+                    </div>
+                    <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2">
+                    
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl">
+                        <div class="col-span-2 font-semibold">
+                            City
+                        </div>
+                        <div class="col-span-3">
+                            {{ customer().user?.city | tmxFallbackValue }}
+                        </div>
+                    </div>
+                    <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2">
+                    
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl">
+                        <div class="col-span-2 font-semibold">
+                            State
+                        </div>
+                        <div class="col-span-3">
+                            {{ customer().user?.state | tmxFallbackValue }}
+                        </div>
+                    </div>
+                    <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2">
+                    
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl">
+                        <div class="col-span-2 font-semibold">
+                            Zip
+                        </div>
+                        <div class="col-span-3">
+                            {{ customer().user?.zip | tmxFallbackValue }}
+                        </div>
+                    </div>
+                    <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2">
+                    
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl">
+                        <div class="col-span-2 font-semibold">
+                            Create Date
+                        </div>
+                        <div class="col-span-3">
+                            {{ customer().participantGroup?.createDateTime | tmxDisplayDate | tmxFallbackValue }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </cui-accordion-body>
+    </cui-accordion-item>
+</cui-accordion>

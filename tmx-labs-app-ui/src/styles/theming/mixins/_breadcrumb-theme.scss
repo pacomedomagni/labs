@@ -1,0 +1,17 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+
+@mixin breadcrumb-theme($theme) {
+	$color-config: mat.m2-get-color-config($theme);
+	$is-dark: map.get($color-config, 'is-dark');
+
+	@if $is-dark {
+		.xng-breadcrumb-root {
+			color: rgba(255, 255, 255, .6) !important;
+		}
+
+		.xng-breadcrumb-trail {
+			color: rgba(255, 255, 255, .9) !important;
+		}
+	}
+}

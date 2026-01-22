@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifiers>linux-arm64</RuntimeIdentifiers>
+    <AssemblyName>Progressive.Telematics.Labs.Business</AssemblyName>
+    <RootNamespace>Progressive.Telematics.Labs.Business</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Mappers\DriverMappers.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="8.0.0" />
+    <PackageReference Include="Tmx.EditorConfig" Version="1.4.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Telematics.Labs.Business.Resources\Telematics.Labs.Business.Resources.csproj" />
+    <ProjectReference Include="..\Telematics.Labs.Services\Telematics.Labs.Services.csproj" />
+    <ProjectReference Include="..\Telematics.Labs.Shared\Telematics.Labs.Shared.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,20 @@
+cui-accordion-header {
+  align-items: center;
+  gap: 0.4rem;
+  
+  tmx-menu-button-group {
+    margin-left: auto;
+    margin-right: 0;
+  }
+}
+
+.customer-details {
+  font-weight: bold;
+  padding-top: 0.4rem;
+}
+
+cui-accordion-item {
+  align-items: center;
+  gap: 1.6rem;
+}
+

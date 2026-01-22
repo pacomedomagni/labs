@@ -1,0 +1,54 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+@use "theming/themes/dark-blue";
+@use "../mixins/app-theme";
+@use "theming/palettes";
+
+$color-config: mat.m2-get-color-config(dark-blue.$theme);
+$primary: map.get(dark-blue.$color-config, 'primary');
+$background: map.get(dark-blue.$color-config, 'background');
+$background: map.merge($background, (background: mat.m2-get-color-from-palette(palettes.$cui-grey, 850)));
+$theme: map.merge(dark-blue.$theme, (background: $background));
+
+$theme-extensions: (
+	is-green: false,
+	is-light: false
+);
+$modified-theme: map.merge(dark-blue.$theme, dark-blue.$theme-extensions);
+
+@include app-theme.labs-theme($modified-theme);
+
+.mat-mdc-radio-button.mat-accent .mat-radio-inner-circle,
+.mat-radio-button.mat-accent .mat-radio-ripple .mat-ripple-element:not(.mat-radio-persistent-ripple),
+.mat-radio-button.mat-accent.mat-radio-checked .mat-radio-persistent-ripple,
+.mat-radio-button.mat-accent:active .mat-radio-persistent-ripple {
+	background-color: mat.m2-get-color-from-palette($primary);
+}
+
+.mat-mdc-radio-button.mat-accent.mat-radio-checked .mat-radio-outer-circle {
+	border-color: mat.m2-get-color-from-palette($primary);
+}
+
+.mat-checkbox-checked.mat-accent .mat-checkbox-ripple .mat-ripple-element {
+	opacity: 0.03 !important;
+	background-color: mat.m2-get-color-from-palette($primary);
+}
+
+.mat-checkbox-checked.mat-accent .mat-checkbox-background,
+.mat-checkbox-indeterminate.mat-accent .mat-checkbox-background {
+	background-color: mat.m2-get-color-from-palette($primary);
+}
+
+.app-logo {
+	content: url("../../../../public/assets/logo-dark.png");
+}
+
+.mat-mdc-button-base.mat-mdc-outlined-button,.mat-mdc-button-base.mat-primary.mat-button:not(.mat-button-disabled),.mat-mdc-button-base.mat-primary.mat-mdc-outlined-button:not(.mat-button-disabled) {
+    background: #2c2c2c;
+    color: #90caf9
+}
+
+.card-container {
+    background-color: #fff;
+    background-color: #424242
+}

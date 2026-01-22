@@ -1,0 +1,18 @@
+services:
+  app:
+    container_name: app
+    build:
+      context: ./source
+      dockerfile: ../Dockerfile
+      target: runtime
+      args:
+        - APP_NAME=dotnetcore
+      secrets:
+        - PGRCONFIG_TOKEN
+    ports:
+      - 8080:8080
+
+secrets:
+  PGRCONFIG_TOKEN:
+    environment: PGRCONFIG_TOKEN
+

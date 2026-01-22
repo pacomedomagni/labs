@@ -1,0 +1,31 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+@use 'theming/palettes';
+@use "base/variables" as variables;
+
+@mixin notification-banner-theme($theme) {
+    $color-config: mat.m2-get-color-config($theme);
+    $is-dark: map.get($color-config, 'is-dark');
+    $green: mat.m2-define-palette(palettes.$cui-green);
+    $blue: mat.m2-define-palette(palettes.$cui-blue);
+    $orange: mat.m2-define-palette(palettes.$cui-orange);
+    $warn: mat.m2-define-palette(palettes.$cui-red);
+
+    .notification-timer-bar {
+        &--success {
+            background-color: mat.m2-get-color-from-palette($green, if($is-dark, 50, 900));
+        }
+
+        &--info {
+            background-color: if($is-dark, variables.$white, mat.m2-get-color-from-palette($blue, 900));
+        }
+
+        &--warn {
+            background-color: mat.m2-get-color-from-palette($orange, if($is-dark, 50, 1000));
+        }
+
+        &--error {
+            background-color: mat.m2-get-color-from-palette($warn, if($is-dark, 50, 900));
+        }
+    }
+}

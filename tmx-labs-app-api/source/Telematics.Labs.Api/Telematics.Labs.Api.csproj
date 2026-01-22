@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifiers>linux-arm64</RuntimeIdentifiers>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <UserSecretsId>dad63717-5704-4652-9e5d-bccfda29de4e</UserSecretsId>
+    <AssemblyName>Progressive.Telematics.Labs.Api</AssemblyName>
+    <RootNamespace>Progressive.Telematics.Labs.Api</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Connected Services\**" />
+    <Compile Remove="RequestModels\DevicePreparation\**" />
+    <Content Remove="Connected Services\**" />
+    <Content Remove="RequestModels\DevicePreparation\**" />
+    <EmbeddedResource Remove="Connected Services\**" />
+    <EmbeddedResource Remove="RequestModels\DevicePreparation\**" />
+    <None Remove="Connected Services\**" />
+    <None Remove="RequestModels\DevicePreparation\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="accessConfig.webguard" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="accessConfig.webguard">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.8" />
+    <PackageReference Include="Polly" Version="8.4.1" />
+    <PackageReference Include="Polly.Contrib.WaitAndRetry" Version="1.1.1" />
+    <PackageReference Include="Progressive.TMX.AppLogger" Version="1.7.1" />
+    <PackageReference Include="Progressive.WAM.Webguard.Client.Core" Version="8.0.0.65" />
+    <PackageReference Include="Progressive.WAM.Webguard.Client.Kerberos.Core" Version="8.0.0.45" />
+    <PackageReference Include="Progressive.WAM.Webguard.Protect.Core" Version="8.0.0.37" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="System.ServiceModel.Duplex" Version="6.0.0" />
+    <PackageReference Include="System.ServiceModel.Http" Version="8.1.1" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="8.0.0" />
+    <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Telematics.Labs.Business.Resources\Telematics.Labs.Business.Resources.csproj" />
+    <ProjectReference Include="..\Telematics.Labs.Business\Telematics.Labs.Business.csproj" />
+    <ProjectReference Include="..\Telematics.Labs.Services\Telematics.Labs.Services.csproj" />
+    <ProjectReference Include="..\Telematics.Labs.Shared\Telematics.Labs.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controllers\DevicePreperation\BenchTest\" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta charset="utf-8" />
+
+	<title>TMX Labs</title>
+	<base href="/" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+	<style type="text/css">
+		/*Pre Loader*/
+
+		.preloader {
+			background-color: rgba(244, 245, 247, .75);
+			position: fixed;
+			/* top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0; */
+			height: 100%;
+			width: 100%;
+			text-align: center;
+			z-index: 1001;
+		}
+
+		.preloader .copy {
+			position: absolute;
+			left: 50px;
+			top: 50%;
+			right: 42px;
+			margin-top: 50px;
+		}
+
+		.preloader h2 {
+			color: #405e7c;
+			font-size: 1.5em;
+			font-family: 'Open Sans', sans-serif;
+			font-weight: 300;
+		}
+
+		.spin-all {
+			position: absolute;
+			height: 250px;
+			width: 250px;
+			top: 50%;
+			left: 50%;
+			margin-top: -125px;
+			margin-left: -125px;
+			-webkit-animation: spinall-animate 4s infinite linear;
+			-moz-animation: spinall-animate 4s infinite linear;
+			-o-animation: spinall-animate 4s infinite linear;
+			animation: spinall-animate 4s infinite linear;
+		}
+
+		.logo {
+			top: 50%;
+			left: 50%;
+			margin-top: -28px;
+			margin-left: -28px;
+			display: inline-block;
+			position: absolute;
+			width: 55px;
+			height: 55px;
+			stroke-width: 0;
+			z-index: 1000;
+		}
+
+		.preloader-1 {
+			background: #f4f5f7;
+			border-radius: 50%;
+			border: 1px solid rgba(243, 243, 243, 0.75);
+			height: 100px;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			margin-left: -50px;
+			margin-top: -50px;
+			width: 100px;
+			z-index: 100;
+		}
+
+		.preloader-2 {
+			background: #ff7e00;
+			border-radius: 50%;
+			height: 100px;
+			position: absolute;
+			top: 70px;
+			left: 70px;
+			width: 100px;
+			z-index: 75;
+		}
+
+		.preloader-3 {
+			background: #2aa5fc;
+			border-radius: 50%;
+			height: 100px;
+			position: absolute;
+			top: 80px;
+			left: 70px;
+			width: 100px;
+			z-index: 70;
+		}
+
+		.preloader-4 {
+			background: #1e73e9;
+			border-radius: 50%;
+			height: 100px;
+			position: absolute;
+			top: 80px;
+			left: 80px;
+			width: 100px;
+			z-index: 65;
+		}
+
+		.preloader-5 {
+			background: #405e7c;
+			border-radius: 50%;
+			height: 100px;
+			position: absolute;
+			top: 70px;
+			left: 80px;
+			width: 100px;
+			z-index: 72;
+		}
+
+		@keyframes spinall-animate {
+			0% {
+				-ms-transform: rotate(0deg);
+				-webkit-transform: rotate(0deg);
+				transform: rotate(0deg);
+			}
+
+			100% {
+				-ms-transform: rotate(720deg);
+				-webkit-transform: rotate(720deg);
+				transform: rotate(720deg);
+			}
+		}
+
+		@-webkit-keyframes spinall-animate {
+			0% {
+				-ms-transform: rotate(0deg);
+				-webkit-transform: rotate(0deg);
+				transform: rotate(0deg);
+			}
+
+			100% {
+				-ms-transform: rotate(720deg);
+				-webkit-transform: rotate(720deg);
+				transform: rotate(720deg);
+			}
+		}
+
+		@-moz-keyframes spinall-animate {
+			0% {
+				-ms-transform: rotate(0deg);
+				-webkit-transform: rotate(0deg);
+				transform: rotate(0deg);
+			}
+
+			100% {
+				-ms-transform: rotate(720deg);
+				-webkit-transform: rotate(720deg);
+				transform: rotate(720deg);
+			}
+		}
+
+		@-o-keyframes spinall-animate {
+			0% {
+				-ms-transform: rotate(0deg);
+				-webkit-transform: rotate(0deg);
+				transform: rotate(0deg);
+			}
+
+			100% {
+				-ms-transform: rotate(720deg);
+				-webkit-transform: rotate(720deg);
+				transform: rotate(720deg);
+			}
+		}
+	</style>
+</head>
+
+<body class="overflow-hidden">
+	<tmx-root>
+		<div class="preloader">
+			<img class="logo" src="assets/icons/pgr-p.svg" alt="Loading"/>
+			<div class="preloader-1"></div>
+			<div class="spin-all">
+				<div class="preloader-2"></div>
+				<div class="preloader-3"></div>
+				<div class="preloader-4"></div>
+				<div class="preloader-5"></div>
+			</div>
+		</div>
+	</tmx-root>
+</body>
+
+</html>

@@ -1,0 +1,30 @@
+{
+	"environment": {
+		"name": "dev",
+		"isProduction": false,
+		"prefix": "d"
+	},
+	"build": {
+		"version": "${BUILD_DEFINITIONVERSION}",
+		"buildId": "${BUILD_BUILDID}",
+		"buildNumber": "${BUILD_BUILDNUMBER}",
+		"branch": "${BUILD_SOURCEBRANCHNAME}"
+	},
+	"auth": {
+		"issuer": "dev-tokenservice.proghszq.com",
+		"discoveryDoc": "/oidc.discovery.json",
+		"redirectUri": "/oauth_sso",
+		"clientId": "TmxLabsUI",
+		"responseType": "code",
+		"scope": "openid",
+		"skipIssuerCheck": true,
+		"strictDiscoveryDocumentValidation": false,
+		"showDebugInformation": true
+	},
+	"apiKeys": {
+		"googleMaps": "AIzaSyDhPPbW0jMFZN7S6NruSVloEyRRCRPtoXw"
+	},
+	"connections": {
+		"apiUrl": "https://tmx-labs-app-main-pro-tmx-labs-app-api-dev.np.glb.pgrcloud.app/Api"
+	}
+}

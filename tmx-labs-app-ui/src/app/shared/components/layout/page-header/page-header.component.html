@@ -1,0 +1,7 @@
+<mat-card appearance="outlined" class="page-header mb-l">
+	<mat-card-title>{{headerText}}</mat-card-title>
+	<mat-card-subtitle>
+		<ng-content select="span"></ng-content>
+	</mat-card-subtitle>
+	<ng-content select="[header-addon]"></ng-content>
+</mat-card>

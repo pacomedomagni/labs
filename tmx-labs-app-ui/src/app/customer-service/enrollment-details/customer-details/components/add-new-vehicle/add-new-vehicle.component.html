@@ -1,0 +1,75 @@
+<div class="flex flex-col p-xs pb-0">
+    <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+        <mat-label>Year</mat-label>
+        <mat-select
+            (valueChange)="yearChange($event)"
+            [(ngModel)]="vehicleDetails.year"
+            name="year"
+            #yearModel="ngModel"
+            id="tmx-year-edit"
+            required
+        >
+            @for (year of years(); track year) {
+                <mat-option [value]="year">{{ year }}</mat-option>
+            }
+        </mat-select>
+        @if (yearModel.invalid && (yearModel.dirty || yearModel.touched)) {
+            <mat-error>Year is required</mat-error>
+        }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+        <mat-label>Make</mat-label>
+        <mat-select
+            (valueChange)="makeChange($event)"
+            [(ngModel)]="vehicleDetails.make"
+            name="make"
+            #makeModel="ngModel"
+            id="tmx-make-edit"
+            required
+        >
+            @for (make of makes(); track make) {
+                <mat-option [value]="make">{{ make }}</mat-option>
+            }
+        </mat-select>
+        @if (makeModel.invalid && (makeModel.dirty || makeModel.touched)) {
+            <mat-error>Make is required</mat-error>
+        }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+        <mat-label>Model</mat-label>
+        <mat-select
+            [(ngModel)]="vehicleDetails.model"
+            name="model"
+            #modelModel="ngModel"
+            id="tmx-model-edit"
+            required
+        >
+            @for (model of models(); track model) {
+                <mat-option [value]="model">{{ model }}</mat-option>
+            }
+        </mat-select>
+        @if (modelModel.invalid && (modelModel.dirty || modelModel.touched)) {
+            <mat-error>Model is required</mat-error>
+        }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+        <mat-label>Scoring Algorithm</mat-label>
+        <mat-select
+            [(ngModel)]="vehicleDetails.scoringAlgorithm"
+            name="scoringAlgo"
+            #scoringAlgoModel="ngModel"
+            id="tmx-scoring-algo-edit"
+            required
+        >   
+            @for (algo of scoringAlgos(); track algo.code) {
+                <mat-option [value]="algo">{{ algo.description }}</mat-option>
+            }
+        </mat-select>
+        @if (scoringAlgoModel.invalid && (scoringAlgoModel.dirty || scoringAlgoModel.touched)) {
+            <mat-error>Scoring Algorithm is required</mat-error>
+        }
+    </mat-form-field>
+</div>

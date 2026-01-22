@@ -1,0 +1,55 @@
+<div class="flex flex-col p-xs pb-0">
+  <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+    <mat-label>Name</mat-label>
+    <input matInput [(ngModel)]="customerDetails.user.fullName" name="name" #nameModel="ngModel" id="tmx-name-edit" pattern="^[a-zA-Z0-9\- ']*$" type="text" required>
+     @if (nameModel.hasError('pattern') && !nameModel.hasError('required') && nameModel.touched) {
+        <mat-error>Name contains invalid characters</mat-error>
+      }
+      @if (nameModel.hasError('required') && nameModel.touched) {
+        <mat-error>Name is required</mat-error>
+      }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+    <mat-label>Address</mat-label>
+    <input matInput [(ngModel)]="customerDetails.user.address" name="address" #addressModel="ngModel" id="tmx-address1-edit" pattern="^[a-zA-Z0-9\-. ']*$" type="text" required>
+    @if (addressModel.hasError('pattern') && !addressModel.hasError('required') && addressModel.touched) {
+        <mat-error>Address contains invalid characters</mat-error>
+      }
+      @if (addressModel.hasError('required') && addressModel.touched) {
+        <mat-error>Address is required</mat-error>
+      }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+    <mat-label>City</mat-label>
+    <input matInput [(ngModel)]="customerDetails.user.city"  name="city" #cityModel="ngModel" id="tmx-city-edit" type="text" pattern="^[a-zA-Z0-9\- ']*$" required>
+      @if (cityModel.hasError('pattern') && !cityModel.hasError('required') && cityModel.touched) {
+        <mat-error>City contains invalid characters</mat-error>
+      }
+      @if (cityModel.hasError('required') && cityModel.touched) {
+        <mat-error>City is required</mat-error>
+      }
+    </mat-form-field>
+
+  <mat-form-field appearance="outline">
+      <mat-label>State</mat-label>
+      <mat-select id="tmx-elig-zip-state" name="type" cuiMatSelectAccessibility [(ngModel)]="customerDetails.user.state">
+        @for (state of states; track state) {
+          <mat-option [value]="state">{{ state }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+  <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+    <mat-label>Zip Code</mat-label>
+    <input matInput [(ngModel)]="customerDetails.user.zip" #zipModel="ngModel" name="zip" id="tmx-zip-edit" pattern="^[0-9]{5}$" type="text" required maxlength="5" minlength="5">
+    @if (zipModel.hasError('pattern') && !zipModel.hasError('required') && zipModel.touched) {
+        <mat-error>Zip code must be 5 digits</mat-error>
+      }
+      @if (zipModel.hasError('required') && zipModel.touched) {
+        <mat-error>Zip is required</mat-error>
+      }
+  </mat-form-field>
+
+</div>

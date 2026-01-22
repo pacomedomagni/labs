@@ -1,0 +1,71 @@
+<cui-accordion>
+  <cui-accordion-item #accordionItem>
+     <cui-accordion-header [rightAlignToggle]="true">
+       <mat-icon
+          aria-hidden="true"
+         color="primary"
+         class="pr-xxs my-auto device-icon"
+         [svgIcon]="deviceIcon()"
+       ></mat-icon>
+       <span class="participant-name my-auto">{{ participantLabel() }}</span>
+       <span class="vehicle-description my-auto">{{ headerDisplayName() }}</span>
+       <tmx-menu-button-group
+        class="ml-auto my-auto"
+         [actions]="menuActions()"
+         (actionClicked)="onActionClicked($event)"
+       ></tmx-menu-button-group>
+     </cui-accordion-header>
+     <cui-accordion-body>
+       <div class="participant-section">
+         <div>
+           @for (row of baseInfoRows(); track row.label; let i = $index) {
+             <div class="grid grid-cols-5 gap-x-8 text-2xl">
+               <div class="col-span-2 font-semibold">
+                 {{ row.label }}
+               </div>
+               <div class="col-span-3" [class.font-semibold]="row.emphasize">
+                 {{ row.value | tmxDisplayDate | tmxFallbackValue }}
+               </div>
+             </div>
+             @if (i < baseInfoRows().length - 1) {
+               <hr class="border-t-2 my-2" aria-hidden="true">
+             }
+           }
+           @if (baseInfoRows().length > 0 && deviceInfoRows().length > 0) {
+             <hr class="border-t-4 my-4" aria-hidden="true">
+           }
+           @for (row of deviceInfoRows(); track row.label; let i = $index) {
+             <div class="grid grid-cols-5 gap-x-4 text-2xl">
+               <div class="col-span-2 font-semibold">
+                 {{ row.label }}
+               </div>
+               <div class="col-span-3" [class.font-semibold]="row.emphasize">
+                 {{ row.value | tmxDisplayDate | tmxFallbackValue }}
+               </div>
+             </div>
+             @if (i < deviceInfoRows().length - 1) {
+               <hr class="border-t-2 my-2" aria-hidden="true">
+             }
+           }
+           @if (deviceInfoRows().length > 0 && returnInfoRows().length > 0) {
+             <hr class="border-t-4 my-4" aria-hidden="true">
+           }
+           @for (row of returnInfoRows(); track row.label; let i = $index) {
+             <div class="grid grid-cols-5 gap-x-4 text-2xl">
+               <div class="col-span-2 font-semibold">
+                 {{ row.label }}
+               </div>
+               <div class="col-span-3" [class.font-semibold]="row.emphasize">
+                 {{ row.value | tmxDisplayDate | tmxFallbackValue }}
+               </div>
+             </div>
+             @if (i < returnInfoRows().length - 1) {
+               <hr class="border-t-2 my-2" aria-hidden="true">
+             }
+           }
+         </div>
+     </div>
+   </cui-accordion-body>
+ </cui-accordion-item>
+</cui-accordion>
+

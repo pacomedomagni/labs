@@ -1,0 +1,28 @@
+@use "sass:color";
+@use "base/variables" as variables2;
+@use "theming/palettes";
+
+@use "sass:map";
+@use "@angular/material" as mat;
+
+@mixin page-header-theme($theme) {
+	$color-config: mat.m2-get-color-config($theme);
+	$foreground: map.get($color-config, 'foreground');
+	$is-dark: map.get($color-config, 'is-dark');
+	$blue: mat.m2-define-palette(palettes.$cui-blue);
+
+	.page-header {
+		border-bottom-color: mat.m2-get-color-from-palette($foreground, divider);
+		box-shadow: 0 20px 0px 0px variables2.$white, 0 -20px 0px 0px variables2.$white, 5px 0 10px -5px color.adjust(variables2.$black, $alpha: -.8), -5px 0 10px -5px color.adjust(variables2.$black, $alpha: -.8) !important;
+	}
+
+	.page-header-description {
+		color: mat.m2-get-color-from-palette($foreground, secondary-text);
+	}
+
+	@if $is-dark {
+		.page-header {
+			box-shadow: 0 10px 0px 0px #424242, 0 -10px 0px 0px #424242, 5px 0 20px -5px mat.m2-get-color-from-palette($blue, 500), -5px 0 20px -5px mat.m2-get-color-from-palette($blue, 500) !important;
+		}
+	}
+}

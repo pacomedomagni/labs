@@ -1,0 +1,44 @@
+@use "base/variables" as variables2;
+@use "theming/palettes";
+
+@use "sass:map";
+@use "@angular/material" as mat;
+
+@mixin snackbar-theme($theme) {
+	$color-config: mat.m2-get-color-config($theme);
+	$is-dark: map.get($color-config, 'is-dark');
+	$orange: mat.m2-define-palette(palettes.$cui-orange);
+
+	.snackbar-message {
+		white-space: pre-wrap;
+	}
+
+	.snackbar-background {
+		/* &-error {
+      background-color: mat-color($warn, if($is-dark, 50, 900));
+      color: mat-color($warn, if($is-dark, 900, '900-contrast'));
+
+      .mat-simple-snackbar-action {
+        color: mat-color($warn, if($is-dark, 900, '900-contrast'));
+      }
+    }
+
+    &-success {
+      background-color: mat-color($green, if($is-dark, 50, 900));
+      color: mat-color($green, if($is-dark, 900, '900-contrast'));
+
+      .mat-simple-snackbar-action {
+        color: mat-color($green, if($is-dark, 900, '900-contrast'));
+      }
+    } */
+
+		&-warning {
+			background-color: mat.m2-get-color-from-palette($orange, if($is-dark, 50, 500));
+			color: mat.m2-get-color-from-palette($orange, if($is-dark, 1000, variables2.$white));
+
+			.mat-mdc-snack-bar-action {
+				color: mat.m2-get-color-from-palette($orange, if($is-dark, 1000, variables2.$white));
+			}
+		}
+	}
+}

@@ -1,0 +1,38 @@
+container:
+  image: 
+    repository: ${APP_REGISTRY}/${APP_PLATFORM}/${APP_NAME}
+    tag: ${CDP_BRANCH_NAME}-${CDP_RUN_ID}-${CDP_COMMIT_SHA}
+
+  ## currently this is needed because our example .NET app does not have an endpoint at /Home/ready which is default
+  readinessProbe:
+    httpGet:
+      path: /healthz
+
+  ## Allows environment specific settings to be set in the container
+  customConfigMap:
+    enabled: true
+    values: |-
+      ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT}"   
+
+  secretGroup:
+    enabled: true
+    secrets:
+      ClientId: ${CLIENT_ID}
+      ClientSecret: ${CLIENT_SECRET}  
+
+route_list:
+  ${OPENSHIFT_CLUSTER_ROUTE_NAME}:
+    host: ${OPENSHIFT_CLUSTER_ROUTE_URL}
+    type: cluster
+  ${OPENSHIFT_GTM_ROUTE_NAME}:
+    host: ${OPENSHIFT_GTM_ROUTE_URL}
+    type: gtm
+
+kerbsidecar:
+  enabled: ${ENABLE_KERBSIDECAR}
+  zid: ${KERBSIDECAR_ZID_NAME}
+  realm: ${KERBSIDECAR_ZID_REALM}
+  config: ${KRB5_CONFIG}
+  hashicorpVault:
+    role: ${KERBSIDECAR_ZID_VAULT_ROLE}
+    pathToSecret: ${KERBSIDECAR_ZID_VAULT_PATH}

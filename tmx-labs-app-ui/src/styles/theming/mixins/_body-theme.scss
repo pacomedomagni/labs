@@ -1,0 +1,85 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+@use "theming/palettes";
+
+$primary-typeface: 'Roboto', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+@mixin body-theme($theme) {
+	$color-config: mat.m2-get-color-config($theme);
+	$accent: map.get($color-config, 'accent');
+	$primary: map.get($color-config, 'primary');
+	$foreground: map.get($color-config, 'foreground');
+	//$background: map.get($color-config, 'background');
+	$warn: map.get($color-config, 'warn');
+	$is-dark: map.get($color-config, 'is-dark');
+
+	$green: mat.m2-define-palette(palettes.$cui-green);
+	$blue: mat.m2-define-palette(palettes.$cui-blue);
+	$orange: mat.m2-define-palette(palettes.$cui-orange);
+	$warn: mat.m2-define-palette(palettes.$cui-red);
+
+
+	$warn-palette: mat.m2-define-palette(palettes.$cui-red, 700, 50, 900);
+	$theme: map.merge($theme, (warn: $warn-palette));
+
+	/*mat.m2-get-color-from-palette($green, if($is-dark, 50, 900));*/
+
+	body,
+	main,
+	.mat-mdc-card,
+	.mat-mdc-button,
+	.mat-mdc-form-field,
+	.mat-mdc-list-item,
+	.mat-mdc-raised-button,
+	.mat-mdc-icon-button,
+	.mat-mdc-outlined-button,
+	.mat-mdc-unelevated-button,
+	.mat-mdc-fab,
+	.mat-mdc-mini-fab,
+	.mat-toolbar,
+	.mat-toolbar h1,
+	.mat-toolbar h2,
+	.mat-toolbar h3,
+	.mat-toolbar h4,
+	.mat-toolbar h5,
+	.mat-toolbar h6 {
+		font-family: $primary-typeface;
+	}
+
+	// Match admin app - CoreUI default is light off-blue/gray
+    body {
+        @if not $is-dark {
+            background-color: white;
+        }
+        color: mat.m2-get-color-from-palette($foreground, text);
+    }
+
+	.mat-mdc-list-base .mat-mdc-list-item {
+		height: 36px !important;
+		font-size: 14px !important;
+	}
+
+	.mat-divider {
+		margin: 0 15px !important;
+	}
+
+	.mat-sidenav {
+		box-shadow: inset -1px 0px 5px 0px rgba(0, 0, 0, 0.2);
+	}
+	.cdk-mouse-focused:not(.mat-radio-button):not(.mat-checkbox):not(.mat-calendar-content):not(.mat-sort-header):not(.mat-button-toggle):not(.mat-date-range-input-container) {
+		outline-color: mat.m2-get-color-from-palette($primary);
+	}
+
+	.warning {
+		color: mat.m2-get-color-from-palette($warn);
+	}
+
+	xng-breadcrumb{
+		@if $is-dark {
+			background-color: rgb(26, 26, 26);
+		}
+		@else {
+			background-color: white;
+		}
+	}
+}

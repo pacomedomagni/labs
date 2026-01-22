@@ -1,0 +1,10 @@
+﻿@if (!showDetails()) {
+  <tmx-enrollment-results-table 
+    [data]="dataArray() || []"
+    (viewParticipant)="viewParticipant($event)"
+  ></tmx-enrollment-results-table>
+} @else if (enrollmentDetails(); as detail) {
+  <tmx-enrollment-details [details]="detail"></tmx-enrollment-details>
+} @else {
+  <p class="no-selection">Enrollment details are unavailable.</p>
+}

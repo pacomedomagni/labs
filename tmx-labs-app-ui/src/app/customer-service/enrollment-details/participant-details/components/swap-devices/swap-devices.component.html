@@ -1,0 +1,29 @@
+<div class="swap-devices__container">
+  <mat-form-field appearance="outline" class="swap-devices__field" [hideRequiredMarker]="true">
+    <mat-label>Please select vehicle to swap with</mat-label>
+    <mat-select
+      name="destParticipantSeqId"
+      [(ngModel)]="formModel.destParticipantSeqId"
+      required
+      [disabled]="candidates.length === 0"
+    >
+      @if (selectedCandidate) {
+        <mat-select-trigger>
+          <div class="swap-devices__trigger">
+            <span class="swap-devices__trigger-primary">{{ selectedCandidate.displayName }}</span>
+            <span class="swap-devices__trigger-secondary">{{ selectedCandidate.deviceSerialNumber }}</span>
+          </div>
+        </mat-select-trigger>
+      }
+      @for (candidate of candidates; track candidate.participantSeqId) {
+        <mat-option [value]="candidate.participantSeqId">
+          <div class="swap-devices__option">
+            <span class="swap-devices__option-primary">{{ candidate.displayName }}</span>
+            <span class="swap-devices__option-secondary">{{ candidate.deviceSerialNumber }}</span>
+          </div>
+        </mat-option>
+      }
+    </mat-select>
+    <mat-error>Participant is required</mat-error>
+  </mat-form-field>
+</div>

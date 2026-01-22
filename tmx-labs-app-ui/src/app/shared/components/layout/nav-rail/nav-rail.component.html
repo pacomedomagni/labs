@@ -1,0 +1,45 @@
+<div class="overflow-y-auto overflow-x-hidden h-full -mr-2 pr-2 flex flex-col">
+    <!-- This is a workaround to prevent NVDA from skipping the focus switch button. Known issue with NVDA. -->
+    <span>&nbsp;</span>
+    <cui-hidden-focus-switch-button
+        [pgrID]="'testFocusSwitch'"
+        [label]="'Skip To Content'"
+        [focusSwitchId]="'main-content'"
+        class="absolute z-10"
+    ></cui-hidden-focus-switch-button>
+    <nav class="nav-rail lg:mt-xxl flex flex-col h-full" aria-label="Primary">
+        <ul class="flex flex-col flex-1">
+            @for (link of navLinks(); track link.label) {
+                <li>
+                    <a
+                        mat-icon-button
+                        class="nav-rail-link flex justify-center items-center focus-white"
+                        #rla="routerLinkActive"
+                        [routerLinkActive]="['active']"
+                        [routerLink]="link.route"
+                    >
+                        <div class="flex flex-col items-center">
+                            @if (link.icon) {
+                                <mat-icon class="material-icons-icon">{{ link.icon }}</mat-icon>
+                            }
+                            @if (link.svgIcon) {
+                                <mat-icon
+                                    class="material-icons-icon"
+                                    svgIcon="{{ link.svgIcon }}"
+                                ></mat-icon>
+                            }
+                            @if (link.faIcon) {
+                                <fa-icon class="material-icons-icon" [icon]="link.faIcon"></fa-icon>
+                            }
+                            <span class="nav-rail-link-label mt-bl-1">{{ link.label }}</span>
+                        </div>
+                    </a>
+                </li>
+            }
+        </ul>
+
+        <div class="flex-shrink-0 flex flex-col text-white items-center justify-end">
+            <cui-theme-picker class="mb-xs focus-white"></cui-theme-picker>
+        </div>
+    </nav>
+</div>

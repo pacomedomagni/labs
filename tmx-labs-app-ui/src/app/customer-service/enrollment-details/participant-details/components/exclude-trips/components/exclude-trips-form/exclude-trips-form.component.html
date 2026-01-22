@@ -1,0 +1,38 @@
+<div class="form-grid">
+    <div class="control">
+        <tmx-date-time-control
+            [label]="'Range Start Date'"
+            [id]="'range-start'"
+            [model]="rangeStartDate"
+            [isRequired]="true"
+            [error]="rangeStartError"
+            (modelChange)="onRangeStartDateChangeModel($event)"
+        ></tmx-date-time-control>
+        <input
+            type="hidden"
+            name="rangeStart"
+            required
+            [(ngModel)]="formModel.rangeStart"
+            #rangeStartCtrl="ngModel"
+        />
+    </div>
+
+    <div class="control">
+        <tmx-date-time-control
+            [label]="'Range End Date'"
+            [id]="'range-end'"
+            [model]="rangeEndDate"
+            [isRequired]="true"
+            [error]="rangeEndError"
+            (modelChange)="onRangeEndDateChangeModel($event)"
+        ></tmx-date-time-control>
+        <input
+            type="hidden"
+            name="rangeEnd"
+            required
+            [(ngModel)]="formModel.rangeEnd"
+            #rangeEndCtrl="ngModel"
+        />
+    </div>
+
+</div>

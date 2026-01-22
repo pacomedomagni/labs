@@ -1,0 +1,23 @@
+{
+  "global": {
+    "APP_NAME": "tmx-labs-app",
+    "APP_PLATFORM": "pro",
+    "APP_TYPE": "angular",
+    "OPENSHIFT_PREFIX": "pro-tmx-labs-app"
+  },
+  "build": {
+    "default": {
+      "APP_BUILD_PATH": "./tmx-labs-app/tmx-labs-app-ui",
+      "APP_DOCKERFILE": "${APP_BASE_PATH}/tmx-labs-app-ui/Dockerfile"
+    }
+  },
+  "deploy": {
+    "dev": {},
+    "test": {},
+    "qa": {},
+    "stress": {},
+    "prod": {
+      "OPENSHIFT_GTM_ROUTE_URL": "${OPENSHIFT_PROJECT}.${OPENSHIFT_GTM_DOMAIN}"
+    }
+  }
+}

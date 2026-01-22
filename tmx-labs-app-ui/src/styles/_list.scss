@@ -1,0 +1,26 @@
+ul.cui-ubi-list {
+	display: block;
+	padding-left: 3rem;
+
+	li {
+		display: list-item;
+
+		&::before {
+			content: '\2022';
+			display: inline-block;
+			font-weight: bold;
+			margin-left: -1em;
+			width: 1em;
+		}
+
+		ul {
+			display: block;
+			margin: 1rem 0;
+			padding-left: 3rem;
+
+			li::before {
+				content: '-';
+			}
+		}
+	}
+}

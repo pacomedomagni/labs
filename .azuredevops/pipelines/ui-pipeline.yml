@@ -1,0 +1,104 @@
+resources:
+  repositories:
+    - repository: self
+      clean: true
+    - repository: templates
+      type: githubenterprise
+      endpoint: GitHub-EMU-CDP-Only
+      name: progressive/pipeline-templates
+      ref: refs/tags/latest
+    
+
+trigger:
+  batch: false
+  branches:
+    include:
+      - main
+      - release/*
+  paths:
+    include:
+      - tmx-labs-app-ui/**
+    exclude:
+      - '**/*.md'
+
+pr:
+  branches:
+    include:
+      - develop
+      - master
+      - main
+  paths:
+    include:
+      - tmx-labs-app-ui/**
+
+variables:
+  - group: tmx-labs-app-openshift-secrets
+  - group: tmx-labs-app-application-secrets
+  
+
+name: $(Date:yyyyMMdd)$(Rev:.r)_$(Build.BuildId)
+
+stages:
+  - template: .azuredevops/pipelines/build.yml@templates
+    parameters:
+      id: default
+      state: ui-variables.json
+      type: container
+
+  - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+    - template: .azuredevops/pipelines/deploy.yml@templates
+      parameters:
+        id: dev
+        env: dev
+        type: openshift
+        dependsOn: build_default
+        regions: ['east', 'metro']
+        secrets:
+          OPENSHIFT_TOKEN_EAST: $(OPENSHIFT_TOKEN_DEV_NP1_E1)
+          OPENSHIFT_TOKEN_METRO: $(OPENSHIFT_TOKEN_DEV_NP1_E2)
+        
+  - ${{ if and(ne(variables['Build.Reason'], 'PullRequest'), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))) }}:
+    - template: .azuredevops/pipelines/deploy.yml@templates
+      parameters:
+        id: test
+        env: test
+        type: openshift
+        dependsOn: build_default
+        deployApproval: nonprod-approval
+        regions: ['east', 'metro']
+        secrets:
+          OPENSHIFT_TOKEN_EAST: $(OPENSHIFT_TOKEN_TEST_NP1_E1)
+          OPENSHIFT_TOKEN_METRO: $(OPENSHIFT_TOKEN_TEST_NP1_E2)
+          
+  - ${{ if and(ne(variables['Build.Reason'], 'PullRequest'), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))) }}:
+    - template: .azuredevops/pipelines/deploy.yml@templates
+      parameters:
+        id: qa
+        env: qa
+        type: openshift
+        dependsOn: deploy_dev
+        deployApproval: nonprod-approval
+        regions: ['east', 'metro']
+        secrets:
+          OPENSHIFT_TOKEN_EAST: $(OPENSHIFT_TOKEN_QA_QA1_E1)
+          OPENSHIFT_TOKEN_METRO: $(OPENSHIFT_TOKEN_QA_QA1_E2)
+          
+  - ${{ if and(ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')) }}:
+    - template: .azuredevops/pipelines/qa-signoff.yml@templates
+      parameters:
+        id: qa_signoff
+        type: qa-signoff
+        dependsOn: deploy_qa
+
+  - ${{ if and(ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')) }}:
+    - template: .azuredevops/pipelines/deploy.yml@templates
+      parameters:
+        id: prod
+        env: prod
+        type: openshift
+        dependsOn: qa_signoff
+        regions: ['east', 'metro']
+        secrets:
+          OPENSHIFT_TOKEN_EAST: $(OPENSHIFT_TOKEN_PROD_P1_E1)
+          OPENSHIFT_TOKEN_METRO: $(OPENSHIFT_TOKEN_PROD_P1_E2)
+

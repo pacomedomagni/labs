@@ -1,0 +1,10 @@
+--- # Change Automation Configuration
+templateId : "A AutoCRQ for Product"
+productName : "Application.Product.Technical Application.Telematics Core Services"
+branchFilter : [release/*]
+pciApp : false
+soxApp : false
+usePullRequestTitleForReason : true
+correlateCRQs : false
+deployType : "auto"
+testResultsApp : "Link"

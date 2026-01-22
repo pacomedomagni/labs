@@ -1,0 +1,53 @@
+@if (hasActions()) {
+    <button
+        mat-flat-button
+        color="primary"
+        class="actions__trigger"
+        [matMenuTriggerFor]="actionsMenu"
+        (click)="$event.stopPropagation()"
+    >
+        Actions
+        <mat-icon matSuffix>arrow_drop_down</mat-icon>
+    </button>
+}
+
+<mat-menu #actionsMenu="matMenu" class="cui-menu">
+    @for (action of actions(); track action.id) {
+        @if (hasChildren(action)) {
+            <!-- Menu item with submenu -->
+            <button
+                mat-menu-item
+                [disabled]="action.disabled ?? false"
+                [matTooltip]="action.tooltip ?? ''"
+                matTooltipPosition="above"
+                [matMenuTriggerFor]="submenu"
+            >
+                {{ action.label }}
+            </button>
+            <mat-menu #submenu="matMenu" class="cui-menu">
+                @for (subAction of getValidChildren(action); track subAction.id) {
+                    <button
+                        mat-menu-item
+                        [disabled]="subAction.disabled ?? false"
+                        [matTooltip]="subAction.tooltip ?? ''"
+                        matTooltipPosition="above"
+                        (click)="onActionClick(subAction)"
+                    >
+                        {{ subAction.label }}
+                    </button>
+                }
+            </mat-menu>
+        } @else if(action.type === 'button') {
+            <!-- Regular menu item -->
+            <button
+                mat-menu-item
+                [disabled]="action.disabled ?? false"
+                [matTooltip]="action.tooltip ?? ''"
+                matTooltipPosition="above"
+                (click)="onActionClick(action)"
+            >
+                {{ action.label }}
+            </button>
+        }
+    }
+</mat-menu>

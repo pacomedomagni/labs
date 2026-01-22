@@ -1,0 +1,148 @@
+<table mat-table [dataSource]="dataSource" multiTemplateDataRows>
+    <!-- Date Column -->
+    <ng-container matColumnDef="date">
+        <th class="col-0-width" mat-header-cell *matHeaderCellDef>Date</th>
+        <td class="col-0-width" mat-cell *matCellDef="let element">
+            {{ element.tripDay | date: 'MM/dd/yyyy' }}
+        </td>
+    </ng-container>
+
+    <!-- Trips Column -->
+    <ng-container matColumnDef="trips">
+        <th class="col-1-width text-right" mat-header-cell *matHeaderCellDef>Trips</th>
+        <td class="col-1-width text-right" mat-cell *matCellDef="let element">
+            {{ element.totalTrips }}
+        </td>
+    </ng-container>
+
+    <!-- Duration Column -->
+    <ng-container matColumnDef="duration">
+        <th class="col-2-width text-right" mat-header-cell *matHeaderCellDef>Duration</th>
+        <td class="col-2-width text-right" mat-cell *matCellDef="let element">
+            {{ element.totalDuration }}
+        </td>
+    </ng-container>
+
+    <!-- Mileage Column -->
+    <ng-container matColumnDef="mileage">
+        <th class="col-3-width text-right" mat-header-cell *matHeaderCellDef>Mileage</th>
+        <td class="col-3-width text-right" mat-cell *matCellDef="let element">
+            {{ element.mileage | number: '1.2-2' }}
+        </td>
+    </ng-container>
+
+    <!-- Hard Brakes Column -->
+    <ng-container matColumnDef="hardBrakes">
+        <th class="col-4-width text-right" mat-header-cell *matHeaderCellDef>Hard Brakes</th>
+        <td class="col-4-width text-right" mat-cell *matCellDef="let element">
+            {{ element.hardBrakes }}
+        </td>
+    </ng-container>
+
+    <!-- Hard Accels Column -->
+    <ng-container matColumnDef="hardAccels">
+        <th class="col-5-width text-right" mat-header-cell *matHeaderCellDef>Hard Accels</th>
+        <td class="col-5-width text-right" mat-cell *matCellDef="let element">
+            {{ element.hardAccels }}
+        </td>
+    </ng-container>
+
+    <!-- High Risk Seconds Column -->
+    <ng-container matColumnDef="highRiskSeconds">
+        <th class="col-6-width text-right" mat-header-cell *matHeaderCellDef>High Risk Seconds</th>
+        <td class="col-6-width text-right" mat-cell *matCellDef="let element">
+            {{ element.highRiskSeconds }}
+        </td>
+    </ng-container>
+    <!-- Expand Column -->
+    <ng-container matColumnDef="expand">
+        <th class="col-7-width" mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+        <td class="col-7-width" mat-cell *matCellDef="let element">
+            <button
+                matIconButton
+                aria-label="expand row"
+                (click)="toggle(element); $event.stopPropagation()"
+                class="example-toggle-button"
+                [class.example-toggle-button-expanded]="isExpanded(element)"
+            >
+                <mat-icon>keyboard_arrow_down</mat-icon>
+            </button>
+        </td>
+    </ng-container>
+    <!-- Dummy Column to take up remaining space -->
+    <ng-container matColumnDef="dummyCol">
+        <th mat-header-cell *matHeaderCellDef aria-hidden="true">&nbsp;</th>
+        <td aria-hidden="true" mat-cell *matCellDef="let element">
+            &nbsp;
+        </td>
+    </ng-container>
+
+    <!-- Expanded Content Column -->
+    <ng-container matColumnDef="expandedDetail">
+        <td
+            class="p-0"
+            mat-cell
+            *matCellDef="let element"
+            [attr.colspan]="columnsToDisplayWithExpand.length"
+        >
+            <div
+                class="example-element-detail-wrapper"
+                [class.example-element-detail-wrapper-expanded]="isExpanded(element)"
+            >
+                <div class="min-h-0">
+                    @for (trip of element.trips; track trip.tripSeqID) {
+                        <div class="flex">
+                            <div class="col-0-width py-2 px-6">
+                                <button
+                                    type="button"
+                                    class="cui-link"
+                                    (click)="dateRangeClick(trip)"
+                                    aria-label="Trip time range"
+                                >
+                                    {{ formatTripTimeRange(trip) }}
+                                </button>
+                            </div>
+                            <div class="col-1-width text-right py-2 px-6">
+                                <button
+                                    type="button"
+                                    class="cui-link"
+                                    (click)="mapClick(trip)"
+                                    [attr.aria-label]="
+                                        'Open map for trip at ' + formatTripTimeRange(trip)
+                                    "
+                                >
+                                    Map
+                                </button>
+                            </div>
+                            <div class="col-2-width text-right py-2 px-6">
+                                {{ trip.tripDurationString }}
+                            </div>
+                            <div class="col-3-width text-right py-2 px-6">
+                                {{ trip.tripMiles | number: '1.1-2' }}
+                            </div>
+                            <div class="col-4-width text-right py-2 px-6">
+                                {{ trip.hardBrakes }}
+                            </div>
+                            <div class="col-5-width text-right py-2 px-6">
+                                {{ trip.hardAccelerations }}
+                            </div>
+                            <div class="col-6-width text-right py-2 px-6">
+                                {{ trip.highRiskSeconds }}
+                            </div>
+                            <div class="py-2 px-6"></div>
+                        </div>
+                    }
+                </div>
+            </div></td
+    ></ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+    <tr
+        mat-row
+        *matRowDef="let element; columns: columnsToDisplayWithExpand"
+        class="trip-row"
+        [class.expanded-row]="isExpanded(element)"
+        (click)="toggle(element)"
+    ></tr>
+    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+</table>

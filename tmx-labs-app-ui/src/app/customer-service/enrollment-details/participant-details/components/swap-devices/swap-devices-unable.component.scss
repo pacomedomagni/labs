@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.swap-devices-unable__container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--cui-spacing-sm, 1rem);
+}
+
+.swap-devices-unable__icon {
+  font-size: 3rem;
+  color: var(--cui-color-primary-500, #005eb8);
+  margin-bottom: var(--cui-spacing-xs, 0.75rem);
+}
+
+.swap-devices-unable__title {
+  margin: 0 0 var(--cui-spacing-xxs, 0.25rem);
+  font-weight: 600;
+}
+
+.swap-devices-unable__description {
+  margin: 0;
+  max-width: 22rem;
+}
