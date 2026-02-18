@@ -252,7 +252,7 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
         if (trimmed.length >= 5) {
             this.invalidTimeFormat = !this.parseTime(trimmed);
         } else if (trimmed.length >= 3) {
-            const partialTimePattern = /^\d{1,2}:?\d{0,2}$/;
+            const partialTimePattern = /^\d{1,2}:\d{0,2}$/;
             this.invalidTimeFormat = !partialTimePattern.test(trimmed);
         } else {
             this.invalidTimeFormat = false;
