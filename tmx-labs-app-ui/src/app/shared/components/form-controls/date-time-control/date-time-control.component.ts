@@ -218,33 +218,47 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
         if (!this.isSyncing) {
             this.interacted = true;
         }
+
         if (value == null) {
-            this.timeInput = '';
+            // MatTimepickerInput emits null when it can't parse the raw input.
+            // Don't overwrite timeInput — the user is still typing.
+            // Read the actual DOM value to keep timeInput in sync with what's displayed.
+            const rawValue = this.timeInputRef?.nativeElement?.value ?? '';
+            this.timeInput = rawValue;
         } else if (typeof value === 'string') {
             this.timeInput = value;
         } else if (value instanceof Date) {
             this.timeInput = this.toTimeString(value);
+            this.invalidTimeFormat = false;
         } else {
             this.timeInput = String(value ?? '');
         }
 
-        // Check if time format is valid — progressive validation
-        if (this.timeInput && this.timeInput.trim()) {
-            const trimmed = this.timeInput.trim();
-            if (trimmed.length >= 5) {
-                this.invalidTimeFormat = !this.parseTime(trimmed);
-            } else if (trimmed.length >= 3) {
-                const partialTimePattern = /^\d{1,2}:?\d{0,2}$/;
-                this.invalidTimeFormat = !partialTimePattern.test(trimmed);
-            } else {
-                this.invalidTimeFormat = false;
-            }
+        this.refreshError();
+        this.updateModel();
+    }
+
+    onTimeInput(event: any): void {
+        const input = event.target?.value;
+        if (!input || !input.trim()) {
+            this.invalidTimeFormat = false;
+            this.refreshError();
+            return;
+        }
+
+        const trimmed = input.trim();
+
+        // Progressive validation — don't flag errors on partial input
+        if (trimmed.length >= 5) {
+            this.invalidTimeFormat = !this.parseTime(trimmed);
+        } else if (trimmed.length >= 3) {
+            const partialTimePattern = /^\d{1,2}:?\d{0,2}$/;
+            this.invalidTimeFormat = !partialTimePattern.test(trimmed);
         } else {
             this.invalidTimeFormat = false;
         }
 
         this.refreshError();
-        this.updateModel();
     }
 
     onTimeSelected(event: MatTimepickerSelected<Date> | Date | null): void {

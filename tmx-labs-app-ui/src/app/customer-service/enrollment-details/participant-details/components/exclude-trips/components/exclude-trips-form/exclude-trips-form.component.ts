@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, Input, OnInit, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { CommonModule, formatDate } from '@angular/common';
-import { FormsModule, NgForm, NgModel } from '@angular/forms';
+import { FormsModule, NgForm, NgModel, ValidationErrors } from '@angular/forms';
 import { FORM_DIALOG_CONTENT } from 'src/app/shared/components/dialogs/form-dialog/form-dialog.component';
 import { DialogService } from 'src/app/shared/services/dialogs/primary/dialog.service';
 import { DateTimeEditorComponent } from 'src/app/shared/components/dialogs/date-time-editor/date-time-editor.component';
@@ -53,6 +53,8 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
     originalRangeStart?: string;
     private rangeStartInteracted = false;
     private rangeEndInteracted = false;
+    private rangeStartValidationError: ValidationErrors | null = { required: true };
+    private rangeEndValidationError: ValidationErrors | null = { required: true };
     private readonly dialogService = inject(DialogService);
 
     private readonly injectedContent = inject<ExcludeTripsDialogContent>(FORM_DIALOG_CONTENT, {
@@ -78,11 +80,16 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
             this.parentForm?.addControl(control);
         });
 
-        // Set initial errors so OK button is disabled until both fields have values
-        setTimeout(() => {
-            this.validateRangeStart();
-            this.validateRangeEnd();
-        });
+        // Attach validator functions that Angular re-runs on every updateValueAndValidity.
+        // They read from rangeStartValidationError / rangeEndValidationError which we control.
+        if (this.rangeStartCtrl?.control) {
+            this.rangeStartCtrl.control.setValidators(() => this.rangeStartValidationError);
+            this.rangeStartCtrl.control.updateValueAndValidity();
+        }
+        if (this.rangeEndCtrl?.control) {
+            this.rangeEndCtrl.control.setValidators(() => this.rangeEndValidationError);
+            this.rangeEndCtrl.control.updateValueAndValidity();
+        }
     }
 
     async openDateTimeEditor(kind: 'start' | 'end'): Promise<void> {
@@ -159,64 +166,42 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
 
     private validateRangeStart(): void {
         const missing = !this.formModel.rangeStart;
-        this.setControlError(this.rangeStartCtrl, 'required', missing);
+        this.rangeStartValidationError = missing ? { required: true } : null;
         this.rangeStartError = missing ? 'Date is required.' : null;
+        this.rangeStartCtrl?.control?.updateValueAndValidity();
     }
 
     private validateRangeEnd(): void {
-        const control = this.rangeEndCtrl;
         const hasValue = !!this.formModel.rangeEnd;
 
         if (!hasValue) {
-            this.setControlError(control, 'required', true);
-            this.setControlError(control, 'order', false);
-            this.setControlError(control, 'overlap', false);
+            this.rangeEndValidationError = { required: true };
             this.rangeEndError = 'Date is required.';
+            this.rangeEndCtrl?.control?.updateValueAndValidity();
             return;
         }
-
-        this.setControlError(control, 'required', false);
 
         const start = this.isoToDate(this.formModel.rangeStart);
         const end = this.isoToDate(this.formModel.rangeEnd);
 
         if (start && end && end.getTime() <= start.getTime()) {
-            this.setControlError(control, 'order', true);
-            this.setControlError(control, 'overlap', false);
+            this.rangeEndValidationError = { order: true };
             this.rangeEndError = 'End date must be later than start date.';
-            this.setParentFormInvalid(true);
+            this.rangeEndCtrl?.control?.updateValueAndValidity();
             return;
         }
 
         const overlaps = start && end ? this.hasOverlap(this.formModel.rangeStart, this.formModel.rangeEnd, this.originalRangeStart) : false;
         if (overlaps) {
-            this.setControlError(control, 'order', false);
-            this.setControlError(control, 'overlap', true);
+            this.rangeEndValidationError = { overlap: true };
             this.rangeEndError = 'Selected date range overlaps with an existing exclusion.';
-            this.setParentFormInvalid(true);
+            this.rangeEndCtrl?.control?.updateValueAndValidity();
             return;
         }
 
-        this.setControlError(control, 'order', false);
-        this.setControlError(control, 'overlap', false);
+        this.rangeEndValidationError = null;
         this.rangeEndError = null;
-        this.setParentFormInvalid(false);
-    }
-
-    private setParentFormInvalid(invalid: boolean): void {
-        if (!this.parentForm?.form) {
-            return;
-        }
-        
-        if (invalid) {
-            this.parentForm.form.setErrors({ invalidRange: true });
-        } else {
-            const errors = this.parentForm.form.errors;
-            if (errors && 'invalidRange' in errors) {
-                delete errors['invalidRange'];
-                this.parentForm.form.setErrors(Object.keys(errors).length > 0 ? errors : null);
-            }
-        }
+        this.rangeEndCtrl?.control?.updateValueAndValidity();
     }
 
     private isoToDate(iso?: string): Date | null {
@@ -252,22 +237,4 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         control.control.markAsDirty();
         control.control.markAsTouched();
     }
-
-    private setControlError(control: NgModel | undefined, key: string, hasError: boolean): void {
-        if (!control?.control) {
-            return;
-        }
-
-        const errors = { ...(control.control.errors ?? {}) };
-        if (hasError) {
-            errors[key] = true;
-        } else {
-            delete errors[key];
-        }
-
-        control.control.setErrors(Object.keys(errors).length > 0 ? errors : null);
-        control.control.markAsTouched();
-        control.control.markAsDirty();
-    }
-
 }

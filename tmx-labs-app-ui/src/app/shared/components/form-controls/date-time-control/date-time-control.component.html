@@ -35,6 +35,7 @@
                 [(ngModel)]="timeInput"
                 [ngModelOptions]="{ standalone: true }"
                 (ngModelChange)="onTimeInputChange($event)"
+                (input)="onTimeInput($event)"
                 (blur)="onTimeBlur()"
             />
             <mat-timepicker-toggle matSuffix [for]="timePicker" (mousedown)="allowTimePickerOpen = true" (keydown.enter)="allowTimePickerOpen = true" (keydown.space)="allowTimePickerOpen = true"></mat-timepicker-toggle>
