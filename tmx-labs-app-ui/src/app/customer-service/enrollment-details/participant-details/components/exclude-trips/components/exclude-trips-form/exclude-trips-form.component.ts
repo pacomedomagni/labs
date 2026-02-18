@@ -77,6 +77,12 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         this.controls.forEach((control) => {
             this.parentForm?.addControl(control);
         });
+
+        // Set initial errors so OK button is disabled until both fields have values
+        setTimeout(() => {
+            this.validateRangeStart();
+            this.validateRangeEnd();
+        });
     }
 
     async openDateTimeEditor(kind: 'start' | 'end'): Promise<void> {
@@ -245,7 +251,6 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
 
         control.control.markAsDirty();
         control.control.markAsTouched();
-        control.control.updateValueAndValidity({ emitEvent: false });
     }
 
     private setControlError(control: NgModel | undefined, key: string, hasError: boolean): void {

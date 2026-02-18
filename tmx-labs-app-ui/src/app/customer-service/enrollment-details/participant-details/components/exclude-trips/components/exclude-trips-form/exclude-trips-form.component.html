@@ -29,8 +29,8 @@
         <input
             type="hidden"
             name="rangeStart"
-            required
             [(ngModel)]="formModel.rangeStart"
+            [ngModelOptions]="{ updateOn: 'blur' }"
             #rangeStartCtrl="ngModel"
         />
     </div>
@@ -65,8 +65,8 @@
         <input
             type="hidden"
             name="rangeEnd"
-            required
             [(ngModel)]="formModel.rangeEnd"
+            [ngModelOptions]="{ updateOn: 'blur' }"
             #rangeEndCtrl="ngModel"
         />
     </div>
