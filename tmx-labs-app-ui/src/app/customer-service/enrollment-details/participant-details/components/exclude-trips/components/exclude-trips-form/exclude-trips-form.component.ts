@@ -51,6 +51,8 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
     rangeEndError: string | null = null;
     existingRanges: { rangeStart: string; rangeEnd: string }[] = [];
     originalRangeStart?: string;
+    private rangeStartInteracted = false;
+    private rangeEndInteracted = false;
     private readonly dialogService = inject(DialogService);
 
     private readonly injectedContent = inject<ExcludeTripsDialogContent>(FORM_DIALOG_CONTENT, {
@@ -65,9 +67,6 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
             this.existingRanges = this.injectedContent.data?.existingRanges ?? [];
             this.originalRangeStart = this.injectedContent.data?.originalRangeStart;
         }
-
-        this.validateRangeStart();
-        this.validateRangeEnd();
     }
 
     ngAfterViewInit(): void {
@@ -77,11 +76,6 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
 
         this.controls.forEach((control) => {
             this.parentForm?.addControl(control);
-        });
-
-        Promise.resolve().then(() => {
-            this.validateRangeStart();
-            this.validateRangeEnd();
         });
     }
 
@@ -101,7 +95,21 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         });
 
         const result = await firstValueFrom(dialogRef.afterClosed());
+
+        // Mark as interacted regardless of OK/Cancel
+        if (kind === 'start') {
+            this.rangeStartInteracted = true;
+        } else {
+            this.rangeEndInteracted = true;
+        }
+
         if (!result) {
+            // Cancel: still validate to show "Date is required" if empty
+            if (kind === 'start') {
+                this.validateRangeStart();
+            } else {
+                this.validateRangeEnd();
+            }
             return;
         }
 
@@ -136,11 +144,11 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
     }
 
     shouldShowRangeStartError(): boolean {
-        return !!this.rangeStartError && this.isControlInteracted(this.rangeStartCtrl);
+        return !!this.rangeStartError && this.rangeStartInteracted;
     }
 
     shouldShowRangeEndError(): boolean {
-        return !!this.rangeEndError && this.isControlInteracted(this.rangeEndCtrl);
+        return !!this.rangeEndError && this.rangeEndInteracted;
     }
 
     private validateRangeStart(): void {
@@ -270,8 +278,4 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         }
     }
 
-    private isControlInteracted(control?: NgModel): boolean {
-        const formControl = control?.control;
-        return !!formControl && (formControl.touched || formControl.dirty);
-    }
 }

@@ -9,15 +9,19 @@
                 [id]="id + '-date'"
                 [max]="max"
                 [min]="min"
-                [name]="name ? name + '-date' : id + '-date'"
                 [required]="isRequired"
+                [errorStateMatcher]="dateErrorStateMatcher"
                 [(ngModel)]="dateValue"
+                [ngModelOptions]="{ standalone: true }"
                 (dateChange)="onDateChange($event.value)"
                 (input)="onDateInput($event)"
                 (blur)="onDateBlur()"
             />
             <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
             <mat-datepicker #datePicker></mat-datepicker>
+            @if (invalidDateFormat) {
+                <mat-error>Invalid date format. Please use MM/DD/YYYY.</mat-error>
+            }
         </mat-form-field>
 
         <mat-form-field appearance="outline" [hideRequiredMarker]="true">
@@ -27,17 +31,23 @@
                 [matTimepicker]="timePicker"
                 [disabled]="isDisabled"
                 [id]="id + '-time'"
-                [name]="name ? name + '-time' : id + '-time'"
                 [required]="isRequired"
+                [errorStateMatcher]="timeErrorStateMatcher"
                 #timeInputRef
                 [(ngModel)]="timeInput"
+                [ngModelOptions]="{ standalone: true }"
                 (ngModelChange)="onTimeInputChange($event)"
                 (blur)="onTimeBlur()"
             />
             <mat-timepicker-toggle matSuffix [for]="timePicker"></mat-timepicker-toggle>
             <mat-timepicker #timePicker interval="1min" (selected)="onTimeSelected($event)"></mat-timepicker>
+            @if (invalidTimeFormat) {
+                <mat-error>Invalid time format. Please use HH:MM AM/PM.</mat-error>
+            }
         </mat-form-field>
     </div>
 
-    <mat-error *ngIf="displayError && errorMessage">{{ errorMessage }}</mat-error>
+    @if (displayError && errorMessage) {
+        <mat-error>{{ errorMessage }}</mat-error>
+    }
 </div>
