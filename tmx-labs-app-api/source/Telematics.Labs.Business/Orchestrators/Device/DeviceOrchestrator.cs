@@ -12,6 +12,7 @@ using Progressive.Telematics.Labs.Business.Resources.Shared;
 using Progressive.Telematics.Labs.Services.Database;
 using Progressive.Telematics.Labs.Services.Database.Models;
 using Progressive.Telematics.Labs.Services.Database.Models.DeviceOrder;
+using Progressive.Telematics.Labs.Services.Api;
 using Progressive.Telematics.Labs.Services.Wcf;
 using Progressive.Telematics.Labs.Shared;
 using Progressive.Telematics.Labs.Shared.Attributes;
@@ -45,7 +46,8 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Device
         ILabsMyScoreDeviceDAL labsMyScoreDeviceDal,
         IDeviceOrderDAL deviceOrderDal,
         IDeviceRecoveryService deviceRecoveryService,
-        IAccountDAL accountDal) : IDeviceOrchestrator
+        IAccountDAL accountDal,
+        IDeviceApi deviceApi) : IDeviceOrchestrator
     {
         private const int ENROLLED_STATUS_CODE = 1;
 
@@ -191,30 +193,59 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Device
                 response.AddMessage(MessageCode.Handled, true);
                 return response;
             }
-            var audioResponse = await deviceService.GetDeviceAudioBySerialNumber(request.DeviceSerialNumber);
-            if (audioResponse == null)
-            {
-                response.AddMessage(MessageCode.ErrorCode, "GetAudioStatusFailed");
-                response.AddMessage(MessageCode.ErrorDetails, "No response received from device service.");
-                return response;
-            }
 
-            if (audioResponse.ResponseStatus != WcfXirgoService.ResponseStatus.Success)
+            // Check if device is IoT-enabled
+            var featuresResponse = await deviceService.DeviceFeatures(request.DeviceSerialNumber);
+            var isIoTDevice = featuresResponse?.Features?.Any(f => f.Code == TMXDeviceFeature.IOTDevice) ?? false;
+
+            if (isIoTDevice)
             {
-                response.AddMessage(MessageCode.ErrorCode, "GetAudioStatusFailed");
-                var detail = JoinErrorMessages(audioResponse.ResponseErrors?.Select(error => error?.Message));
-                if (!string.IsNullOrWhiteSpace(detail))
+                // IoT device - use DeviceAPI (AWS)
+                var audioStatus = await deviceApi.GetAudioStatus(request.DeviceSerialNumber);
+                
+                if (audioStatus == null)
                 {
-                    response.AddMessage(MessageCode.ErrorDetails, detail!);
+                    response.AddMessage(MessageCode.ErrorCode, "GetAudioStatusFailed");
+                    response.AddMessage(MessageCode.ErrorDetails, "No response received from device API.");
+                    return response;
                 }
 
-                return response;
-            }
+                var isAudioOn = audioStatus.Equals("On", StringComparison.OrdinalIgnoreCase);
 
-            response.AddExtender(DeviceResourceExtenderKeys.AudioStatus, audioResponse.IsAudioOn);
-            response.AddMessage(
-                MessageCode.StatusDescription,
-                $"Device audio is currently {(audioResponse.IsAudioOn ? "On" : "Off")}.");
+                response.AddExtender(DeviceResourceExtenderKeys.AudioStatus, isAudioOn);
+                response.AddMessage(
+                    MessageCode.StatusDescription,
+                    $"Device audio is currently {audioStatus}.");
+            }
+            else
+            {
+                // Non-IoT device - use Xirgo service
+                var audioResponse = await deviceService.GetDeviceAudioBySerialNumber(request.DeviceSerialNumber);
+                
+                if (audioResponse == null)
+                {
+                    response.AddMessage(MessageCode.ErrorCode, "GetAudioStatusFailed");
+                    response.AddMessage(MessageCode.ErrorDetails, "No response received from device service.");
+                    return response;
+                }
+
+                if (audioResponse.ResponseStatus != WcfXirgoService.ResponseStatus.Success)
+                {
+                    response.AddMessage(MessageCode.ErrorCode, "GetAudioStatusFailed");
+                    var detail = JoinErrorMessages(audioResponse.ResponseErrors?.Select(error => error?.Message));
+                    if (!string.IsNullOrWhiteSpace(detail))
+                    {
+                        response.AddMessage(MessageCode.ErrorDetails, detail!);
+                    }
+                    return response;
+                }
+
+                var isAudioOn = audioResponse.IsAudioOn;
+                response.AddExtender(DeviceResourceExtenderKeys.AudioStatus, isAudioOn);
+                response.AddMessage(
+                    MessageCode.StatusDescription,
+                    $"Device audio is currently {(isAudioOn ? "On" : "Off")}.");
+            }
 
             return response;
         }
@@ -228,30 +259,56 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Device
                 response.AddMessage(MessageCode.Handled, true);
                 return response;
             }
-            var xirgoResponse = await deviceService.UpdateDeviceAudio(request.DeviceSerialNumber, request.IsAudioOn);
-            if (xirgoResponse == null)
-            {
-                response.AddMessage(MessageCode.ErrorCode, "SetAudioStatusFailed");
-                response.AddMessage(MessageCode.ErrorDetails, "No response received from device service.");
-                return response;
-            }
 
-            if (xirgoResponse.ResponseStatus != WcfXirgoService.ResponseStatus.Success)
+            // Check if device is IoT-enabled
+            var featuresResponse = await deviceService.DeviceFeatures(request.DeviceSerialNumber);
+            var isIoTDevice = featuresResponse?.Features?.Any(f => f.Code == TMXDeviceFeature.IOTDevice) ?? false;
+
+            if (isIoTDevice)
             {
-                response.AddMessage(MessageCode.ErrorCode, "SetAudioStatusFailed");
-                var detail = JoinErrorMessages(xirgoResponse.ResponseErrors?.Select(error => error?.Message));
-                if (!string.IsNullOrWhiteSpace(detail))
+                // IoT device - use DeviceAPI (AWS)
+                var success = await deviceApi.SetAudioStatus(request.DeviceSerialNumber, request.IsAudioOn);
+                
+                if (!success)
                 {
-                    response.AddMessage(MessageCode.ErrorDetails, detail!);
+                    response.AddMessage(MessageCode.ErrorCode, "SetAudioStatusFailed");
+                    response.AddMessage(MessageCode.ErrorDetails, "Failed to update device audio status in the cloud.");
+                    return response;
                 }
 
-                return response;
+                response.AddExtender(DeviceResourceExtenderKeys.AudioStatus, request.IsAudioOn);
+                response.AddMessage(
+                    MessageCode.StatusDescription,
+                    $"Device audio set to {(request.IsAudioOn ? "On" : "Off")}.");
             }
+            else
+            {
+                // Non-IoT device - use Xirgo service
+                var updateResponse = await deviceService.UpdateDeviceAudio(request.DeviceSerialNumber, request.IsAudioOn);
+                
+                if (updateResponse == null)
+                {
+                    response.AddMessage(MessageCode.ErrorCode, "SetAudioStatusFailed");
+                    response.AddMessage(MessageCode.ErrorDetails, "No response received from device service.");
+                    return response;
+                }
 
-            response.AddExtender(DeviceResourceExtenderKeys.AudioStatus, request.IsAudioOn);
-            response.AddMessage(
-                MessageCode.StatusDescription,
-                $"Device audio set to {(request.IsAudioOn ? "On" : "Off")}.");
+                if (updateResponse.ResponseStatus != WcfXirgoService.ResponseStatus.Success)
+                {
+                    response.AddMessage(MessageCode.ErrorCode, "SetAudioStatusFailed");
+                    var detail = JoinErrorMessages(updateResponse.ResponseErrors?.Select(error => error?.Message));
+                    if (!string.IsNullOrWhiteSpace(detail))
+                    {
+                        response.AddMessage(MessageCode.ErrorDetails, detail!);
+                    }
+                    return response;
+                }
+
+                response.AddExtender(DeviceResourceExtenderKeys.AudioStatus, request.IsAudioOn);
+                response.AddMessage(
+                    MessageCode.StatusDescription,
+                    $"Device audio set to {(request.IsAudioOn ? "On" : "Off")}.");
+            }
 
             return response;
         }
@@ -282,24 +339,43 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Device
                 return response;
             }
 
-            var updateResponse = await deviceService.UpdateDeviceAudio(request.DeviceSerialNumber, request.IsAudioOn);
-            if (updateResponse == null)
-            {
-                response.AddMessage(MessageCode.ErrorCode, "UpdateAudioFailed");
-                response.AddMessage(MessageCode.ErrorDetails, "No response received from device service.");
-                return response;
-            }
+            var featuresResponse = await deviceService.DeviceFeatures(request.DeviceSerialNumber);
+            var isIoTDevice = featuresResponse?.Features?.Any(f => f.Code == TMXDeviceFeature.IOTDevice) ?? false;
 
-            if (updateResponse.ResponseStatus != WcfXirgoService.ResponseStatus.Success)
+            if (isIoTDevice)
             {
-                response.AddMessage(MessageCode.ErrorCode, "UpdateAudioFailed");
-                var detail = JoinErrorMessages(updateResponse.ResponseErrors?.Select(error => error?.Message));
-                if (!string.IsNullOrWhiteSpace(detail))
+                // IoT device - use DeviceAPI (AWS)
+                var success = await deviceApi.SetAudioStatus(request.DeviceSerialNumber, request.IsAudioOn);
+                
+                if (!success)
                 {
-                    response.AddMessage(MessageCode.ErrorDetails, detail!);
+                    response.AddMessage(MessageCode.ErrorCode, "UpdateAudioFailed");
+                    response.AddMessage(MessageCode.ErrorDetails, "Failed to update device audio status in the cloud.");
+                    return response;
+                }
+            }
+            else
+            {
+                // Non-IoT device - use Xirgo service
+                var updateResponse = await deviceService.UpdateDeviceAudio(request.DeviceSerialNumber, request.IsAudioOn);
+                if (updateResponse == null)
+                {
+                    response.AddMessage(MessageCode.ErrorCode, "UpdateAudioFailed");
+                    response.AddMessage(MessageCode.ErrorDetails, "No response received from device service.");
+                    return response;
                 }
 
-                return response;
+                if (updateResponse.ResponseStatus != WcfXirgoService.ResponseStatus.Success)
+                {
+                    response.AddMessage(MessageCode.ErrorCode, "UpdateAudioFailed");
+                    var detail = JoinErrorMessages(updateResponse.ResponseErrors?.Select(error => error?.Message));
+                    if (!string.IsNullOrWhiteSpace(detail))
+                    {
+                        response.AddMessage(MessageCode.ErrorDetails, detail!);
+                    }
+
+                    return response;
+                }
             }
 
             var addResponse = await deviceActivityService.AddDeviceActivity(deviceSeqId, description);

@@ -1,0 +1,45 @@
+<h1 class="screen-reader-only" aria-label="Device Lot Search">Device Lot Search</h1>
+<mat-card appearance="outlined" class="mb-xxs">
+    <div class="flex flex-wrap justify-center items-center">
+        <mat-form-field class="w-[300px]" appearance="outline" hideRequiredMarker="true">
+            <mat-label>Lot ID or Device Serial Number</mat-label>
+            <input
+                #searchQueryInput
+                [formControl]="searchQuery"
+                matInput
+                (keydown.enter)="onSubmitClicked()"
+            />
+            @if (searchQuery.hasError('required')) {
+                <mat-error>This field is required.</mat-error>
+            }
+            @if (searchQuery.hasError('invalidLotID') || searchQuery.hasError('invalidDeviceSerialNumber')) {
+                <mat-error>The provided Lot ID or Device Serial Number includes invalid character(s).</mat-error>
+            }
+        </mat-form-field>
+        <button class="ml-3xs mb-mat-error-offset" mat-flat-button color="primary" (click)="onSubmitClicked()" [disabled]="!searchQuery.valid">Submit</button>
+    </div>
+</mat-card>
+<div role="region" aria-live="polite" aria-atomic="true">
+    @if (initialState()) {
+        <mat-card appearance="outlined" class="mb-xxs">
+            <cui-empty-state
+                tabindex="0"
+                icon="search"
+                primaryText="Please enter a Lot ID or Device Serial Number"
+                secondaryText="To activate, deactivate, or update location of the device(s)"
+            >
+            </cui-empty-state>
+            <!-- Screen reader announcement for initial state -->
+            <div class="visuallyhidden" role="status" aria-live="polite" aria-atomic="true">
+                @if (initialState()) {
+                    <span>Please enter a Lot ID or Device Serial Number</span>
+                }
+            </div>
+        </mat-card>
+    } @else {
+        <div class="flex flex-col xl:flex-row gap-16">
+            <tmx-lot-details class="w-full xl:w-1/3" [deviceLot]="deviceLot()"></tmx-lot-details>
+            <tmx-device-details class="w-full xl:w-2/3" [deviceLot]="deviceLot()"></tmx-device-details>
+        </div>
+    }
+</div>

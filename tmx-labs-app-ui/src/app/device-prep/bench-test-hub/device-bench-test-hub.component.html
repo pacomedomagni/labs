@@ -1,51 +1,12 @@
-<div class="p-6 bg-gray-50 min-h-screen">
-  <div class="grid gap-6 mb-6" style="grid-template-columns: 35% 65%;">
-    <!-- PANEL 1: Benchtesting Boards -->
-    <tmx-bench-testing-boards></tmx-bench-testing-boards>
+<div class="p-6min-h-screen">
+    <div class="flex flex-col xl:flex-row gap-6 mb-6">
+        <!-- PANEL 1: Benchtesting Boards -->
+        <tmx-bench-testing-boards
+        class="bg-white border-2 border-black rounded-lg p-8 w-full min-w-[495px] xl:flex-1 xl:w-2/5"></tmx-bench-testing-boards>
 
-    <!-- PANEL 2: Current Board -->
-    <div class="bg-white border-2 border-black rounded-lg p-6">
-      <h2 class="text-lg font-bold mb-4">Current Board:</h2>
-      <div class="flex justify-between items-center mb-4">
-        <div class="flex gap-2">
-          <button class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold text-sm hover:bg-blue-700">
-            RUN TEST
-          </button>
-          <button class="bg-gray-400 text-white px-4 py-2 rounded-md font-semibold text-sm hover:bg-gray-500">
-            CLEAR BOARD
-          </button>
-        </div>
-      </div>
-
-      <!-- Device Serial Number Grid -->
-      <div class="grid grid-cols-5 gap-2">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-        <input type="text" placeholder="Device Serial Number" class="border border-gray-300 px-2 py-2 text-sm rounded">
-      </div>
+        <tmx-bench-test-current-board
+            class="w-full flex xl:w-3/5"
+        ></tmx-bench-test-current-board>
     </div>
-  </div>
-
-  <!-- PANEL 3: Lot Benchtest Progress -->
-  <tmx-lot-benchtest-progress></tmx-lot-benchtest-progress>
+    <tmx-lot-benchtest-progress></tmx-lot-benchtest-progress>
 </div>

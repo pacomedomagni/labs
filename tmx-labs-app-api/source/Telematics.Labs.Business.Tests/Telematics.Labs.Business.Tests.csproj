@@ -7,6 +7,11 @@
     <RootNamespace>Progressive.Telematics.Labs.Business.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Tools\**" />
+    <EmbeddedResource Remove="Tools\**" />
+    <None Remove="Tools\**" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="microsoft.aspnetcore.http" Version="2.2.2" />
     <PackageReference Include="Tmx.EditorConfig" Version="1.4.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
@@ -33,8 +38,5 @@
     <None Update="TestData\ExternalPolicy.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Tools\" />
   </ItemGroup>
 </Project>

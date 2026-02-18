@@ -1,6 +1,7 @@
 import {
     AfterViewInit,
     Component,
+    effect,
     inject,
     OnDestroy,
     OnInit,
@@ -22,12 +23,16 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { EnrollmentResultsComponent } from './components/enrollment-results/enrollment-results.component';
+import { EnrollmentDetailsComponent } from '../enrollment-details/enrollment-details.component';
+import { EnrollmentDetailService } from '../enrollment-details/participant-details/services/enrollment-details/enrollment-details.service';
+import { AccountService } from '../../shared/services/api/account/account.service';
 import { Validators } from '@angular/forms';
 import { SearchValidators } from './search-validators';
 import {
     CustomerInfo,
     CustomerSearchResponse,
     GetCustsByDevSearchResponse,
+    EnrollmentDetails,
 } from 'src/app/shared/data/participant/resources';
 import { ActivatedRoute } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
@@ -48,6 +53,7 @@ import { ChangeDetectorRef } from '@angular/core';
     MatButtonModule,
     MatIconModule,
     EnrollmentResultsComponent,
+    EnrollmentDetailsComponent,
   ],
 })
 export class CustomerServiceSearchComponent implements OnDestroy, AfterViewInit, OnInit {
@@ -55,10 +61,13 @@ export class CustomerServiceSearchComponent implements OnDestroy, AfterViewInit,
 
     private route = inject(ActivatedRoute);
     private customerSearchService = inject(CustomerSearchService);
-    private cdr = inject(ChangeDetectorRef); // Add this
+    private cdr = inject(ChangeDetectorRef);
+    private enrollmentDetailService = inject(EnrollmentDetailService);
+    private accountService = inject(AccountService);
 
     private _destroySubject$ = new Subject<void>();
     private routedEmailSearch?: string;
+    private currentParticipantGroupId: number | null = null;
 
     searchTypes: SearchType[] = [];
     private _activeSearchType: SearchType;
@@ -67,6 +76,8 @@ export class CustomerServiceSearchComponent implements OnDestroy, AfterViewInit,
     customerResults: WritableSignal<CustomerInfo[]> = signal([]);
     recordCount: WritableSignal<number> = signal(0);
     shouldAnnounceInitialStatus: WritableSignal<boolean> = signal(false);
+    showDetails: WritableSignal<boolean> = signal(false);
+    enrollmentDetails: WritableSignal<EnrollmentDetails | null> = signal(null);
 
     private readonly LAST_NAME_EMAIL = 'Last Name/Email';
     private readonly DEVICE_ID = 'Device ID';
@@ -105,6 +116,18 @@ export class CustomerServiceSearchComponent implements OnDestroy, AfterViewInit,
                 },
             },
         ];
+
+        // Watch for when exactly 1 result is returned and auto-view it
+        effect(() => {
+            const results = this.customerResults();
+            if (results.length === 1 && this.searchComplete()) {
+                this.viewParticipant(results[0]);
+            } else if (results.length !== 1) {
+                // Reset details view when results change and it's not a single result
+                this.showDetails.set(false);
+                this.enrollmentDetailService.clear();
+            }
+        });
     }
 
     onSearchSubmitted(value: SearchSubmission) {
@@ -136,6 +159,51 @@ export class CustomerServiceSearchComponent implements OnDestroy, AfterViewInit,
 
     onSearchTypeChanged(searchType: SearchType): void {
         this._activeSearchType = searchType;
+    }
+
+    viewParticipant(customer: CustomerInfo): void {
+        const baseDetails: EnrollmentDetails = {
+            customer: customer,
+            accounts: [],
+        };
+
+        this.enrollmentDetailService.updateEnrollmentDetails(baseDetails);
+        this.enrollmentDetails.set(baseDetails);
+        this.showDetails.set(true);
+        
+        const participantGroupSeqId = customer.participantGroup?.participantGroupSeqID ?? null;
+        this.currentParticipantGroupId = participantGroupSeqId;
+
+        if (participantGroupSeqId === null) {
+            return;
+        }
+
+        this.accountService
+            .getAccountsByParticipantGroupSeqId(participantGroupSeqId)
+            .pipe(takeUntil(this._destroySubject$))
+            .subscribe({
+                next: (response) => {
+                    if (this.currentParticipantGroupId !== participantGroupSeqId) {
+                        return;
+                    }
+                    const updatedDetails: EnrollmentDetails = {
+                        customer: customer,
+                        accounts: response.accounts ?? [],
+                    };
+                    this.enrollmentDetailService.updateEnrollmentDetails(updatedDetails);
+                    this.enrollmentDetails.set(updatedDetails);
+                },
+                error: () => {
+                    if (this.currentParticipantGroupId === participantGroupSeqId) {
+                        const errorDetails: EnrollmentDetails = {
+                            customer: customer,
+                            accounts: [],
+                        };
+                        this.enrollmentDetailService.updateEnrollmentDetails(errorDetails);
+                        this.enrollmentDetails.set(errorDetails);
+                    }
+                },
+            });
     }
 
     ngOnInit(): void {

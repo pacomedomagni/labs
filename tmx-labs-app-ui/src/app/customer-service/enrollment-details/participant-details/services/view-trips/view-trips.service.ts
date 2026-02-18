@@ -9,6 +9,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { TableDialogComponent } from 'src/app/shared/components/dialogs/table-dialog/table-dialog.component';
 import { TripsService } from 'src/app/shared/services/api/trips/trips.service';
 import { Observable, catchError, of, switchMap } from 'rxjs';
+import { formatLinesAsStackedHtml } from 'src/app/shared/utils/string-utils';
 
 @Injectable({
     providedIn: 'root',
@@ -35,7 +36,7 @@ export class ViewTripsService {
                     title: 'View Trips',
                     subtitleComponent: ViewTripsSubtitleComponent,
                     subtitleComponentData: {
-                        vehicleDisplay: this.formattingService.formatVehicleNickname(vehicle, nickname),
+                        vehicleDisplay: formatLinesAsStackedHtml([this.formattingService.formatVehicleNickname(vehicle, nickname)]),
                         weekdayTripSummaryVisible: hasData,
                         participantSeqId: participantSeqId
                     },

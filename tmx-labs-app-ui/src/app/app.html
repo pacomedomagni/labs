@@ -1,6 +1,9 @@
 <tmx-spinner></tmx-spinner>
 <tmx-nav-rail [navLinks]="links()"></tmx-nav-rail>
-<div class="app-main">
+@if (secondarySideBar.visible() ){
+  <tmx-secondary-sidebar></tmx-secondary-sidebar>
+}
+<div class="app-main" [class.has-secondary-sidebar]="secondarySideBar.visible()">
   <header class="app-main__header"></header>
   <main class="app-main__content">
     <router-outlet></router-outlet>

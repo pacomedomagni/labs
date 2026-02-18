@@ -1,5 +1,6 @@
 @if (((googleMapsService.isApiLoaded$ | async) && data.length > 0)) {
     <google-map
+        title="Trip map"
         [options]="mapOptions"
         (mapInitialized)="onMapInitialized()"
         width="100%"

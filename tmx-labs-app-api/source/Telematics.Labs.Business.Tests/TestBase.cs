@@ -18,7 +18,6 @@ namespace Progressive.Telematics.Labs.Business.Tests
         public Mock<ServiceDeviceActivityService> DeviceActivity { get; set; }
         public Mock<IDeviceLotService> DeviceLot { get; set; }
         public Mock<IParticipantService> Participant { get; set; }
-      //  public Mock<IPolicyService> Policy { get; set; }
         public Mock<ITransactionAuditLogService> TransactionAuditLog { get; set; }
         public Mock<IValueCalculatorService> ValueCalculator { get; set; }
         public Mock<IXirgoDeviceService> XirgoDevice { get; set; }
@@ -29,33 +28,12 @@ namespace Progressive.Telematics.Labs.Business.Tests
 
     public class Apis
     {
-        
-        //public Mock<ICommonApi> Common { get; set; }
-        //public Mock<IDeviceApi> Device { get; set; }
-        //public Mock<IPolicyDeviceApi> PolicyDevice { get; set; }
-       
-        //public Mock<IUbiApi> UbiApi { get; set; }
-        //public Mock<ITrialApi> Trial { get; set; }
-        //public Mock<IPolicyServicingApi> PolicyServicing { get; set; }
     }
 
     public class Databases
     {
-        //public Mock<IHomebaseDAL> Homebase { get; set; }
-        //public Mock<IPolicyDAL> Policy { get; set; }
-        //public Mock<ITripDetailsDAL> TripDetails { get; set; }
-    }
-
-    public class Orchestrators
-    {
-        //public Mock<IParticipantActionsOrchestrator> Participant { get; set; }
-        //public Mock<IPluginActionsOrchestrator> Plugin { get; set; }
-        //public Mock<IPolicyOrchestrator> Policy { get; set; }
-        //public Mock<IArePolicyOrchestrator> ArePolicy { get; set; }
-        //public Mock<ISnapshotPolicyOrchestrator> SnapshotPolicy { get; set; }
-        //public Mock<IMobileActionsOrchestrator> Mobile { get; set; }
-        //public Mock<IRegistrationOrchestrator> Registration { get; set; }
-        //public Mock<IScoringAlgorithmsOrchestrator> ScoringAlgorithmOrchestrator { get; set; }
+        public Mock<Progressive.Telematics.Labs.Services.Database.ILotManagementDAL> LotManagement { get; set; }
+        public Mock<Progressive.Telematics.Labs.Services.Database.IBenchTestBoardDAL> BenchTestBoardDAL { get; set; }
     }
 
     public abstract class TestBase<T, T2>
@@ -65,7 +43,6 @@ namespace Progressive.Telematics.Labs.Business.Tests
         protected Apis Apis { get; set; }
         protected Databases Databases { get; set; }
         protected Services Services { get; private set; }
-        protected Orchestrators Orchestrators { get; set; }
         protected Mock<ILogger<T>> Logger { get; set; }
         protected IHttpContextAccessor HttpContextAccessor { get; set; }
         protected string CurrentUser { get { return HttpContextAccessor.HttpContext.Request.Headers[HttpContextExtensions.TMX_USER_HEADER]; } }
@@ -75,10 +52,9 @@ namespace Progressive.Telematics.Labs.Business.Tests
             Logger = new Mock<ILogger<T>>();
             MockHttpContext();
             MockApis();
-            mockDatabases();
+            MockDatabases();
             MockServices();
             MockMappers();
-            MockOrchestrators();
         }
 
         private void MockHttpContext()
@@ -93,27 +69,15 @@ namespace Progressive.Telematics.Labs.Business.Tests
         {
             Apis = new Apis
             {
-                //ClaimsParticipantManagement = new Mock<IClaimsParticipantManagementApi>(),
-                //Common = new Mock<ICommonApi>(),
-                //Device = new Mock<IDeviceApi>(),
-                //HomebaseParticipantManagement = new Mock<IHomebaseParticipantManagementApi>(),
-                //Policy = new Mock<IPolicyApi>(),
-                //PolicyDevice = new Mock<IPolicyDeviceApi>(),
-                //PolicyTrip = new Mock<IPolicyTripApi>(),
-                //UbiApi = new Mock<IUbiApi>(),
-                //Trial = new Mock<ITrialApi>(),
-                //PolicyServicing = new Mock<IPolicyServicingApi>()
-
             };
         }
 
-        private void mockDatabases()
+        private void MockDatabases()
         {
             Databases = new Databases
             {
-                //Homebase = new Mock<IHomebaseDAL>(),
-                //Policy = new Mock<IPolicyDAL>(),
-                //TripDetails = new Mock<ITripDetailsDAL>()
+                LotManagement = new Mock<Progressive.Telematics.Labs.Services.Database.ILotManagementDAL>(),
+                BenchTestBoardDAL = new Mock<Progressive.Telematics.Labs.Services.Database.IBenchTestBoardDAL>()
             };
         }
 
@@ -134,29 +98,11 @@ namespace Progressive.Telematics.Labs.Business.Tests
             };
         }
 
-        private void MockOrchestrators()
-        {
-            Orchestrators = new Orchestrators
-            {
-                //ArePolicy = new Mock<IArePolicyOrchestrator>(),
-                //Policy = new Mock<IPolicyOrchestrator>(),
-                //SnapshotPolicy = new Mock<ISnapshotPolicyOrchestrator>(),
-                //Mobile = new Mock<IMobileActionsOrchestrator>(),
-                //Participant = new Mock<IParticipantActionsOrchestrator>(),
-                //Plugin = new Mock<IPluginActionsOrchestrator>(),
-                //Registration = new Mock<IRegistrationOrchestrator>(),
-                //ScoringAlgorithmOrchestrator = new Mock<IScoringAlgorithmsOrchestrator>()
-            };
-        }
-
         private void MockMappers()
         {
             var mockMapper = new MapperConfiguration(cfg =>
             {
-                //cfg.AddProfile(typeof(AreMappers));
-                //cfg.AddProfile(typeof(DevicePrepMappers));
-                //cfg.AddProfile(typeof(SharedMappers));
-                //cfg.AddProfile(typeof(SnapshotMappers));
+                cfg.AddProfile(typeof(SharedMappers));
             });
             Mapper = mockMapper.CreateMapper();
         }
@@ -169,7 +115,6 @@ namespace Progressive.Telematics.Labs.Business.Tests
 
             verification(typeof(Apis), Apis);
             verification(typeof(Databases), Databases);
-            verification(typeof(Orchestrators), Orchestrators);
             verification(typeof(Services), Services);
             Logger.Verify();
         }

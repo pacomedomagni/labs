@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Progressive.Telematics.Labs.Shared.Attributes;
 using Progressive.Telematics.Labs.Shared.Configs;
+using Progressive.Telematics.Labs.Shared.Extensions;
 using System;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -24,6 +25,9 @@ using WcfXirgoService;
 using WcfXirgoSessionService;
 using BenchTestBoardService;
 using BenchTestServices;
+using DiscountFulfillment = DiscountFulfillmentService;
+using PreviewFulfillment = PreviewFulfillmentService;
+using CLBusinessDeviceOrderService;
 
 namespace Progressive.Telematics.Labs.Services.Wcf
 {
@@ -48,6 +52,10 @@ namespace Progressive.Telematics.Labs.Services.Wcf
         ParticipantGroupServiceClient CreateParticipantGroupServiceClient();
         BenchTestBoardServiceClient CreateBenchTestBoardServiceClient();
         BenchTestServiceClient CreateBenchTestServiceClient();
+        DiscountFulfillment.FulfillmentServiceClient CreateDiscountFulfillmentServiceClient();
+        PreviewFulfillment.FulfillmentServiceClient CreatePreviewFulfillmentServiceClient();
+        BusinessDeviceOrderServiceClient CreateCLBusinessDeviceOrderServiceClient();
+
     }
 	public class WcfServiceFactory : IWcfServiceFactory
 	{
@@ -226,6 +234,51 @@ namespace Progressive.Telematics.Labs.Services.Wcf
                 Security = { Mode = SecurityMode.None }
             };
             var client = new BenchTestServiceClient(binding, endpoint);
+            client.Endpoint.AddTokenEndpoint(_configuration);
+            return client;
+        }
+
+        public DiscountFulfillment.FulfillmentServiceClient CreateDiscountFulfillmentServiceClient()
+        {
+            var endpoint = new EndpointAddress(_config.WcfServices["DiscountFulfillment"].FormatServiceUrl());
+            var binding = new BasicHttpBinding
+            {
+                MaxBufferSize = int.MaxValue,
+                ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+                MaxReceivedMessageSize = int.MaxValue,
+                AllowCookies = true
+            };
+            var client = new DiscountFulfillment.FulfillmentServiceClient(binding, endpoint);
+            client.Endpoint.AddTokenEndpoint(_configuration);
+            return client;
+        }
+
+        public PreviewFulfillment.FulfillmentServiceClient CreatePreviewFulfillmentServiceClient()
+        {
+            var endpoint = new EndpointAddress(_config.WcfServices["PreviewFulfillment"].FormatServiceUrl());
+            var binding = new BasicHttpBinding
+            {
+                MaxBufferSize = int.MaxValue,
+                ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+                MaxReceivedMessageSize = int.MaxValue,
+                AllowCookies = true
+            };
+            var client = new PreviewFulfillment.FulfillmentServiceClient(binding, endpoint);
+            client.Endpoint.AddTokenEndpoint(_configuration);
+            return client;
+        }
+
+        public BusinessDeviceOrderServiceClient CreateCLBusinessDeviceOrderServiceClient()
+        {
+            var endpoint = new EndpointAddress(_config.WcfServices["CLBusinessDeviceOrder"].FormatServiceUrl());
+            var binding = new WSHttpBinding
+            {
+                ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+                MaxReceivedMessageSize = int.MaxValue,
+                AllowCookies = true,
+                Security = { Mode = SecurityMode.None }
+            };
+            var client = new BusinessDeviceOrderServiceClient(binding, endpoint);
             client.Endpoint.AddTokenEndpoint(_configuration);
             return client;
         }

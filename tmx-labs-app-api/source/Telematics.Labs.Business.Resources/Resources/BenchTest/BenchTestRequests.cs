@@ -10,6 +10,7 @@ namespace Progressive.Telematics.Labs.Business.Resources.Resources.BenchTest
         public string UserID { get; set; }
         public System.DateTime? StartDateTime { get; set; }
         public System.DateTime? EndDateTime { get; set; }
+        public int DeviceCount { get; set; }
     }
 
     public class AddBenchTestBoardRequest

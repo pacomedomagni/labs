@@ -152,7 +152,7 @@ export const helpText: Map<string, HelpTextData> = new Map<string, HelpTextData>
             type: HelpTextType.Help,
             content: `<div class="flex flex-col gap-xxs">
                 <span>
-                    Trip Insights provides a detailed view of a single trip, including speed trends and risk levels throughout a journey
+                    'Trip Insights' provides a detailed view of a single trip, including speed trends and risk levels throughout a journey
                 </span>
                 <ul class="list-disc">
                     <li>The graph shows speed over time for the selected trip.</li>
@@ -166,7 +166,7 @@ export const helpText: Map<string, HelpTextData> = new Map<string, HelpTextData>
         HelpText.WeekdayTripSummary,
         {
             type: HelpTextType.Help,
-            content: `Weekday Trip Summary provides an overview of a participant's aggregated trip data, organized by the day of the week the trips occurred.`,
+            content: `'Weekday Trip Summary' provides an overview of a participant's aggregated trip data, organized by the day of the week the trips occurred.`,
         },
     ],
     [

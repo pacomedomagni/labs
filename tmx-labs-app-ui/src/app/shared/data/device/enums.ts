@@ -81,19 +81,6 @@ export enum DeviceOrderStatus {
 	Cancelled = "Cancelled"
 
 }
-
-export enum BenchTestBaoardStatus {
-	Available = "Available",
-	Testing = "Testing",
-	Complete = "Complete"
-}
-
-export const BenchTestBaoardStatusValue = new Map<BenchTestBaoardStatus, number>([
-	[BenchTestBaoardStatus.Available, 1],
-	[BenchTestBaoardStatus.Testing, 2],
-	[BenchTestBaoardStatus.Complete, 3]
-]);
-
 export const DeviceReturnReasonCodeValue = new Map<DeviceReturnReasonCode, number>([
 	[DeviceReturnReasonCode.OptOut, 1],
 	[DeviceReturnReasonCode.Cancel, 2],

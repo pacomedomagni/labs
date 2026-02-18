@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -29,8 +29,6 @@ import type { MatTimepickerSelected } from '@angular/material/timepicker';
 })
 export class DateTimeControlComponent implements OnChanges {
     @Input() model: Date | null = null;
-    @Output() modelChange = new EventEmitter<Date | null>();
-
     @Input() min: Date | null = null;
     @Input() max: Date | null = null;
     @Input() label = '';
@@ -39,6 +37,9 @@ export class DateTimeControlComponent implements OnChanges {
     @Input() isRequired = false;
     @Input() isDisabled = false;
     @Input() error: string | null = null;
+    @Output() modelChange = new EventEmitter<Date | null>();
+
+    @ViewChild('timeInputRef') timeInputRef?: ElementRef<HTMLInputElement>;
 
     dateValue: Date | null = null;
     timeInput = '';
@@ -49,6 +50,10 @@ export class DateTimeControlComponent implements OnChanges {
     private initialTime = '';
     private isSyncing = false;
     private currentError: string | null = null;
+    private invalidTimeFormat = false;
+    private invalidDateFormat = false;
+
+    constructor(private readonly cdr: ChangeDetectorRef) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['model'] && !this.isSyncing) {
@@ -62,11 +67,54 @@ export class DateTimeControlComponent implements OnChanges {
 
     onDateChange(value: Date | null): void {
         this.dateValue = value ? new Date(value) : null;
+        this.invalidDateFormat = this.dateValue ? Number.isNaN(this.dateValue.getTime()) : false;
+        this.refreshError();
         this.updateModel();
     }
 
-    onTimeInputChange(value: string): void {
-        this.timeInput = value ?? '';
+    onDateInput(event: any): void {
+        const input = event.target?.value;
+        if (!input || !input.trim()) {
+            this.invalidDateFormat = false;
+            this.refreshError();
+            return;
+        }
+
+        // Check if the typed value is a valid date
+        const parsed = new Date(input);
+        this.invalidDateFormat = Number.isNaN(parsed.getTime());
+        this.refreshError();
+    }
+
+    onDateBlur(): void {
+        // Revalidate on blur
+        if (this.dateValue) {
+            this.invalidDateFormat = Number.isNaN(this.dateValue.getTime());
+        } else {
+            this.invalidDateFormat = false;
+        }
+        this.refreshError();
+    }
+
+    onTimeInputChange(value: any): void {
+        if (value == null) {
+            this.timeInput = '';
+        } else if (typeof value === 'string') {
+            this.timeInput = value;
+        } else if (value instanceof Date) {
+            this.timeInput = this.toTimeString(value);
+        } else {
+            this.timeInput = String(value ?? '');
+        }
+
+        // Check if time format is valid
+        if (this.timeInput && this.timeInput.trim()) {
+            this.invalidTimeFormat = !this.parseTime(this.timeInput.trim());
+        } else {
+            this.invalidTimeFormat = false;
+        }
+
+        this.refreshError();
         this.updateModel();
     }
 
@@ -76,19 +124,52 @@ export class DateTimeControlComponent implements OnChanges {
         this.updateModel();
     }
 
+    onTimeBlur(): void {
+        const normalized = this.normalizeTimeString(this.timeInput);
+        if (!normalized || normalized === this.timeInput) {
+            return;
+        }
+
+        this.timeInput = normalized;
+        this.updateModel();
+    }
+
     get errorMessage(): string | null {
         return this.currentError;
     }
 
-    private syncFromModel(): void {
+    syncFromModel(): void {
         const source = this.model instanceof Date && !Number.isNaN(this.model.getTime()) ? new Date(this.model) : null;
 
         this.dateValue = source;
         this.timeInput = source ? this.toTimeString(source) : '';
         this.initialDate = source ? new Date(source) : null;
         this.initialTime = this.timeInput;
-
+        this.invalidDateFormat = false;
+        this.invalidTimeFormat = false;
         this.refreshError();
+
+        this.tryDetectChanges();
+
+        this.syncNativeTimeInput();
+        Promise.resolve().then(() => this.syncNativeTimeInput());
+    }
+
+    private tryDetectChanges(): void {
+        const cd: any = this.cdr as any;
+        if (cd && cd.destroyed) {
+            return;
+        }
+
+        this.cdr.detectChanges();
+    }
+
+    private syncNativeTimeInput(): void {
+        const el = this.timeInputRef?.nativeElement;
+        if (el) {
+            el.value = this.timeInput ?? '';
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
     }
 
     private updateModel(): void {
@@ -97,7 +178,8 @@ export class DateTimeControlComponent implements OnChanges {
         }
 
         const date = this.dateValue;
-        const time = (this.timeInput ?? '').trim();
+        const rawTime = this.timeInput ?? '';
+        const time = typeof rawTime === 'string' ? rawTime.trim() : String(rawTime).trim();
 
         if (!date && !time) {
             this.emitModel(null);
@@ -187,7 +269,23 @@ export class DateTimeControlComponent implements OnChanges {
     }
 
     private toTimeString(source: Date): string {
-        return source.toTimeString().slice(0, 8);
+        try {
+            return this.datePipe.transform(source, 'hh:mm:ss a') ?? source.toTimeString().slice(0, 8);
+        } catch {
+            return source.toTimeString().slice(0, 8);
+        }
+    }
+
+    private normalizeTimeString(value: string | null | undefined): string | null {
+        const parsed = typeof value === 'string' ? this.parseTime(value) : null;
+        if (!parsed) {
+            return null;
+        }
+
+        const [hours, minutes, seconds] = parsed;
+        const base = this.dateValue ? new Date(this.dateValue) : new Date();
+        base.setHours(hours, minutes, seconds, 0);
+        return this.toTimeString(base);
     }
 
     private toDateFromSelection(event: MatTimepickerSelected<Date> | Date | null): Date | null {
@@ -211,6 +309,15 @@ export class DateTimeControlComponent implements OnChanges {
     private computeErrorMessage(): string | null {
         if (this.error) {
             return this.error;
+        }
+
+        // Check for invalid format errors first
+        if (this.invalidDateFormat) {
+            return 'Invalid date format. Please use MM/DD/YYYY.';
+        }
+
+        if (this.invalidTimeFormat) {
+            return 'Invalid time format. Please use HH:MM AM/PM.';
         }
 
         const value = this.model;

@@ -66,6 +66,7 @@ export class ExcludeTripsComponent implements OnInit {
 
     readonly rows = signal<ExcludeTripsRow[]>([]);
     readonly isLoading = signal<boolean>(false);
+    readonly statusMessage = signal<{ text: string; type: 'success' | 'error' } | null>(null);
 
     readonly hasData = computed(() => this.rows().length > 0);
 
@@ -81,10 +82,12 @@ export class ExcludeTripsComponent implements OnInit {
     }
 
     onAddRange(): void {
+        this.statusMessage.set(null);
         this.openRangeDialog('create');
     }
 
     onEditRange(row: ExcludeTripsRow): void {
+        this.statusMessage.set(null);
         this.openRangeDialog('edit', row);
     }
 
@@ -92,7 +95,6 @@ export class ExcludeTripsComponent implements OnInit {
         this.dialogService
             .openConfirmationDialog({
                 title: 'Delete Excluded Date Range',
-                subtitle: this.injectedContent.vehicleDisplay,
                 message: 'Are you sure you want to delete this date range?',
                 confirmText: 'YES',
                 cancelText: 'CANCEL',
@@ -125,7 +127,7 @@ export class ExcludeTripsComponent implements OnInit {
                 },
                 error: (error) => {
                     console.error('Failed to load excluded date ranges', error);
-                    this.notificationService.error('Unable to load excluded date ranges.');
+                    this.statusMessage.set({ text: 'Unable to load excluded date ranges.', type: 'error' });
                     this.rows.set([]);
                     this.dataSource.data = [];
                     this.updateConfirmState(false);
@@ -178,7 +180,6 @@ export class ExcludeTripsComponent implements OnInit {
 
         const dialogRef = this.dialogService.openFormDialog<typeof formModule.ExcludeTripsFormComponent, ExcludeTripsFormModel>({
             title: mode === 'edit' ? 'Edit Excluded Date Range' : 'Add Excluded Date Range',
-            subtitle: this.injectedContent.vehicleDisplay,
             component: formModule.ExcludeTripsFormComponent,
             componentData: {
                 mode,
@@ -214,7 +215,7 @@ export class ExcludeTripsComponent implements OnInit {
     private createRange(form: ExcludeTripsFormModel): void {
         const participantSeqId = this.injectedContent.participantSeqId;
         if (this.hasOverlap(form.rangeStart, form.rangeEnd)) {
-            this.notificationService.error('Selected date range overlaps with an existing exclusion.');
+            this.statusMessage.set({ text: 'Selected date range overlaps with an existing exclusion.', type: 'error' });
             return;
         }
 
@@ -223,13 +224,13 @@ export class ExcludeTripsComponent implements OnInit {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: () => {
-                    this.notificationService.success('Excluded date range added.');
+                    this.statusMessage.set({ text: 'Excluded date range added.', type: 'success' });
                     this.loadRanges();
                 },
                 error: (error) => {
                     console.error('Failed to create excluded date range', error);
                     const message = this.extractErrorMessage(error) ?? 'Unable to add excluded date range.';
-                    this.notificationService.error(message);
+                    this.statusMessage.set({ text: message, type: 'error' });
                 },
             });
     }
@@ -242,7 +243,7 @@ export class ExcludeTripsComponent implements OnInit {
         const description = this.normalizeDescription(row.original.description);
 
         if (this.hasOverlap(form.rangeStart, form.rangeEnd, row.original.rangeStart)) {
-            this.notificationService.error('Selected date range overlaps with an existing exclusion.');
+            this.statusMessage.set({ text: 'Selected date range overlaps with an existing exclusion.', type: 'error' });
             return;
         }
 
@@ -259,13 +260,13 @@ export class ExcludeTripsComponent implements OnInit {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: () => {
-                    this.notificationService.success('Excluded date range updated.');
+                    this.statusMessage.set({ text: 'Excluded date range updated.', type: 'success' });
                     this.loadRanges();
                 },
                 error: (error) => {
                     console.error('Failed to update excluded date range', error);
                     const message = this.extractErrorMessage(error) ?? 'Unable to update excluded date range.';
-                    this.notificationService.error(message);
+                    this.statusMessage.set({ text: message, type: 'error' });
                 },
             });
     }
@@ -279,13 +280,13 @@ export class ExcludeTripsComponent implements OnInit {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: () => {
-                    this.notificationService.success('Excluded date range removed.');
+                    this.statusMessage.set({ text: 'Excluded date range removed.', type: 'success' });
                     this.loadRanges();
                 },
                 error: (error) => {
                     console.error('Failed to delete excluded date range', error);
                     const message = this.extractErrorMessage(error) ?? 'Unable to remove excluded date range.';
-                    this.notificationService.error(message);
+                    this.statusMessage.set({ text: message, type: 'error' });
                 },
             });
     }

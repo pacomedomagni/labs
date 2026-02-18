@@ -1,28 +1,46 @@
-<cui-dialog closeButtonLabel="Close Dialog" [showClose]="true" [showFooter]="true" (close)="onClose()">
-  <div mat-dialog-title dialog-header class="flex">
-    <span>{{ data.title }}</span>
-  </div>
-  @if (shouldDisplaySubtitle()) {
-    <tmx-dialog-subtitle [leftContent]="data.subtitle" dialog-sub-header></tmx-dialog-subtitle>
-  }
-  <div mat-dialog-content dialog-content [ngClass]="data.alignTextLeft ? 'text-left' : 'text-center'" class="mt-xxs">
-    @if (hasStringContent()) {
-      <div [innerHTML]="data.message"></div>
+<cui-dialog
+    role="dialog"
+    aria-modal="true"
+    closeButtonLabel="Close Dialog"
+    [showClose]="true"
+    [showFooter]="true"
+    (close)="onClose()"
+>
+    <div mat-dialog-title dialog-header class="flex">
+        <span>{{ data.title }}</span>
+    </div>
+    @if (shouldDisplaySubtitle()) {
+        <tmx-dialog-subtitle [leftContent]="data.subtitle" dialog-sub-header></tmx-dialog-subtitle>
     }
-    
-    <!-- Dynamic component content -->
-    @if (hasDynamicComponent()) {
-      <ng-container #dynamicComponentContainer></ng-container>
-    }
-  </div>
-  <ng-container dialog-footer>
-    <button mat-flat-button color="primary" class="mr-xxs" id="btn-confirm" (click)="onConfirm()">
-      {{ data.confirmText }}
-    </button>
-    @if (!data.hideCancelButton) {
-      <button mat-stroked-button color="primary" id="btn-cancel" (click)="onCancel()">
-        {{ data.cancelText }}
-      </button>
-    }
-  </ng-container>
+    <div
+        mat-dialog-content
+        dialog-content
+        [ngClass]="data.alignTextLeft ? 'text-left' : 'text-center'"
+        class="mt-xxs"
+    >
+        @if (hasStringContent()) {
+            <div [innerHTML]="data.message"></div>
+        }
+
+        <!-- Dynamic component content -->
+        @if (hasDynamicComponent()) {
+            <ng-container #dynamicComponentContainer></ng-container>
+        }
+    </div>
+    <ng-container dialog-footer>
+        <button
+            mat-flat-button
+            color="primary"
+            class="mr-xxs"
+            id="btn-confirm"
+            (click)="onConfirm()"
+        >
+            {{ data.confirmText }}
+        </button>
+        @if (!data.hideCancelButton) {
+            <button mat-stroked-button color="primary" id="btn-cancel" (click)="onCancel()">
+                {{ data.cancelText }}
+            </button>
+        }
+    </ng-container>
 </cui-dialog>

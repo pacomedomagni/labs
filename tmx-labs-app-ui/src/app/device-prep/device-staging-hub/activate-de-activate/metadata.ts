@@ -5,7 +5,7 @@ import { faToggleOn } from '@fortawesome/free-solid-svg-icons';
 export const metadata: ApplicationGroupMetadata = {
     id: ApplicationGroupIds.ActivateDeactivateDevices,
     name: 'Activate/Deactivate Devices',
-    description: 'Base landing page for Activate/Deactivate Devices.',
+    description: 'Base landing page for Activate/Deactivate Devices',
     faIcon: faToggleOn,
     isReady: true,
     access: ['isLabsUser'],

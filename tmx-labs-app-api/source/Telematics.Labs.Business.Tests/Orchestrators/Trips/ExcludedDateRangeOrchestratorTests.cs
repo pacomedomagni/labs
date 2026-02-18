@@ -65,7 +65,7 @@ namespace Progressive.Telematics.Labs.Business.Tests.Trips
         }
 
         [Fact]
-        public async Task UpdateAsync_UsesOriginalRangeStartAndReturnsResult()
+        public async Task UpdateAsync_WhenStartUnchanged_UsesDalUpdate()
         {
             var existing = new ExcludedDateRange
             {
@@ -78,7 +78,7 @@ namespace Progressive.Telematics.Labs.Business.Tests.Trips
             {
                 ParticipantSeqId = existing.ParticipantSeqId,
                 OriginalRangeStart = existing.RangeStart,
-                RangeStart = new DateTime(2024, 1, 2),
+                RangeStart = existing.RangeStart,
                 RangeEnd = new DateTime(2024, 1, 12),
                 Description = "Adjusted",
             };
@@ -100,6 +100,44 @@ namespace Progressive.Telematics.Labs.Business.Tests.Trips
 
             Assert.Equal(updated, result);
             _excludedTripsDal.Verify(dal => dal.UpdateExcludedTripAsync(command.ParticipantSeqId, command.RangeStart, command.RangeEnd, command.Description, command.OriginalRangeStart), Times.Once);
+            _excludedTripsDal.Verify(dal => dal.DeleteExcludedTripAsync(It.IsAny<int>(), It.IsAny<DateTime>()), Times.Never);
+            _excludedTripsDal.Verify(dal => dal.InsertExcludedTripAsync(It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string?>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateAsync_WhenStartChanges_ReinsertsRange()
+        {
+            var originalStart = new DateTime(2024, 1, 1);
+            var newStart = new DateTime(2024, 1, 2);
+
+            var command = new ExcludedDateRangeCommand
+            {
+                ParticipantSeqId = 42,
+                OriginalRangeStart = originalStart,
+                RangeStart = newStart,
+                RangeEnd = new DateTime(2024, 1, 12),
+                Description = "Adjusted",
+            };
+
+            var inserted = new ExcludedDateRange
+            {
+                ParticipantSeqId = command.ParticipantSeqId,
+                RangeStart = command.RangeStart,
+                RangeEnd = command.RangeEnd,
+                Description = command.Description,
+                CreateDate = DateTime.UtcNow,
+            };
+
+            _excludedTripsDal
+                .Setup(dal => dal.InsertExcludedTripAsync(command.ParticipantSeqId, command.RangeStart, command.RangeEnd, command.Description))
+                .ReturnsAsync(inserted);
+
+            var result = await _sut.UpdateAsync(command);
+
+            Assert.Equal(inserted, result);
+            _excludedTripsDal.Verify(dal => dal.DeleteExcludedTripAsync(command.ParticipantSeqId, originalStart), Times.Once);
+            _excludedTripsDal.Verify(dal => dal.InsertExcludedTripAsync(command.ParticipantSeqId, command.RangeStart, command.RangeEnd, command.Description), Times.Once);
+            _excludedTripsDal.Verify(dal => dal.UpdateExcludedTripAsync(It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string?>(), It.IsAny<DateTime?>()), Times.Never);
         }
 
         [Fact]

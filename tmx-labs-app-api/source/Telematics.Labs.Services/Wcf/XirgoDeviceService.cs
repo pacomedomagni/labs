@@ -23,6 +23,7 @@ namespace Progressive.Telematics.Labs.Services.Wcf
         Task<GetDeviceBySerialNumberResponse> GetDeviceBySerialNumber(string serialNumber);
         Task<GetDeviceBySimResponse> GetDeviceBySim(string sim);    
         Task<UpdateDeviceResponse> UpdateXirgoDevice(int deviceSeqId, DeviceStatus status, DeviceLocation location);
+        Task<UpdateDeviceResponse> UpdateAsync(UpdateDeviceRequest updateDeviceRequest);
     }
 
     public class XirgoDeviceService : WcfService<XirgoServiceClient>, IXirgoDeviceService
@@ -169,6 +170,13 @@ namespace Progressive.Telematics.Labs.Services.Wcf
                     LocationCode = (int)location
                 }
             }), logger);
+            return response;
+        }
+
+        public async Task<UpdateDeviceResponse> UpdateAsync(UpdateDeviceRequest updateDeviceRequest)
+        {
+            using var client = CreateClient();
+            var response = await client.HandledCall(() => client.UpdateAsync(updateDeviceRequest), logger);
             return response;
         }
     }

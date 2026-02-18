@@ -1,11 +1,12 @@
 import { Component, HostListener, InjectionToken, Injector, Type, inject, ViewChild, AfterViewInit, WritableSignal, signal, computed } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { HelpText } from '../../../help/metadata';
-import { DialogComponent, NotificationBannerComponent } from '@pgr-cla/core-ui-components';
+import { DialogComponent } from '@pgr-cla/core-ui-components';
 import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { HelpTextIconComponent } from '../../help-text-icon/help-text-icon.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatPaginator, MatPaginatorModule } from "@angular/material/paginator";
+import { DialogSubtitleComponent } from "../../layout/dialog-subtitle/dialog-subtitle.component";
 
 export const TABLE_DIALOG_CONTENT = new InjectionToken<string>('app.tableDiag.content');
 export const TABLE_DIALOG_PAGINATOR = new InjectionToken<MatPaginator>('app.tableDiag.paginator');
@@ -23,8 +24,8 @@ export const TABLE_DIALOG_CONFIRM_DISABLED = new InjectionToken<WritableSignal<b
     HelpTextIconComponent,
     MatDialogModule,
     MatButtonModule,
-    NotificationBannerComponent,
-    MatPaginatorModule
+    MatPaginatorModule,
+    DialogSubtitleComponent
 ],
 })
 export class TableDialogComponent implements AfterViewInit {

@@ -1,0 +1,95 @@
+<div>
+  <h2 class="text-3xl font-bold mb-6">Benchtesting Boards</h2>     
+  
+  <div class="grid grid-cols-[1fr_auto] gap-4 items-center mb-12">
+    <mat-form-field appearance="outline" class="custom-field">
+      <mat-label>Select an open board</mat-label>
+      <mat-select id="board-select" name="board" [(ngModel)]="dropdownSelectedBoard">
+        @for (board of openBoards(); track board) {
+          <mat-option [value]="board">{{ board.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <div class="button-container">
+      <button [disabled]="!canStartBenchTest" mat-flat-button color="primary" class="custom-button" (click)="startBenchtest()">
+        START BENCHTEST
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-8">
+    <h2 id="benchtests-heading" class="text-3xl text-gray-800 mb-6">Benchtests In Progress</h2>
+    <div class="max-h-96 overflow-x-auto">
+      <table mat-table [dataSource]="activeBoards()" class="cui-table" aria-labelledby="benchtests-heading">
+        <!-- Board Name Column -->
+        <ng-container matColumnDef="boardName">
+          <th mat-header-cell class="cui-cell-12 text-xl font-bold" *matHeaderCellDef>Board Name</th>
+          <td mat-cell class="cui-cell-12 text-2xl cursor-pointer" 
+              [class.bg-blue-50]="selectedActiveBoard?.boardID === element.boardID"
+              *matCellDef="let element"
+              [attr.aria-label]="'Board Name: ' + element.name"
+              (click)="selectBoard(element)"
+              (keydown.enter)="selectBoard(element)"
+              (keydown.space)="selectBoard(element)">
+            {{ element.name }}
+          </td>
+        </ng-container>
+        
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell class="cui-cell-12 text-xl font-bold" *matHeaderCellDef>Status</th>
+          <td mat-cell class="cui-cell-12 text-2xl cursor-pointer pr-8" 
+              [class.bg-blue-50]="selectedActiveBoard?.boardID === element.boardID"
+              *matCellDef="let element"
+              [attr.aria-label]="'Status: ' + getStatusText(element.statusCode)"
+              (click)="selectBoard(element)"
+              (keydown.enter)="selectBoard(element)"
+              (keydown.space)="selectBoard(element)">
+            {{ getStatusText(element.statusCode) }}
+          </td>
+        </ng-container>
+        
+        <!-- Count Column -->
+        <ng-container matColumnDef="count">
+          <th mat-header-cell class="cui-cell-6 text-xl font-bold" *matHeaderCellDef>Count</th>
+          <td mat-cell class="cui-cell-6 text-2xl cursor-pointer text-center" 
+              [class.bg-blue-50]="selectedActiveBoard?.boardID === element.boardID"
+              *matCellDef="let element"
+              [attr.aria-label]="'Count: ' + (element.deviceCount || '0')"
+              (click)="selectBoard(element)"
+              (keydown.enter)="selectBoard(element)"
+              (keydown.space)="selectBoard(element)">
+            {{ element.deviceCount || '0' }}
+          </td>
+        </ng-container>
+        
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions" stickyEnd>
+          <th mat-header-cell class="cui-cell-actions" *matHeaderCellDef>
+            <span class="screen-reader-only">Actions</span>
+          </th>
+          <td mat-cell class="px-8 text-right" *matCellDef="let element">
+            <button mat-flat-button color="primary" class="px-12 !py-4 !text-xl" 
+                    [attr.aria-label]="'Open ' + element.name"
+                    (click)="openBenchTestInProgress(element)">
+              OPEN
+            </button>
+          </td>
+        </ng-container>
+        
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row 
+            *matRowDef="let row; columns: displayedColumns"
+            [class.bg-blue-50]="selectedActiveBoard?.boardID === row.boardID">
+        </tr>
+        
+        <!-- No data row -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell py-4 text-gray-500 text-xl" [attr.colspan]="displayedColumns.length">
+            No boards in progress
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>

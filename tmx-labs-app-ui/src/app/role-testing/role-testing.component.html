@@ -1,0 +1,32 @@
+<mat-card appearance="outlined">
+  <form #form="ngForm">
+
+    <mat-form-field appearance="outline" [hideRequiredMarker]="true" class="mr-xs">
+      <mat-label>User Name</mat-label>
+      <input [(ngModel)]="userInfo.name" name="name" type="text" matInput required>
+      <mat-error>User Name is required</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+      <mat-label>Lan ID</mat-label>
+      <input [(ngModel)]="userInfo.lanId" name="lanId" type="text" matInput required>
+      <mat-error>Lan ID is required</mat-error>
+    </mat-form-field>
+
+    <div class="flex flex-col">
+      <ul>
+        @for (access of properties; track access) {
+          <li>
+            <mat-checkbox [value]="access" [checked]="userInfo[access]"	(change)="userInfo[access] = $event.checked">{{ access }}</mat-checkbox>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div class="mt-xxs">
+      <button mat-flat-button color="primary" class="mr-xxs" (click)="submit()"	[disabled]="!form.valid">Ok</button>
+      <button mat-stroked-button color="primary" class="mr-xxs" (click)="reset()">Reset</button>
+    </div>
+
+  </form>
+</mat-card>

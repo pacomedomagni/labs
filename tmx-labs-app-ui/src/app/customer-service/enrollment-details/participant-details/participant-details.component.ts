@@ -2,6 +2,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, inject, signal, ViewChild, ElementRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 // Third-party imports
 import { AccordionModule } from '@pgr-cla/core-ui-components';
@@ -51,7 +52,9 @@ import { ActionHandlerContext, ParticipantDataRow } from './models/models';
 })
 export class ParticipantDetailsComponent {
     @ViewChild('accordionItem', { read: ElementRef }) accordionItem?: ElementRef<HTMLElement>;
+    @ViewChild('accordionContent') accordionContent?: ElementRef<HTMLElement>;
 
+    private readonly liveAnnouncer = inject(LiveAnnouncer);
     private readonly participantDetailsFormattingService = inject(
         ParticipantDetailsFormattingService,
     );
@@ -217,6 +220,7 @@ export class ParticipantDetailsComponent {
                 model: vehicle.model ?? '',
                 vehicleSeqID: vehicle.vehicleSeqID ?? null,
             },
+            participantSeqID: this.participantResource().participantSeqID ?? undefined,
         };
     });
 
@@ -380,6 +384,26 @@ export class ParticipantDetailsComponent {
         }, 0);
     }
 
+    onAccordionOpened(): void {
+        // Clear any previous screen reader announcements
+        this.liveAnnouncer.announce('', 'assertive');
+        
+        // Build announcement with key details
+        const label = this.participantLabel();
+        const baseRows = this.baseInfoRows();
+        const deviceRows = this.deviceInfoRows();
+        const returnRows = this.returnInfoRows();
+        
+        const totalItems = baseRows.length + deviceRows.length + returnRows.length;
+        
+        setTimeout(() => {
+            this.liveAnnouncer.announce(
+                `${label} details expanded. ${totalItems} items. Use tab to navigate through each item.`, 
+                'assertive'
+            );
+        }, 50);
+    }
+
     private filterRows(rows: ParticipantDataRow[]): ParticipantDataRow[] {
         return rows.filter((row) => row.alwaysShow || this.normalize(row.value) !== null);
     }
@@ -391,5 +415,12 @@ export class ParticipantDetailsComponent {
 
         const trimmed = value.trim();
         return trimmed.length > 0 ? trimmed : null;
+    }
+
+    getRowAriaLabel(row: ParticipantDataRow): string {
+        const value = row.value ?? '';
+        const normalizedValue = this.normalize(value);
+        const displayValue = normalizedValue || 'Not available';
+        return `${row.label}: ${displayValue}`;
     }
 }

@@ -4,20 +4,16 @@ using Progressive.Telematics.Labs.Services.Wcf;
 using Progressive.Telematics.Labs.Shared;
 using Progressive.Telematics.Labs.Shared.Configs;
 using Progressive.Telematics.Labs.Shared.Utils;
-using Progressive.WAM.Webguard.Client.Core.Wcf;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.ServiceModel;
-using System.ServiceModel.Description;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Progressive.WAM.Webguard.Client.Kerberos.Core.Wcf;
 
 namespace Progressive.Telematics.Labs.Services
 {
@@ -63,27 +59,6 @@ namespace Progressive.Telematics.Labs.Services
             throw new TelematicsApiException(logger, message, response.StatusCode);
         }
 
-        internal static void AddTokenEndpoint(this ServiceEndpoint endpoint, IConfiguration configuration)
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                endpoint.EndpointBehaviors.Add(new KerberosJwtTokenEndpointBehavior(AppServicesHelper.GetConfig<WebguardClient>().ModernAuthorizationServiceUrl));
-            }
-            else
-            {
-                string clientSecret = Environment.GetEnvironmentVariable(configuration.GetSection("WebGuardClient").GetValue<String>("ClientSecret"));
-                string clientId = Environment.GetEnvironmentVariable(configuration.GetSection("WebGuardClient").GetValue<String>("ClientId"));
-                endpoint.EndpointBehaviors.Add(new JwtTokenEndpointBehavior(AppServicesHelper.GetConfig<WebguardClient>().ModernAuthorizationServiceUrl, clientId, clientSecret));
-            }
-
-           
-        }
-
-        internal static void AddTokenEndpoint(this ServiceEndpoint endpoint)
-        {
-            endpoint.EndpointBehaviors.Add(new TokenEndpointBehavior(AppServicesHelper.GetConfig<WebguardConfig>().AuthenticationServiceUrl));
-        }
-
         internal static async Task<T> HandledCall<T, T2>(this ClientBase<T2> client, Func<Task<T>> action, ILogger logger, string message = "") where T2: class
         {
             return await HandledCall(client, action, logger, new Dictionary<ResponseStatus, string> { [ResponseStatus.Default] = message });
@@ -124,9 +99,15 @@ namespace Progressive.Telematics.Labs.Services
             => JsonSerializer.Deserialize<T>(json, options);
 
         public static ValueTask<TValue> DeserializeAnonymousTypeAsync<TValue>(Stream stream, TValue anonymousTypeObject, JsonSerializerOptions options = default, CancellationToken cancellationToken = default)
-            => JsonSerializer.DeserializeAsync<TValue>(stream, options, cancellationToken); // Method to deserialize from a stream added for completeness
+            => JsonSerializer.DeserializeAsync<TValue>(stream, options, cancellationToken);
     }
 }
+
+
+
+
+
+
 
 
 

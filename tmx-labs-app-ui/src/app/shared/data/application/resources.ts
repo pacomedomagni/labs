@@ -1,4 +1,4 @@
-import { MessageCode } from "./enums";
+import { MessageCode, OrderType } from "./enums";
 
 export interface Resource {
     extenders: Map<string, unknown>[];
@@ -11,10 +11,29 @@ export interface KeyValuePair<TKey, TValue> {
 }
 
 export interface UserInfo {
-    isLabsAdmin: boolean;
-    isLabsUser?: boolean;
-    lanId: string;
-    name: string;
+	isInOpsAdminRole: boolean;
+	isInSupportAdminRole: boolean;
+	isInOpsUserRole: boolean;
+	isCommercialLineRole: boolean;
+	hasEligibilityAccess: boolean;
+	hasInsertInitialParticipationScoreInProcessAccess: boolean;
+	hasOptOutSuspensionAccess: boolean;
+	hasPolicyMergeAccess: boolean;
+	hasResetEnrollmentAccess: boolean;
+	hasStopShipmentAccess: boolean;
+	hasUpdatePProGuidAccess: boolean;
+	hasVehicleSupportAccess: boolean;
+	isInAppChangeRole: boolean;
+	isInMobileRegistrationAdminRole: boolean;
+	isInTheftOnlyRole: boolean;
+	isInTheftRole: boolean;
+	isInFeeReversalRole: boolean;
+	isInFeeReversalOnlyRole: boolean;
+	lanId: string;
+	name: string;
+	// TMX Labs specific roles
+	isLabsAdmin: boolean;
+	isLabsUser: boolean;
 }
 
 export interface WebguardConfig {
@@ -124,6 +143,51 @@ export interface TimeSpan {
 	totalMilliseconds: number;
 	totalMinutes: number;
 	totalSeconds: number;
+}
+
+export interface Orders {
+	searchOrderNumber: string;
+	searchBeginDate: string;
+	searchEndDate: string;
+	type: OrderType;
+	openSnapshotOrders: number;
+	processedSnapshotOrders: number;
+	snapshotDevicesNeeded: number;
+	openCommercialLinesOrders: number;
+	processedCommercialLinesOrders: number;
+	commercialLinesDevicesNeeded: number;
+}
+
+export interface StateOrder {
+	state: string;
+	numberOfOrders: number;
+	numberOfDevices: number;
+	numberOfOldOrders: number;
+	oldestOrder: Date;
+	numberDaysForOldOrders: number;
+}
+
+export interface OrderSearch {
+	type: OrderType;
+	orderId: string;
+}
+
+export interface OrdersByState {
+	type: OrderType;
+	stateOrders: StateOrder[];
+}
+
+export interface OrderDetails {
+	orderId: string;
+	orderNumber: string;
+	orderDate: Date;
+	state: string;
+	deviceCount: number;
+	deviceType: string;
+	status: string;
+	vehicleInfo?: string;
+	deviceVersion?: string;
+	shippingDetails?: string;
 }
 
 export interface Resource {

@@ -1,0 +1,62 @@
+<mat-card appearance="outlined">
+    <div class="device-details-header mb-4 text-3xl font-semibold">Device Details</div>
+    <table mat-table [dataSource]="dataSource" class="cui-table">
+        <ng-container matColumnDef="deviceId">
+            <th mat-header-cell *matHeaderCellDef>Device ID</th>
+            <td mat-cell *matCellDef="let element">
+                {{ element.deviceSerialNumber | tmxFallbackValue }}
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="deviceStatus">
+            <th mat-header-cell *matHeaderCellDef>Device Status</th>
+            <td class="whitespace-nowrap" mat-cell *matCellDef="let element">
+                {{ getDeviceStatus(element.statusCode) | tmxFallbackValue }}
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="sim">
+            <th mat-header-cell *matHeaderCellDef>SIM</th>
+            <td mat-cell *matCellDef="let element">
+                {{ element.sim | tmxFallbackValue }}
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="simStatus">
+            <th mat-header-cell *matHeaderCellDef>SIM Status</th>
+            <td class="cui-cell-12" mat-cell *matCellDef="let element">
+                {{ element.isSimActive ? 'Active' : 'Inactive' }}
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="actions" stickyEnd>
+            <th mat-header-cell class="cui-cell-actions" *matHeaderCellDef>
+                <span class="screen-reader-only">Actions</span>
+            </th>
+            <td
+                mat-cell
+                *matCellDef="let element"
+                class="flex px-2 cui-cell-actions visible justify-end"
+            >
+                @if (element.isSimActive) {
+                    <button
+                        mat-flat-button
+                        color="primary"
+                        (click)="onDeactivateDevice(element)"
+                        aria-label="Deactivate device"
+                    >
+                        Deactivate
+                    </button>
+                } @else {
+                    <button
+                        mat-flat-button
+                        color="primary"
+                        (click)="onActivate(element)"
+                        aria-label="Activate device"
+                    >
+                        Activate
+                    </button>
+                }
+            </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+    <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons></mat-paginator>
+</mat-card>

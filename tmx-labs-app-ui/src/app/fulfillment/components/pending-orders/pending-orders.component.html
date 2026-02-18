@@ -1,0 +1,132 @@
+<div class="content-wrapper">
+  <!-- Filters Sidebar -->
+  <aside class="filters-sidebar">
+    <h3 class="filter-title">Filter Orders By</h3>
+    
+    <!-- State Filter -->
+    <div class="filter-section">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>State</mat-label>
+        <mat-select [(ngModel)]="selectedState">
+          <mat-option value="">All States</mat-option>
+          <mat-option value="AL">AL</mat-option>
+          <mat-option value="CO">CO</mat-option>
+          <mat-option value="CT">CT</mat-option>
+          <mat-option value="GA">GA</mat-option>
+          <mat-option value="OH">OH</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Device Type Filter -->
+    <div class="filter-section">
+      <div class="filter-label">Device Type</div>
+      <mat-radio-group [(ngModel)]="selectedDeviceType" class="radio-group">
+        <mat-radio-button value="all">All Devices</mat-radio-button>
+        <mat-radio-button value="we-wv">We WV Only</mat-radio-button>
+        <mat-radio-button value="wx">WX Only</mat-radio-button>
+        <mat-radio-button value="we-wv-wx">We WV & WX</mat-radio-button>
+      </mat-radio-group>
+    </div>
+
+    <!-- Snapshot Version Filter -->
+    <div class="filter-section">
+      <div class="filter-label">Snapshot Version</div>
+      <mat-radio-group [(ngModel)]="selectedSnapshotVersion" class="radio-group">
+        <mat-radio-button value="all">All Snapshot Versions</mat-radio-button>
+        <mat-radio-button value="2.0">Snapshot 2.0 Only</mat-radio-button>
+        <mat-radio-button value="3.0">Snapshot 3.0 Only</mat-radio-button>
+      </mat-radio-group>
+    </div>
+
+    <!-- Order Status Filter -->
+    <div class="filter-section">
+      <div class="filter-label">Order Status</div>
+      <div class="checkbox-group">
+        <mat-checkbox [(ngModel)]="pendingAssignment">Pending Assignment</mat-checkbox>
+        <mat-checkbox [(ngModel)]="readyToPrint">Ready to Print</mat-checkbox>
+      </div>
+    </div>
+
+    <!-- Clear Button -->
+    <button mat-flat-button color="primary" (click)="clearFilters()" class="clear-button">
+      CLEAR
+    </button>
+  </aside>
+
+  <!-- Orders Table -->
+  <div class="orders-content">
+    <!-- Search and Count -->
+    <div class="orders-header">
+      <div class="orders-count">
+        Pending Orders: {{ getPendingCount() }}
+      </div>
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search By</mat-label>
+        <mat-select value="orderNumber">
+          <mat-option value="orderNumber">Order Number</mat-option>
+          <mat-option value="state">State</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" class="cui-table orders-table">
+        <!-- Order Number Column -->
+        <ng-container matColumnDef="orderNumber">
+          <th mat-header-cell *matHeaderCellDef>Order #</th>
+          <td mat-cell *matCellDef="let order">
+            <a href="#" class="order-link">{{ order.orderNumber }}</a>
+          </td>
+        </ng-container>
+
+        <!-- Order Date Column -->
+        <ng-container matColumnDef="orderDate">
+          <th mat-header-cell *matHeaderCellDef>Order Date</th>
+          <td mat-cell *matCellDef="let order">
+            {{ order.orderDate | date:'M/d/yyyy h:mm:ss a' }}
+          </td>
+        </ng-container>
+
+        <!-- State Column -->
+        <ng-container matColumnDef="state">
+          <th mat-header-cell *matHeaderCellDef>State</th>
+          <td mat-cell *matCellDef="let order">{{ order.state }}</td>
+        </ng-container>
+
+        <!-- Device Count Column -->
+        <ng-container matColumnDef="deviceCount">
+          <th mat-header-cell *matHeaderCellDef>Device Count</th>
+          <td mat-cell *matCellDef="let order">{{ order.deviceCount }}</td>
+        </ng-container>
+
+        <!-- Device Type Column -->
+        <ng-container matColumnDef="deviceType">
+          <th mat-header-cell *matHeaderCellDef>Device Type</th>
+          <td mat-cell *matCellDef="let order">{{ order.deviceType }}</td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let order">{{ order.status }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" 
+            tabindex="0"
+            [attr.aria-label]="'Order ' + row.orderNumber + ', ' + row.state + ', ' + row.deviceCount + ' devices, ' + row.status">
+        </tr>
+      </table>
+    </div>
+
+    <!-- Paginator -->
+    <mat-paginator
+      [pageSizeOptions]="[10, 25, 50]"
+      [pageSize]="10"
+      showFirstLastButtons
+      aria-label="Select page of orders">
+    </mat-paginator>
+  </div>
+</div>

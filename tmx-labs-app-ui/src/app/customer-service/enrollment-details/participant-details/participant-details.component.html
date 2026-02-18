@@ -1,5 +1,5 @@
 <cui-accordion>
-  <cui-accordion-item #accordionItem>
+  <cui-accordion-item #accordionItem (opened)="onAccordionOpened()">
      <cui-accordion-header [rightAlignToggle]="true">
        <mat-icon
           aria-hidden="true"
@@ -16,14 +16,14 @@
        ></tmx-menu-button-group>
      </cui-accordion-header>
      <cui-accordion-body>
-       <div class="participant-section">
-         <div>
+       <div #accordionContent class="participant-section" role="region" [attr.aria-label]="participantLabel() + ' details'">
+         <div role="list" [attr.aria-label]="participantLabel() + ' information'">
            @for (row of baseInfoRows(); track row.label; let i = $index) {
-             <div class="grid grid-cols-5 gap-x-8 text-2xl">
-               <div class="col-span-2 font-semibold">
+             <div class="grid grid-cols-5 gap-x-8 text-2xl" role="listitem" tabindex="0" [attr.aria-label]="getRowAriaLabel(row)">
+               <div class="col-span-2 font-semibold" role="term" >
                  {{ row.label }}
                </div>
-               <div class="col-span-3" [class.font-semibold]="row.emphasize">
+               <div class="col-span-3" [class.font-semibold]="row.emphasize" role="definition" >
                  {{ row.value | tmxDisplayDate | tmxFallbackValue }}
                </div>
              </div>
@@ -35,11 +35,11 @@
              <hr class="border-t-4 my-4" aria-hidden="true">
            }
            @for (row of deviceInfoRows(); track row.label; let i = $index) {
-             <div class="grid grid-cols-5 gap-x-4 text-2xl">
-               <div class="col-span-2 font-semibold">
+             <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" tabindex="0" [attr.aria-label]="getRowAriaLabel(row)">
+               <div class="col-span-2 font-semibold" role="term" aria-hidden="true">
                  {{ row.label }}
                </div>
-               <div class="col-span-3" [class.font-semibold]="row.emphasize">
+               <div class="col-span-3" [class.font-semibold]="row.emphasize" role="definition" aria-hidden="true">
                  {{ row.value | tmxDisplayDate | tmxFallbackValue }}
                </div>
              </div>
@@ -51,11 +51,11 @@
              <hr class="border-t-4 my-4" aria-hidden="true">
            }
            @for (row of returnInfoRows(); track row.label; let i = $index) {
-             <div class="grid grid-cols-5 gap-x-4 text-2xl">
-               <div class="col-span-2 font-semibold">
+             <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" tabindex="0" [attr.aria-label]="getRowAriaLabel(row)">
+               <div class="col-span-2 font-semibold" role="term" aria-hidden="true">
                  {{ row.label }}
                </div>
-               <div class="col-span-3" [class.font-semibold]="row.emphasize">
+               <div class="col-span-3" [class.font-semibold]="row.emphasize" role="definition" aria-hidden="true">
                  {{ row.value | tmxDisplayDate | tmxFallbackValue }}
                </div>
              </div>

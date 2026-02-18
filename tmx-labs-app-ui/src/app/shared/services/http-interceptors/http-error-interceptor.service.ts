@@ -42,6 +42,9 @@ export class HttpErrorInterceptorService {
       case 403:
         void this.redirect('forbidden');
         break;
+      case 404:
+        // Do nothing, let other parts of the app handle 404s as needed
+        break;
       case 408:
         this.notificationBannerService.error('Your transaction has timed out, please try again.');
         break;

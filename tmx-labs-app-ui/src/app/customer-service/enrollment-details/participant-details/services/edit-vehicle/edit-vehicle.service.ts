@@ -17,9 +17,11 @@ import { NotificationBannerService } from 'src/app/shared/notifications/notifica
 import { ParticipantService } from 'src/app/shared/services/api/participant/participant.service';
 import { ResourceMessageService } from 'src/app/shared/services/resources/resource-message.service';
 import { DialogService } from '../../../../../shared/services/dialogs/primary/dialog.service';
+import { EnrollmentDetailService } from '../enrollment-details/enrollment-details.service';
 
 export interface VehicleEditDialogContext {
     vehicle: VehicleDetails;
+    participantSeqID?: number;
 }
 
 interface VehicleEditOutcome {
@@ -35,6 +37,7 @@ export class EditVehicleService {
     private readonly participantService = inject(ParticipantService);
     private readonly notificationBannerService = inject(NotificationBannerService);
     private readonly resourceMessageService = inject(ResourceMessageService);
+    private readonly enrollmentDetailService = inject(EnrollmentDetailService);
 
     openEditVehicleDialog(context: VehicleEditDialogContext): Observable<VehicleDetails | null> {
         if (!context.vehicle) {
@@ -82,6 +85,18 @@ export class EditVehicleService {
                                     this.notificationBannerService.success(
                                         outcome.successMessage ?? 'Edit Vehicle Successful',
                                     );
+                                    
+                                    if (context.participantSeqID && outcome.vehicle) {
+                                        this.enrollmentDetailService.updateParticipantVehicle(
+                                            context.participantSeqID,
+                                            {
+                                                year: outcome.vehicle.year,
+                                                make: outcome.vehicle.make,
+                                                model: outcome.vehicle.model,
+                                                vehicleSeqID: outcome.vehicle.vehicleSeqID,
+                                            }
+                                        );
+                                    }
                                 }
                             }),
                             map((outcome) => (outcome.success ? outcome.vehicle : null)),

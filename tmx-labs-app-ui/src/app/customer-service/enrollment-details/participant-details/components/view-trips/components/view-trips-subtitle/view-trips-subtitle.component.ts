@@ -37,14 +37,14 @@ export class ViewTripsSubtitleComponent implements OnInit {
     openWeekDayTripSummary(): void {
         this.dialogService.openTableDialog({
             title: 'Weekday Trip Summary',
-            subtitle: this.vehicleDisplay(),
+            subtitle: this.vehicleDisplay(),    // This is already formatted from the parent (view trips). Formatting again will print HTML string.
             helpKey: HelpText.WeekdayTripSummary,
             component: WeekdayTripSummaryComponent,
             componentData: {
                 vehicleDisplay: this.vehicleDisplay(),
                 participantSeqId: this.participantSeqId(),
             },
-            confirmText: 'Close',
+            confirmText: 'OK',
             hideCancelButton: true,
             width: '1000px',
             height: '750px',

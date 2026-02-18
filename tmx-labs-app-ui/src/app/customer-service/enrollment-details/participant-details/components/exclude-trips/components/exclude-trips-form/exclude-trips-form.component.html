@@ -1,13 +1,31 @@
 <div class="form-grid">
     <div class="control">
-        <tmx-date-time-control
-            [label]="'Range Start Date'"
-            [id]="'range-start'"
-            [model]="rangeStartDate"
-            [isRequired]="true"
-            [error]="rangeStartError"
-            (modelChange)="onRangeStartDateChangeModel($event)"
-        ></tmx-date-time-control>
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Range Start Date</mat-label>
+            <input
+                matInput
+                readonly
+                role="button"
+                placeholder="Range Start Date"
+                [value]="formatDisplayDate(formModel.rangeStart)"
+                [attr.aria-describedby]="shouldShowRangeStartError() ? 'rangeStartError' : null"
+                (click)="openDateTimeEditor('start')"
+                (keydown.enter)="openEditorFromKeyboard($event, 'start')"
+                (keydown.space)="openEditorFromKeyboard($event, 'start')"
+            />
+            <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                aria-label="Select range start date"
+                (click)="openDateTimeEditor('start')"
+            >
+                <mat-icon>open_in_new</mat-icon>
+            </button>
+        </mat-form-field>
+        <div class="error-message" *ngIf="shouldShowRangeStartError()" id="rangeStartError">
+            {{ rangeStartError }}
+        </div>
         <input
             type="hidden"
             name="rangeStart"
@@ -18,14 +36,32 @@
     </div>
 
     <div class="control">
-        <tmx-date-time-control
-            [label]="'Range End Date'"
-            [id]="'range-end'"
-            [model]="rangeEndDate"
-            [isRequired]="true"
-            [error]="rangeEndError"
-            (modelChange)="onRangeEndDateChangeModel($event)"
-        ></tmx-date-time-control>
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Range End Date</mat-label>
+            <input
+                matInput
+                readonly
+                role="button"
+                placeholder="Range End Date"
+                [value]="formatDisplayDate(formModel.rangeEnd)"
+                [attr.aria-describedby]="shouldShowRangeEndError() ? 'rangeEndError' : null"
+                (click)="openDateTimeEditor('end')"
+                (keydown.enter)="openEditorFromKeyboard($event, 'end')"
+                (keydown.space)="openEditorFromKeyboard($event, 'end')"
+            />
+            <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                aria-label="Select range end date"
+                (click)="openDateTimeEditor('end')"
+            >
+                <mat-icon>open_in_new</mat-icon>
+            </button>
+        </mat-form-field>
+        <div class="error-message" *ngIf="shouldShowRangeEndError()" id="rangeEndError">
+            {{ rangeEndError }}
+        </div>
         <input
             type="hidden"
             name="rangeEnd"

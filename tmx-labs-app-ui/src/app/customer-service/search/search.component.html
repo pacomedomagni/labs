@@ -1,4 +1,4 @@
-<h1 class="screen-reader-only" aria-label="Customer Search">Customer Search</h1>
+<h2 class="screen-reader-only" aria-label="Customer Search">Customer Search</h2>
 <mat-card appearance="outlined" class="mb-xxs">
     <div class="flex flex-wrap justify-center">
         <div>
@@ -12,7 +12,7 @@
         </div>
     </div>
 </mat-card>
-<div role="region" aria-live="polite" aria-atomic="true">
+
     @if (!searchComplete()) {
         <mat-card appearance="outlined" class="mb-xxs">
             <cui-empty-state
@@ -44,12 +44,13 @@
             </cui-empty-state>
         </mat-card>
     } @else {
-        <!-- Announce search results for screen readers -->
-        <div class="visuallyhidden" role="status" aria-live="polite" aria-atomic="true">
-            <span>{{ recordCount() }} {{ recordCount() === 1 ? 'result' : 'results' }} found.</span>
-        </div>
-        <tmx-enrollment-results
-            [dataArray]="customerResults()"
-        ></tmx-enrollment-results>
+        @if (!showDetails()) {
+            <tmx-enrollment-results
+                [dataArray]="customerResults()"
+                (viewParticipant)="viewParticipant($event)"
+            ></tmx-enrollment-results>
+        } @else if (enrollmentDetails(); as detail) {
+            <tmx-enrollment-details [details]="detail"></tmx-enrollment-details>
+        }
     }
-</div>
+

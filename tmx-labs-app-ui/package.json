@@ -40,7 +40,7 @@
     "@angular/router": "^20.3.15",
     "@fortawesome/angular-fontawesome": "^3.0.0",
     "@fortawesome/free-solid-svg-icons": "^7.0.1",
-    "@modelcontextprotocol/sdk": "^1.25.1",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "@ngneat/until-destroy": "^10.0.0",
     "@pgr-cla/core-ui-components": "^34.8.0",
     "angular-oauth2-oidc": "^20.0.2",
@@ -79,6 +79,7 @@
       "@modelcontextprotocol/sdk": "1.25.2"
     },
     "@andular/compiler": "^20.3.15",
-    "tar": "^7.5.3"
+    "tar": "^7.5.7",
+    "lodash": "^4.17.23"
   }
 }

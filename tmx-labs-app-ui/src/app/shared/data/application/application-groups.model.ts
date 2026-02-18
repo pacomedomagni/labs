@@ -9,6 +9,7 @@ export enum ApplicationGroupIds {
     PIDTools = "PIDTools",
     DevTools = "DevTools",
     UserTools = "UserTools",
+	RoleTestingTool = "RoleTestingTool",
 	SingleDeviceReturn = "SingleDeviceReturn",
 	ManageDeviceReturnBatches = "ManageDeviceReturnBatches",
 	BenchTestHub = "BenchTestHub",

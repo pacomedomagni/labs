@@ -1,22 +1,4 @@
-<div class="flex flex-wrap justify-center">
- @for(app of apps; track app.id){
-    @if (shouldDisplay(app)){
-      <a [routerLink]="app.id" class="m-xs card-container" matRipple>
-        @if (app.icon) {
-          <mat-icon class="icon-size-lg">{{app.icon}}</mat-icon>
-        }
-        @if (app.svgIcon) {
-          <mat-icon class="icon-size-lg" svgIcon="{{app.svgIcon}}"></mat-icon>
-        }
-        @if (app.faIcon){
-          <fa-icon class="icon-size-lg" [icon]="app.faIcon"></fa-icon>
-        }
-        <div class="ml-xxs">
-          <div class="cui-h3 mb-2">{{app.name}}</div>
-          <span class="cui-label">{{app.description}}</span>
-        </div>
-      </a>
-    }
-  }
-</div>
-<router-outlet></router-outlet>
+@if (!outlet.isActivated) {
+  <tmx-device-staging-hub-search></tmx-device-staging-hub-search>
+}
+<router-outlet #outlet="outlet"></router-outlet>

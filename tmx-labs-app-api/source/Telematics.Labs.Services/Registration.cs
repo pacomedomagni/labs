@@ -4,6 +4,7 @@ using System.Linq;
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Progressive.Telematics.Labs.Business.Resources;
+using Progressive.Telematics.Labs.Services.Api;
 using Progressive.Telematics.Labs.Services.Database.Handlers;
 using Progressive.Telematics.Labs.Shared;
 using Progressive.Telematics.Labs.Shared.Attributes;
@@ -20,6 +21,9 @@ namespace Progressive.Telematics.Labs.Services
             services.AddServicesWithAttributeOfType<SingletonServiceAttribute>(
                 typeof(IServiceCollectionExtension).Namespace
             );
+
+            // Manually register DeviceApi for DI
+            services.AddSingleton<IDeviceApi, DeviceApi>();
 
             SqlMapper.AddTypeHandler(new GuidHandler());
             SqlMapper.AddTypeHandler(new NullableGuidHandler());
@@ -59,38 +63,6 @@ namespace Progressive.Telematics.Labs.Services
                     )
                 );
             });
-
-            //services
-              //.AddTransient<IClaimsParticipantManagementApi, ClaimsParticipantManagementApi>()
-              //.AddTransient<ICommonApi, CommonApi>()
-              //.AddTransient<IDeviceApi, DeviceApi>()
-              //.AddTransient<IHomebaseParticipantManagementApi, HomebaseParticipantManagementApi>()
-              //.AddTransient<IPolicyApi, PolicyApi>()
-              //.AddTransient<IPolicyDeviceApi, PolicyDeviceApi>()
-              //.AddTransient<ITheFloowApiClient, TheFloowApiClient>()
-              //.AddTransient<IPolicyTripApi, PolicyTripApi>()
-              //.AddTransient<IUbiApi, UbiApi>()
-              //.AddTransient<ITrialApi, TrialApi>()
-              //.AddTransient<IPolicyServicingApi, ApplicationConfigApi>()
-              //.AddTransient<ITmxPolicyApi, TmxPolicyApi>(); 
-
-            //services.AddSingleton<ICommercialLineCommands, CommercialLineCommands>();
-            //services.AddSingleton<IRemoveOptOutService, RemoveOptOutService>();
-
-            //services.AddDbContext<CLContext>(
-            //    (serviceProvider, dbContextBuilder) =>
-            //    {
-            //        var connectionStringPlaceHolder = configuration.GetConnectionString(
-            //            "Commercial"
-            //        );
-            //        var environment = configuration.GetSection("EnvironmentPrefixes:SQL").Value;
-
-            //        var connectionString = connectionStringPlaceHolder.InsertEnvironmentType(
-            //            environment
-            //        );
-            //        dbContextBuilder.UseSqlServer(connectionString);
-            //    }
-           // );
 
             return services;
         }

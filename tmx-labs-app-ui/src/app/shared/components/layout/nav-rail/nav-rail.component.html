@@ -8,8 +8,12 @@
         class="absolute z-10"
     ></cui-hidden-focus-switch-button>
     <nav class="nav-rail lg:mt-xxl flex flex-col h-full" aria-label="Primary">
+        <button mat-icon-button class="secondary-toggle" (click)="toggleSideNav()" aria-label="Toggle Sub Menu"
+            [disabled]="(appDataService.currentAppGroup() ? appDataService.currentAppGroup().id !== ApplicationGroupIds.DevicePreparation : true)">
+            <mat-icon>menu</mat-icon>
+        </button>
         <ul class="flex flex-col flex-1">
-            @for (link of navLinks(); track link.label) {
+            @for (link of navLinks(); track link.id) {
                 <li>
                     <a
                         mat-icon-button

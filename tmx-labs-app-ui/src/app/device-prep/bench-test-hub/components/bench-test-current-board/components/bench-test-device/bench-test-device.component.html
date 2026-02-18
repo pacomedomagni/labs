@@ -1,0 +1,56 @@
+<mat-form-field
+    appearance="outline"
+    class="w-full"
+    [subscriptSizing]="displayStatus ? 'dynamic' : 'fixed'"
+>
+    <mat-label>Device Serial Number</mat-label>
+    <input
+        matInput
+        type="text"
+        [formControl]="deviceControl"
+        [errorStateMatcher]="errorStateMatcher"
+        (blur)="onBlur()"
+    />
+    @if (hasError('required')) {
+        <mat-error>Device serial number is required</mat-error>
+    } @else if (hasError('notFound')) {
+        <mat-error>{{
+            errors?.['notFound']?.message || 'Device serial number does not exist'
+        }}</mat-error>
+    } @else if (hasError('alreadyAssigned')) {
+        <mat-error>{{
+            errors?.['alreadyAssigned']?.message || 'Device is currently assigned to a customer.'
+        }}</mat-error>
+    } @else if (hasError('simInactive')) {
+        <mat-error>{{
+            errors?.['simInactive']?.message || 'The SIM is not active for this device.'
+        }}</mat-error>
+    }
+</mat-form-field>
+<div class="mt-2" [ngClass]="{ 'h-8': !displayStatus() }">
+    @if (deviceControl.value) {
+        <!-- Loading Bar -->
+        @if (displayStatus() && loadingText()) {
+            <div class="relative h-8 outline outline-1 rounded-xl overflow-hidden">
+                <div
+                    class="absolute top-0 left-0 h-full transition-all duration-300"
+                    [ngClass]="getLoadingColorClass()"
+                    [style.width.%]="progress()"
+                ></div>
+                @if (loadingText()) {
+                    <div
+                        class="absolute inset-0 overflow-hidden whitespace-nowrap text-ellipsis text-gray-800 text-center leading-8 text-lg font-medium z-10 w-full h-full px-2"
+                    >
+                        {{ loadingText() }}
+                    </div>
+                }
+            </div>
+        <!-- Loading Placeholder -->
+        } @else if (displayStatus() && displayLoadingPlaceholder()) {
+            <div
+                class="relative h-8 outline outline-1 rounded-xl overflow-hidden bg-gray-300 animate-pulse"
+                style="animation-duration: 0.15s"
+            ></div>
+        }
+    }
+</div>

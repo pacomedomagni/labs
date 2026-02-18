@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Progressive.Telematics.Labs.Business.Resources;
 
 namespace Progressive.Telematics.Labs.Business.ResponseModels.CustomerService;

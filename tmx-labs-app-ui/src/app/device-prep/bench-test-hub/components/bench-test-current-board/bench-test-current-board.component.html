@@ -1,0 +1,39 @@
+<!-- PANEL 2: Current Board -->
+<div class="bg-white border-2 border-black rounded-lg p-6">
+    <div class="flex w-full justify-between items-center mb-10">
+        <div class="flex flex-col">
+            <h2 class="font-bold text-3xl mb-2">
+                Current Board: {{ selectedBoard() ? selectedBoard().name : '' }}
+            </h2>
+            @if (shouldDisplayStatus()) {
+                <h3 class="text-xl font-medium">Status: {{ selectedBoardStatus() }}</h3>
+            }
+        </div>
+    </div>
+        <tmx-bench-test-devices-form
+            [displayLoadingPlaceholder]="!isComplete()"
+            [deviceStatuses]="deviceStatuses()"
+            [displayStatus]="isRunning() || isComplete()"
+            (deviceUpdated)="onDeviceUpdated($event)"
+            (deviceRemoved)="onDeviceRemoved($event)"
+            [formControl]="devices"
+            [board]="selectedBoard()"
+        ></tmx-bench-test-devices-form>
+    <div class="flex justify-end gap-6 pt-6">
+        @if (!isRunning()) {
+            <button [disabled]="!canRun()" color="primary" mat-flat-button (click)="runTest()">
+                RUN TEST
+            </button>
+        } @else {
+            <button color="primary" mat-flat-button (click)="stopTest()">STOP TEST</button>
+        }
+        <button
+            [disabled]="!canClearBoard()"
+            mat-stroked-button
+            class="text-primary-800"
+            (click)="clearBoard()"
+        >
+            CLEAR BOARD
+        </button>
+    </div>
+</div>

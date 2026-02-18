@@ -1,0 +1,33 @@
+// Styles for Lot Benchtest Progress Component
+
+.custom-field {
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      height: 48px !important;
+    }
+    
+    .mat-mdc-form-field-flex {
+      height: 48px !important;
+      align-items: center !important;
+    }
+    
+    .mat-mdc-form-field-infix {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      min-height: 48px !important;
+    }
+  }
+}
+
+
+.button-container {
+  padding-bottom: 20px;
+}
+.custom-button {
+  height: 48px !important;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  font-size: 14px !important;
+}

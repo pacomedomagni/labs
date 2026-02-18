@@ -21,7 +21,7 @@ export class UserInfoService {
 	}
 
 	getUserInfo(): Observable<UserInfo> {
-		return this.api.get<{body: UserInfo}>({ uri: `${this.controller}`, options: { fullResponse: true } })
+		return this.api.get<any>({ uri: `${this.controller}`, options: { fullResponse: true } })
 			.pipe(
 				tap(x => {
 					this.userInfo.next(x.body as UserInfo);
@@ -31,19 +31,21 @@ export class UserInfoService {
 	}
 
 	getUserAccess(access: string[]): boolean {
-		if (this.userInfo.value.lanId !== undefined) {
-			let returnValue = false;
-			for (const index in access) {
-				if (this.userInfo.value[access[index]]) {
-					returnValue = true;
-					break;
-				}
-			}
-			return returnValue;
-		}
-		else {
+		const currentUser = this.userInfo.value;
+		if (!currentUser || currentUser.lanId === undefined) {
 			return false;
 		}
+		
+		if (!access || access.length === 0) {
+			return true; // No access restrictions
+		}
+		
+		for (const role of access) {
+			if (currentUser[role as keyof UserInfo]) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

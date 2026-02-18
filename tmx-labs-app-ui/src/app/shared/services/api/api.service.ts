@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpRequest } from "@angular/common/http";
+import { HttpClient, HttpContext, HttpErrorResponse, HttpHeaders, HttpRequest } from "@angular/common/http";
 import { Observable, of, throwError, timer } from "rxjs";
 import { catchError, map, mergeMap, retry, take, timeout, withLatestFrom } from "rxjs/operators";
 
@@ -16,6 +16,8 @@ export interface ApiOptions {
 	retryDelay?: number;
 	async?: boolean;
 	fullResponse?: boolean;
+	hideLoadingIndicator?: boolean;
+	context?: HttpContext;
 };
 
 export interface ApiRequestConfig {
@@ -134,7 +136,8 @@ export class ApiService {
 					headers: request.headers,
 					observe,
 					reportProgress,
-					responseType
+					responseType,
+					...(options.context && { context: options.context })
 				};
 				return this.httpClient.request(request.method, request.url, requestOptions).pipe(
 					timeout(httpTimeout),

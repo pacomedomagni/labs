@@ -1,11 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Progressive.Telematics.Labs.Business.Resources;
+
 public class Slot
 {
     public int Code { get; set; }

@@ -149,15 +149,15 @@ export class ActionDisplayRulesService {
      * Determines if participant can opt out
      */
     canOptOut(context: ActionVisibilityContext): boolean {
-        const { participant } = context;
-        const participantSeqId = participant.participantSeqID ?? null;
+        const { participant, device } = context;
 
-        if (!participantSeqId || participantSeqId <= 0) {
-            return false;
-        }
-
-        const statusCode = participant.participantStatusCode ?? null;
-        return statusCode !== ParticipantStatusValue.get(ParticipantStatus.OptOut);
+        return (
+            participant.participantSeqID != null &&
+            participant.participantSeqID > 0 &&
+            device?.deviceExperienceTypeCode === DeviceExperienceValue.get(DeviceExperience.Device) &&
+            (participant.participantStatusCode ?? null) !==
+                ParticipantStatusValue.get(ParticipantStatus.OptOut)
+        );
     }
 
     /**

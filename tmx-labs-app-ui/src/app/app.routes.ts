@@ -12,6 +12,7 @@ import { OAuthSsoCallbackComponent } from './shared/components/auth/oauth-sso-ca
 import { GrayCardTemplateComponent } from './shared/components/layout/page-templates/gray-outline.component/gray-card-template.component';
 import { RolesAuthGuard } from './shared/guards/roles-auth.guard';
 import { UserRoles } from './shared/data/application/constants';
+import { applicationGroups as devicePrepApps } from './device-prep/device-prep-applications-metadata';
 
 export const routes: Routes = [
     {
@@ -36,50 +37,94 @@ export const routes: Routes = [
                 data: {
                     breadcrumb: {
                         label: 'Device Preparation',
-                        disable: true,
+                        disable: false,
                     },
+                    sidebar: {
+                        title: 'Device Preparation',
+                        svgIcon: 'ubi_snapshot_device',
+                        baseRoute: `${ApplicationGroupIds.DevicePreparation}/Apps`,
+                        apps: devicePrepApps,
+                    },
+                    roles: [UserRoles.LabsAdmin]
                 },
-                loadComponent: () =>
-                    import('./device-prep/device-prep.component').then(
-                        (m) => m.DevicePrepComponent,
-                    ),
                 children: [
                     {
-                        path: ApplicationGroupIds.BenchTestHub,
-                        loadComponent: () =>
-                            import(
-                                './device-prep/bench-test-hub/device-bench-test-hub.component'
-                            ).then((m) => m.TmxDeviceBenchTestHubComponent),
+                        path: '',
+                        redirectTo: 'Apps',
+                        pathMatch: 'full',
                     },
                     {
-                        path: ApplicationGroupIds.DeviceStagingHub,
+                        path: 'Apps',
+                        data: {
+                            breadcrumb: {
+                                label: 'Apps',
+                                disable: false,
+                            },
+                        },
                         loadComponent: () =>
-                            import(
-                                './device-prep/device-staging-hub/device-staging-hub.component'
-                            ).then((m) => m.DeviceStagingHubComponent),
+                            import('./device-prep/device-prep.component').then(
+                                (m) => m.DevicePrepComponent,
+                            ),
                         children: [
                             {
-                                path: 'ActivateDeactivateDevices',
+                                path: ApplicationGroupIds.BenchTestHub,
+                                data: {
+                                            breadcrumb: {
+                                                label: 'Benchtesting Hub',
+                                                disable: true,
+                                            },
+                                            roles: [UserRoles.LabsAdmin]
+                                },
                                 loadComponent: () =>
                                     import(
-                                        './device-prep/device-staging-hub/activate-de-activate/tmx-activate-de-activate.component'
-                                    ).then((m) => m.TmxActivateDeActivateComponent),
+                                        './device-prep/bench-test-hub/device-bench-test-hub.component'
+                                    ).then((m) => m.TmxDeviceBenchTestHubComponent),
                             },
                             {
-                                path: 'ReceiveDevices',
+                                path: ApplicationGroupIds.DeviceStagingHub,
+                                data: {
+                                    breadcrumb: 'Device Staging Hub',
+                                    roles: [UserRoles.LabsAdmin]
+                                },
                                 loadComponent: () =>
                                     import(
-                                        './device-prep/device-staging-hub/receive-devices/tmx-receive-devices.component'
-                                    ).then((m) => m.TmxReceiveDevicesComponent),
+                                        './device-prep/device-staging-hub/device-staging-hub.component'
+                                    ).then((m) => m.DeviceStagingHubComponent),
+                                children: [
+                                    {
+                                        path: 'ActivateDeactivateDevices',
+                                        data: {
+                                            breadcrumb: 'Activate / Deactivate Devices',
+                                            roles: [UserRoles.LabsAdmin]
+                                        },
+                                        loadComponent: () =>
+                                            import(
+                                                './device-prep/device-staging-hub/activate-de-activate/tmx-activate-de-activate.component'
+                                            ).then((m) => m.TmxActivateDeActivateComponent),
+                                    },
+                                    {
+                                        path: 'ReceiveDevices',
+                                        data: {
+                                            breadcrumb: 'Receive Devices',
+                                        },
+                                        loadComponent: () =>
+                                            import(
+                                                './device-prep/device-staging-hub/receive-devices/tmx-receive-devices.component'
+                                            ).then((m) => m.TmxReceiveDevicesComponent),
+                                    },
+                                    {
+                                        path: 'ImportDeviceLot',
+                                        data: {
+                                            breadcrumb: 'Import Device Lot',
+                                        },
+                                        loadComponent: () =>
+                                            import(
+                                                './device-prep/device-staging-hub/import-device-lot/tmx-import-device-lot.component'
+                                            ).then((m) => m.TmxImportDeviceLotComponent),
+                                    },
+                                ],
                             },
-                            {
-                                path: 'ImportDeviceLot',
-                                loadComponent: () =>
-                                    import(
-                                        './device-prep/device-staging-hub/import-device-lot/tmx-import-device-lot.component'
-                                    ).then((m) => m.TmxImportDeviceLotComponent),
-                            },
-                        ]
+                        ],
                     },
                 ],
             },
@@ -92,6 +137,34 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./device-return/device-return.component').then(
                         (m) => m.DeviceReturnComponent,
+                    ),
+            },
+            {
+                path: ApplicationGroupIds.RoleTestingTool,
+                data: {
+                    breadcrumb: {
+                        label: 'Role Testing Tool',
+                        disable: true,
+                    },
+                },
+                canActivate: [AuthGuard],
+                loadComponent: () =>
+                    import('./role-testing/role-testing.component').then(
+                        (m) => m.RoleTestingComponent,
+                    ),
+            },
+            {
+                path: ApplicationGroupIds.OrderFulfillment,
+                data: {
+                    breadcrumb: {
+                        label: 'Order Fulfillment',
+                        disable: true,
+                    },
+                },
+                canActivate: [AuthGuard],
+                loadComponent: () =>
+                    import('./fulfillment/fulfillment.component').then(
+                        (m) => m.CustomerServiceFulfillmentComponent,
                     ),
             },
             {
@@ -123,13 +196,6 @@ export const routes: Routes = [
                                 loadComponent: () =>
                                     import('./customer-service/search/search.component').then(
                                         (m) => m.CustomerServiceSearchComponent,
-                                    ),
-                            },
-                            {
-                                path: 'Fulfillment',
-                                loadComponent: () =>
-                                    import('./fulfillment/fulfillment.component').then(
-                                        (m) => m.CustomerServiceFulfillmentComponent,
                                     ),
                             },
                             {

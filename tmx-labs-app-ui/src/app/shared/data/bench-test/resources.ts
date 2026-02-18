@@ -1,12 +1,14 @@
+import { BenchTestBoardStatus } from "./enums";
+
 export interface Board {
     boardID?: number;
     name: string;
-    statusCode?: number;
+    statusCode?: number | BenchTestBoardStatus;
     userID: string;
     locationCode?: number;
     endDataTime?: Date;
     startDataTime?: Date;
-    count?: number;
+    deviceCount?: number;
 }
 
 export interface GetBoardsByLocationResponse {
@@ -58,4 +60,32 @@ export interface StopIfCompleteBenchTestResponse {
 export interface BenchTestBoardCollectionResponse {
     boards: Board[];
     resultCount: number;
+}
+
+export interface ValidateDeviceForBenchTestResponse {
+    simActive: boolean;
+    isAssigned: boolean;
+}
+
+export interface BenchTestBoardDeviceCollectionResponse{
+    devices: BenchTestBoardDevice[];
+    resultCount: number;
+}
+
+export interface BenchTestBoardDevice {
+  deviceSerialNumber: string;
+  deviceLocationOnBoard: number | null;
+}
+
+export interface BenchTestBoardDeviceStatus {
+  boardID: number;
+  deviceSerialNumber: string;
+  benchTestStatusCode: number;
+  description: string;
+  displayPercent: number;
+}
+
+export interface BenchTestBoardDeviceStatusCollectionResponse {
+  deviceStatuses: BenchTestBoardDeviceStatus[];
+  boardStatus: BenchTestBoardStatus;
 }

@@ -93,7 +93,9 @@ describe('ParticipantActionButtonsService', () => {
                     participantSeqID: 123,
                     participantStatusCode: 1 // Enrolled, can opt out
                 },
-                device: {},
+                device: {
+                    deviceExperienceTypeCode: DeviceExperienceValue.get(DeviceExperience.Device)
+                },
                 eligibleSwapCandidatesCount: 0,
             };
 
@@ -101,8 +103,10 @@ describe('ParticipantActionButtonsService', () => {
 
             const generalGroup = actions.find(a => a.id === 'general');
             expect(generalGroup).toBeDefined();
-            expect(generalGroup?.children).toHaveSize(3);
-            expect(generalGroup?.children![2].id).toBe(ParticipantActionItems.OptOutParticipant);
+            const hasOptOut = generalGroup?.children?.some(
+                (child) => child.id === ParticipantActionItems.OptOutParticipant,
+            );
+            expect(hasOptOut).toBeTrue();
         });
 
         it('should create buttons with correct ids and labels', () => {

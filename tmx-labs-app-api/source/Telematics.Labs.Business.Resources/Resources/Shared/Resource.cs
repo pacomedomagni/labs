@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Progressive.Telematics.Labs.Business.Resources.Enums;
 
 
@@ -59,6 +60,18 @@ namespace Progressive.Telematics.Labs.Business.Resources.Shared
             else
                 resource.Messages.Add(key, value);
             return resource;
+        }
+
+        public static bool HasErrorCode(this Resource resource, string errorMessage)
+        {
+            if(errorMessage == null || resource == null || resource.Messages == null)
+            {
+                return false;
+            }
+
+            return resource.Messages.Any(m =>
+                m.Key == MessageCode.ErrorCode &&
+                m.Value.ToString() == errorMessage);
         }
     }
 }

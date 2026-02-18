@@ -73,10 +73,10 @@ export class ViewTripsComponent implements OnInit {
             hour12: true,
         });
         this.dialogService.openInformationDialog({
-            title: 'Trip Map',
+            title: 'Trip Route Map',
             subtitle: formatLinesAsStackedHtml(
                 [
-                    this.vehicleDisplay,
+                    this.vehicleDisplay.toUpperCase(),
                     `Trip taken on ${formattedDate} from ${startTime} to ${endTime}`,
                 ],
                 'flex flex-col [&>*:nth-child(2)]:text-xl', // Applies smaller text and no caps to 2nd line
@@ -89,6 +89,7 @@ export class ViewTripsComponent implements OnInit {
             },
             width: '800px',
             height: '800px',
+            hideCancelButton: true
         });
     }
 
@@ -108,7 +109,7 @@ export class ViewTripsComponent implements OnInit {
             title: 'Trip Insights',
             subtitle: formatLinesAsStackedHtml(
                 [
-                    this.vehicleDisplay,
+                    this.vehicleDisplay.toUpperCase(),
                     `Trip taken on ${formattedDate} from ${startTime} to ${endTime}`,
                 ],
                 'flex flex-col [&>*:nth-child(2)]:text-xl', // Applies smaller text and no caps to 2nd line
@@ -121,7 +122,7 @@ export class ViewTripsComponent implements OnInit {
                 tripStartDateTime: $event.dateStart,
                 tripEndDateTime: $event.dateEnd,
             },
-            confirmText: 'Close',
+            confirmText: 'OK',
             hideCancelButton: true,
             width: '1200px',
             height: '900px',

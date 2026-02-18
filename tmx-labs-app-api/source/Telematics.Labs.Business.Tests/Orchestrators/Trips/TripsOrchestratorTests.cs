@@ -290,6 +290,188 @@ namespace Progressive.Telematics.Labs.Business.Tests.Trips
             Assert.True(jan15Day.Trips[0].TripStartDateTime < jan15Day.Trips[1].TripStartDateTime);
         }
 
+        #region GetWeekDayTripSummary Tests
+
+        [Fact]
+        public async Task GetWeekDayTripSummary_ReturnsAllSevenDaysOfWeek()
+        {
+            // Arrange
+            const int participantSeqId = 1;
+            var trips = new List<Trip>(); // Empty trips
+
+            _tripsDal
+                .Setup(dal => dal.GetTripsByParticipantSeqId(participantSeqId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(trips);
+
+            // Act
+            var result = await _orchestrator.GetWeekDayTripSummary(participantSeqId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(7, result.Count);
+            Assert.Contains(result, s => s.DayOfWeek == DayOfWeek.Sunday);
+            Assert.Contains(result, s => s.DayOfWeek == DayOfWeek.Monday);
+            Assert.Contains(result, s => s.DayOfWeek == DayOfWeek.Tuesday);
+            Assert.Contains(result, s => s.DayOfWeek == DayOfWeek.Wednesday);
+            Assert.Contains(result, s => s.DayOfWeek == DayOfWeek.Thursday);
+            Assert.Contains(result, s => s.DayOfWeek == DayOfWeek.Friday);
+            Assert.Contains(result, s => s.DayOfWeek == DayOfWeek.Saturday);
+        }
+
+        [Fact]
+        public async Task GetWeekDayTripSummary_WithNoTrips_ReturnsZeroValuesForAllDays()
+        {
+            // Arrange
+            const int participantSeqId = 1;
+            var trips = new List<Trip>();
+
+            _tripsDal
+                .Setup(dal => dal.GetTripsByParticipantSeqId(participantSeqId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(trips);
+
+            // Act
+            var result = await _orchestrator.GetWeekDayTripSummary(participantSeqId);
+
+            // Assert
+            Assert.All(result, summary =>
+            {
+                Assert.Equal(0, summary.Trips);
+                Assert.Equal(TimeSpan.Zero, summary.Duration);
+                Assert.Equal(0, summary.Mileage);
+                Assert.Equal(0, summary.HardBrakes);
+                Assert.Equal(0, summary.HardAccels);
+                Assert.Equal(0, summary.HighRiskSeconds);
+            });
+        }
+
+        [Fact]
+        public async Task GetWeekDayTripSummary_WithTripsOnSomeDays_ReturnsCorrectSummaries()
+        {
+            // Arrange
+            const int participantSeqId = 1;
+            // Monday Jan 15, 2024 and Tuesday Jan 16, 2024
+            var trips = new List<Trip>
+            {
+                new Trip
+                {
+                    TripSeqID = 1,
+                    TripStartDateTime = new DateTime(2024, 1, 15, 8, 0, 0), // Monday
+                    TripEndDateTime = new DateTime(2024, 1, 15, 8, 30, 0), // 30 min duration
+                    TripKilometers = 16.898m, // ~10.5 miles
+                    HardBrakes = 2,
+                    HardAccelerations = 1,
+                    HighRiskSeconds = 15
+                },
+                new Trip
+                {
+                    TripSeqID = 2,
+                    TripStartDateTime = new DateTime(2024, 1, 15, 17, 0, 0), // Monday
+                    TripEndDateTime = new DateTime(2024, 1, 15, 17, 45, 0), // 45 min duration
+                    TripKilometers = 24.14m, // ~15.0 miles
+                    HardBrakes = 1,
+                    HardAccelerations = 0,
+                    HighRiskSeconds = 10
+                },
+                new Trip
+                {
+                    TripSeqID = 3,
+                    TripStartDateTime = new DateTime(2024, 1, 16, 9, 0, 0), // Tuesday
+                    TripEndDateTime = new DateTime(2024, 1, 16, 9, 20, 0), // 20 min duration
+                    TripKilometers = 8.047m, // ~5.0 miles
+                    HardBrakes = 0,
+                    HardAccelerations = 1,
+                    HighRiskSeconds = 5
+                }
+            };
+
+            _tripsDal
+                .Setup(dal => dal.GetTripsByParticipantSeqId(participantSeqId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(trips);
+
+            // Act
+            var result = await _orchestrator.GetWeekDayTripSummary(participantSeqId);
+
+            // Assert
+            Assert.Equal(7, result.Count);
+
+            // Monday should have aggregated values
+            var monday = result.First(s => s.DayOfWeek == DayOfWeek.Monday);
+            Assert.Equal(2, monday.Trips);
+            Assert.Equal(TimeSpan.FromMinutes(75), monday.Duration);
+            Assert.Equal(3, monday.HardBrakes);
+            Assert.Equal(1, monday.HardAccels);
+            Assert.Equal(25, monday.HighRiskSeconds);
+
+            // Tuesday should have single trip values
+            var tuesday = result.First(s => s.DayOfWeek == DayOfWeek.Tuesday);
+            Assert.Equal(1, tuesday.Trips);
+            Assert.Equal(TimeSpan.FromMinutes(20), tuesday.Duration);
+
+            // Other days should have zero values
+            var wednesday = result.First(s => s.DayOfWeek == DayOfWeek.Wednesday);
+            Assert.Equal(0, wednesday.Trips);
+            Assert.Equal(TimeSpan.Zero, wednesday.Duration);
+        }
+
+        [Fact]
+        public async Task GetWeekDayTripSummary_IsOrderedBySundayThroughSaturday()
+        {
+            // Arrange
+            const int participantSeqId = 1;
+            var trips = new List<Trip>();
+
+            _tripsDal
+                .Setup(dal => dal.GetTripsByParticipantSeqId(participantSeqId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(trips);
+
+            // Act
+            var result = await _orchestrator.GetWeekDayTripSummary(participantSeqId);
+
+            // Assert
+            Assert.Equal(DayOfWeek.Sunday, result[0].DayOfWeek);
+            Assert.Equal(DayOfWeek.Monday, result[1].DayOfWeek);
+            Assert.Equal(DayOfWeek.Tuesday, result[2].DayOfWeek);
+            Assert.Equal(DayOfWeek.Wednesday, result[3].DayOfWeek);
+            Assert.Equal(DayOfWeek.Thursday, result[4].DayOfWeek);
+            Assert.Equal(DayOfWeek.Friday, result[5].DayOfWeek);
+            Assert.Equal(DayOfWeek.Saturday, result[6].DayOfWeek);
+        }
+
+        [Fact]
+        public async Task GetWeekDayTripSummary_WithNullTripStartDateTime_ExcludesFromSummary()
+        {
+            // Arrange
+            const int participantSeqId = 1;
+            var trips = new List<Trip>
+            {
+                new Trip
+                {
+                    TripSeqID = 1,
+                    TripStartDateTime = null, // No start date
+                    TripKilometers = 16.09m // ~10 miles
+                },
+                new Trip
+                {
+                    TripSeqID = 2,
+                    TripStartDateTime = new DateTime(2024, 1, 15, 8, 0, 0), // Monday
+                    TripKilometers = 8.047m // ~5 miles
+                }
+            };
+
+            _tripsDal
+                .Setup(dal => dal.GetTripsByParticipantSeqId(participantSeqId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(trips);
+
+            // Act
+            var result = await _orchestrator.GetWeekDayTripSummary(participantSeqId);
+
+            // Assert
+            var monday = result.First(s => s.DayOfWeek == DayOfWeek.Monday);
+            Assert.Equal(1, monday.Trips); // Only the trip with start date
+        }
+
+        #endregion
+
         /// <summary>
         /// Creates sample trips for testing
         /// </summary>

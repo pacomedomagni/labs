@@ -239,7 +239,6 @@ export class ActionHandlerService {
         }
 
         const device = context.deviceResource();
-        console.log('Device resource:', device);
         
         // Check if device has AWSIot feature
         const features = device.features ?? [];

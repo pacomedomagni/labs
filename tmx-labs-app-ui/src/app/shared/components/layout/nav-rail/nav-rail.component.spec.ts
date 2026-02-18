@@ -16,7 +16,10 @@ describe('NavRailComponent', () => {
   ];
 
   beforeEach(async () => {
-  const appDataServiceSpy = jasmine.createSpyObj('AppDataService', ['shouldDisplayApplication']);
+  const appDataServiceSpy = {
+    shouldDisplayApplication: jasmine.createSpy('shouldDisplayApplication'),
+    currentAppGroup: () => null,
+  } as unknown as AppDataService;
   const sideSheetServiceStub = {} as SideSheetService;
 
     await TestBed.configureTestingModule({

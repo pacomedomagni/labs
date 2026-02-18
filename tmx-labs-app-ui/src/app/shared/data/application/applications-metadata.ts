@@ -1,5 +1,6 @@
 import { metadata as portal } from "../../../portal/metadata";
 import { metadata as device } from "../../metadata/device-metadata";
+import { metadata as roleTesting } from "../../metadata/role-testing-metadata";
 import { metadata as customerService } from "../../../customer-service/customer-service-metadata";
 import {metadata as orderFulfillment} from "../../metadata/order-fulfillment-metadata";
 import {metadata as deviceReturns} from "../../metadata/device-returns-metadata";
@@ -13,5 +14,6 @@ export const applicationGroups: ApplicationGroupMetadata[] = [
 	device,
 	orderFulfillment,
 	deviceReturns,
-	userManagement
+	userManagement,
+	roleTesting
 ];

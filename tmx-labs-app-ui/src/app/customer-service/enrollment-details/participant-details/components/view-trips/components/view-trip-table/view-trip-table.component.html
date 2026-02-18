@@ -96,6 +96,7 @@
                                 <button
                                     type="button"
                                     class="cui-link"
+                                    [tabindex]="isExpanded(element) ? 0 : -1"
                                     (click)="dateRangeClick(trip)"
                                     aria-label="Trip time range"
                                 >
@@ -106,6 +107,7 @@
                                 <button
                                     type="button"
                                     class="cui-link"
+                                    [tabindex]="isExpanded(element) ? 0 : -1"
                                     (click)="mapClick(trip)"
                                     [attr.aria-label]="
                                         'Open map for trip at ' + formatTripTimeRange(trip)

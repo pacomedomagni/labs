@@ -37,9 +37,9 @@ export class ExcludeTripsService {
             cancelText: 'CANCEL',
             helpKey: HelpText.ExcludeTrips,
             hideCancelButton: false,
-            width: '1100px',
-            maxWidth: '90vw',
-            height: '720px',
+            width: '720px',
+            maxWidth: '80vw',
+            height: '520px',
             dialogContentClass: 'py-0',
         });
     }

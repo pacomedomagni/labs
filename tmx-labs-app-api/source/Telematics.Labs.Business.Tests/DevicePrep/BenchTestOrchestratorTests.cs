@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
 using Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep;
 using Progressive.Telematics.Labs.Business.Resources.Enums;
 using Progressive.Telematics.Labs.Business.Resources.Resources.BenchTest;
+using Progressive.Telematics.Labs.Services.Database.Models;
 using Xunit;
 using WcfBoardService = BenchTestBoardService;
 using WcfTestService = BenchTestServices;
@@ -16,7 +18,10 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
         {
             Orchestrator = new BenchTestOrchestrator(
                 Services.BenchTestBoard.Object,
+                Databases.BenchTestBoardDAL.Object,
                 Services.BenchTest.Object,
+                Services.XirgoDevice.Object,
+                Services.DeviceActivity.Object,
                 Logger.Object);
         }
 
@@ -265,15 +270,29 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
             // Arrange
             var request = new GetAllBoardsByLocationRequest { LocationCode = 1 };
 
-            // Mock the service response
-            Services.BenchTestBoard.Setup(s => s.GetAllBoardsByLocation(It.IsAny<int>()))
-                .ReturnsAsync(new WcfBoardService.GetAllBoardsByLocationResponse
+            var dataModels = new List<BenchTestBoardDataModel>
+            {
+                new BenchTestBoardDataModel
                 {
-                    ResponseStatus = WcfBoardService.ResponseStatus.Success,
-                    ResponseErrors = Array.Empty<WcfBoardService.ResponseError>(),
-                    BenchTestBoards = Array.Empty<WcfBoardService.BenchTestBoard>(),
-                    resultCount = 0
-                });
+                    BoardID = 1,
+                    Name = "Test Board 1",
+                    LocationCode = 1,
+                    StatusCode = 1,
+                    DeviceCount = 5
+                },
+                new BenchTestBoardDataModel
+                {
+                    BoardID = 2,
+                    Name = "Test Board 2",
+                    LocationCode = 1,
+                    StatusCode = 2,
+                    DeviceCount = 3
+                }
+            };
+
+            // Mock the DAL response
+            Databases.BenchTestBoardDAL.Setup(d => d.GetAllBoardsByLocation(It.IsAny<int>()))
+                .ReturnsAsync(dataModels);
 
             // Act
             var result = await Orchestrator.GetAllBoardsByLocation(request);
@@ -281,7 +300,10 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
             // Assert
             Assert.NotNull(result);
             Assert.NotNull(result.Boards);
-            Assert.Equal(0, result.ResultCount);
+            Assert.Equal(2, result.ResultCount);
+            Assert.Equal(2, result.Boards.Length);
+            Assert.Equal(5, result.Boards[0].DeviceCount);
+            Assert.Equal(3, result.Boards[1].DeviceCount);
             Assert.True(result.Messages.ContainsKey(MessageCode.StatusDescription));
         }
 
@@ -331,13 +353,12 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
                     BoardID = 1,
                     UserID = "TestUser",
                     ForceUpdate = false,
-                    BenchTestItemList = new[]
+                    Devices = new[]
                     {
-                        new BenchTestItemList
+                        new BenchTestBoardDevice
                         {
                             DeviceSerialNumber = "SN123",
-                            FirmwareSetCode = 1,
-                            LocationOnBoard = 1
+                            DeviceLocationOnBoard = 1
                         }
                     }
                 }
@@ -565,7 +586,7 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
                     BoardID = 1,
                     UserID = "TestUser",
                     ForceUpdate = true,
-                    BenchTestItemList = Array.Empty<BenchTestItemList>()
+                    Devices = Array.Empty<BenchTestBoardDevice>()
                 }
             };
 

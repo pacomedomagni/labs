@@ -1,2 +1,41 @@
-<h3 class="cui-h3">Fulfillment</h3>
-<p class="cui-body">Order fulfillment placeholder.</p>
+<div class="fulfillment-container">
+  <h2 class="screen-reader-only">Order Fulfillment</h2>
+  
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <mat-card appearance="outlined" class="summary-card">
+      <mat-card-content>
+        <div class="summary-label">Pending Orders</div>
+        <div class="summary-value">{{ pendingOrders().toLocaleString() }}</div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card appearance="outlined" class="summary-card">
+      <mat-card-content>
+        <div class="summary-label">Devices Needed</div>
+        <div class="summary-value">{{ devicesNeeded().toLocaleString() }}</div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card appearance="outlined" class="summary-card">
+      <mat-card-content>
+        <div class="summary-label">Completed Today</div>
+        <div class="summary-value">{{ completedToday().toLocaleString() }}</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Tabs -->
+    <mat-tab-group (selectedIndexChange)="onTabChange($event)" class="fulfillment-tabs">
+      <mat-tab label="PENDING ORDERS">
+        <tmx-pending-orders></tmx-pending-orders>
+      </mat-tab>
+      
+      <mat-tab label="COMPLETED ORDERS">
+        <tmx-completed-orders></tmx-completed-orders>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>

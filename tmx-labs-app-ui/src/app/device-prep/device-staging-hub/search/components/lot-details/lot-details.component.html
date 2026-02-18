@@ -1,0 +1,41 @@
+<mat-card appearance="outlined">
+    <div class="flex flex-row justify-between mb-10">
+        <div class="device-lot-details text-3xl">Lot Details</div>
+        <tmx-menu-button-group
+            class="ml-auto my-auto"
+            [actions]="actions"
+            (actionClicked)="actionButtonClicked($event)"
+        ></tmx-menu-button-group>
+    </div>
+    <div class="device-lot-section">
+        <div>
+            <div class="grid grid-cols-5 gap-x-4 text-2xl">
+                <div class="col-span-2 font-semibold">Lot ID</div>
+                <div class="col-span-3">
+                    {{ deviceLot().name | tmxFallbackValue }}
+                </div>
+            </div>
+            <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2" />
+            <div class="grid grid-cols-5 gap-x-4 text-2xl">
+                <div class="col-span-2 font-semibold">Lot Type</div>
+                <div class="col-span-3">
+                    {{ deviceLot().type | tmxFallbackValue}}
+                </div>
+            </div>
+            <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2" />
+            <div class="grid grid-cols-5 gap-x-4 text-2xl">
+                <div class="col-span-2 font-semibold">Lot Status</div>
+                <div class="col-span-3">
+                    {{ getStatusText(deviceLot().statusCode) }} ({{ deviceLot().statusCode }})
+                </div>
+            </div>
+            <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2" />
+            <div class="grid grid-cols-5 gap-x-4 text-2xl">
+                <div class="col-span-2 font-semibold">Create Date</div>
+                <div class="col-span-3">
+                    {{ deviceLot().createDateTime| date:'MM/dd/yyyy h:mm a' | tmxFallbackValue }}
+                </div>
+            </div>
+        </div>
+    </div>
+</mat-card>

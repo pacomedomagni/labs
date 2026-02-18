@@ -35,7 +35,7 @@ export class SearchValidators {
 
             // More restrictive regex - common business email patterns only
             const emailRegex =
-                /^[a-zA-Z0-9]([a-zA-Z0-9._]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
+                /^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
 
             return emailRegex.test(trimmedValue)
                 ? null

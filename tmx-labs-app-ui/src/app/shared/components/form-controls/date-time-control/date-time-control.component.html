@@ -13,6 +13,8 @@
                 [required]="isRequired"
                 [(ngModel)]="dateValue"
                 (dateChange)="onDateChange($event.value)"
+                (input)="onDateInput($event)"
+                (blur)="onDateBlur()"
             />
             <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
             <mat-datepicker #datePicker></mat-datepicker>
@@ -27,8 +29,10 @@
                 [id]="id + '-time'"
                 [name]="name ? name + '-time' : id + '-time'"
                 [required]="isRequired"
+                #timeInputRef
                 [(ngModel)]="timeInput"
                 (ngModelChange)="onTimeInputChange($event)"
+                (blur)="onTimeBlur()"
             />
             <mat-timepicker-toggle matSuffix [for]="timePicker"></mat-timepicker-toggle>
             <mat-timepicker #timePicker interval="1min" (selected)="onTimeSelected($event)"></mat-timepicker>

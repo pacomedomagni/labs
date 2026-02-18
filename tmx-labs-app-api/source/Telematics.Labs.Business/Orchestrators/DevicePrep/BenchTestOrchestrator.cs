@@ -1,16 +1,21 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Progressive.Telematics.Labs.Business.Resources;
+using Progressive.Telematics.Labs.Business.Resources.DevicePrep;
 using Progressive.Telematics.Labs.Business.Resources.Enums;
 using Progressive.Telematics.Labs.Business.Resources.Resources.BenchTest;
 using Progressive.Telematics.Labs.Business.Resources.Shared;
+using Progressive.Telematics.Labs.Services.Database;
+using Progressive.Telematics.Labs.Services.Database.Models;
 using Progressive.Telematics.Labs.Services.Wcf;
 using Progressive.Telematics.Labs.Shared;
 using Progressive.Telematics.Labs.Shared.Attributes;
 using WcfBoardService = BenchTestBoardService;
 using WcfTestService = BenchTestServices;
+using WcfXirgoService;
 
 namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
 {
@@ -29,21 +34,31 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
         Task<Resource> StopBenchTest(StopBenchTestRequest request);
         Task<Resource> ClearBenchTest(ClearBenchTestRequest request);
         Task<StopIfCompleteBenchTestResponse> StopIfCompleteBenchTest(StopIfCompleteBenchTestRequest request);
+        Task<VerifyBenchTestResponse> VerifyBenchTest(VerifyBenchTestRequest request);
     }
 
     public class BenchTestOrchestrator : IBenchTestOrchestrator
     {
         private readonly IBenchTestBoardService _benchTestBoardService;
+        private readonly IBenchTestBoardDAL _benchTestBoardDAL;
         private readonly IBenchTestService _benchTestService;
+        private readonly IXirgoDeviceService _xirgoDeviceService;
+        private readonly IDeviceActivityService _deviceActivityService;
         private readonly ILogger<BenchTestOrchestrator> _logger;
 
         public BenchTestOrchestrator(
             IBenchTestBoardService benchTestBoardService,
+            IBenchTestBoardDAL benchTestBoardDAL,
             IBenchTestService benchTestService,
+            IXirgoDeviceService xirgoDeviceService,
+            IDeviceActivityService deviceActivityService,
             ILogger<BenchTestOrchestrator> logger)
         {
             _benchTestBoardService = benchTestBoardService;
+            _benchTestBoardDAL = benchTestBoardDAL;
             _benchTestService = benchTestService;
+            _xirgoDeviceService = xirgoDeviceService;
+            _deviceActivityService = deviceActivityService;
             _logger = logger;
         }
 
@@ -179,28 +194,21 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
                 return response;
             }
 
-            var result = await _benchTestBoardService.GetAllBoardsByLocation(request.LocationCode);
+            var boards = await _benchTestBoardDAL.GetAllBoardsByLocation(request.LocationCode);
+            var boardList = boards?.ToList() ?? new List<BenchTestBoardDataModel>();
 
-            if (result.ResponseStatus == WcfBoardService.ResponseStatus.Failure)
-            {
-                foreach (var error in result.ResponseErrors ?? Array.Empty<WcfBoardService.ResponseError>())
-                {
-                    response.AddMessage(MessageCode.Error, error.Message);
-                }
-                return response;
-            }
-
-            response.Boards = result.BenchTestBoards?.Select(MapFromWcfBoard).ToArray() ?? Array.Empty<BenchTestBoard>();
-            response.ResultCount = result.resultCount;
+            response.Boards = boardList.Select(MapFromDataModel).ToArray();
+            response.ResultCount = boardList.Count;
             response.AddMessage(MessageCode.StatusDescription, $"Retrieved {response.ResultCount} bench test boards");
             return response;
         }
 
         #endregion
 
+
         #region Test Management
 
-        public async Task<Resource> AddBenchTest(Progressive.Telematics.Labs.Business.Resources.Resources.BenchTest.AddBenchTestRequest request)
+        public async Task<Resource> AddBenchTest(AddBenchTestRequest request)
         {
             var response = new Resource();
 
@@ -211,16 +219,26 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
                 return response;
             }
 
-            var wcfBenchTest = MapToWcfBenchTest(request.BenchTest);
-            var result = await _benchTestService.AddBenchTest(wcfBenchTest);
+            // Set board to running state
+            var updateBoardResponse = await _benchTestBoardService.UpdateBenchTestBoard(new WcfBoardService.BenchTestBoard() {
+                BoardID = request.BenchTest.BoardID,
+                StatusCode = (int)BenchTestBoardStatus.Testing
+            });
 
-            if (result.ResponseStatus == WcfTestService.ResponseStatus.Failure)
+            foreach(var device in request.BenchTest.Devices ?? Array.Empty<BenchTestBoardDevice>())
             {
-                foreach (var error in result.ResponseErrors ?? Array.Empty<WcfTestService.ResponseError>())
+                if (device.DeviceSerialNumber != null)
                 {
-                    response.AddMessage(MessageCode.Error, error.Message);
+                    var updateDeviceResponse = await _xirgoDeviceService.UpdateAsync(new UpdateDeviceRequest()
+                    {
+                        Device = new XirgoDevice
+                        {
+                            DeviceSerialNumber = device.DeviceSerialNumber,
+                            StatusCode = (int)DeviceStatus.ReadyForBenchTest,
+                            BenchTestStatusCode = (int)DeviceBenchTestStatus.ReadyForBenchTest
+                        }
+                    });
                 }
-                return response;
             }
 
             response.AddMessage(MessageCode.StatusDescription, "Bench test added successfully");
@@ -307,27 +325,94 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
             return response;
         }
 
+        public async Task<VerifyBenchTestResponse> VerifyBenchTest(VerifyBenchTestRequest request)
+        {
+            var response = new VerifyBenchTestResponse
+            {
+                Results = Array.Empty<DeviceUpdateResult>()
+            };
+
+            // Get all devices in the lot
+            var wcfResponse = await _xirgoDeviceService.GetDevicesByLot(request.LotSeqId, request.LotType);
+
+            if (wcfResponse.Devices == null || wcfResponse.Devices.Length == 0)
+            {
+                response.Messages = new Dictionary<MessageCode, object>
+                {
+                    { MessageCode.ErrorCode, "NoDevicesFound" },
+                    { MessageCode.ErrorDetails, $"No devices found in lot {request.LotSeqId}" }
+                };
+                return response;
+            }
+
+            response.TotalDevices = wcfResponse.Devices.Length;
+            var results = new List<DeviceUpdateResult>();
+
+            // Loop through each device and update
+            foreach (var device in wcfResponse.Devices)
+            {
+                var result = new DeviceUpdateResult
+                {
+                    DeviceSerialNumber = device.DeviceSerialNumber,
+                    Success = false
+                };
+
+                if (device.ProgramCode == null)
+                {
+                    var updateRequest = new UpdateDeviceRequest();
+
+                    updateRequest.Device = new XirgoDevice
+                    {
+                        DeviceSeqID = device.DeviceSeqID,
+                        IsCommunicationAllowed = true,
+                        StatusCode = TMXDeviceStatus.Available,
+                        ReportedVIN = " ",
+                        WTFStateInfo = " ",
+                        ReportedProtocolCode = 0,
+                        LastRemoteResetDateTime = new DateTime(1970, 1, 1)
+                    };
+
+                    var updateResponse = await _xirgoDeviceService.UpdateAsync(updateRequest);
+
+                    if (updateResponse.ResponseStatus == WcfXirgoService.ResponseStatus.Success)
+                    {
+                        result.Success = true;
+                        response.SuccessfulUpdates++;
+
+                        // Log device activity
+                        await _deviceActivityService.AddDeviceActivity(
+                            device.DeviceSeqID.Value,
+                            $"Bench test verification: Status={device.StatusCode.Value}, Location={device.LocationCode.Value}"
+                        );
+                    }
+                    else
+                    {
+                        result.ErrorMessage = string.Join("; ",
+                            updateResponse.ResponseErrors?.Select(e => e.Message) ?? new[] { "Update failed" });
+                        response.FailedUpdates++;
+                    }
+                }
+                else
+                {
+                    result.ErrorMessage = "Missing required device information (DeviceSeqID, StatusCode, or LocationCode)";
+                    response.FailedUpdates++;
+                }
+
+                results.Add(result);
+            }
+
+            response.Results = results.ToArray();
+            response.Messages = new Dictionary<MessageCode, object>
+            {
+                { MessageCode.StatusDescription, $"Verified {response.TotalDevices} devices: {response.SuccessfulUpdates} successful, {response.FailedUpdates} failed" }
+            };
+
+            return response;
+        }
+
         #endregion
 
         #region Mapping Methods
-
-        private static WcfTestService.BenchTest MapToWcfBenchTest(Progressive.Telematics.Labs.Business.Resources.Resources.BenchTest.BenchTest benchTest)
-        {
-            if (benchTest == null) return null;
-
-            return new WcfTestService.BenchTest
-            {
-                BoardID = benchTest.BoardID,
-                UserID = benchTest.UserID,
-                ForceUpdate = benchTest.ForceUpdate,
-                BenchTestItemList = benchTest.BenchTestItemList?.Select(item => new WcfTestService.BenchTestItemList
-                {
-                    DeviceSerialNumber = item.DeviceSerialNumber,
-                    FirmwareSetCode = item.FirmwareSetCode,
-                    LocationOnBoard = item.LocationOnBoard
-                }).ToArray()
-            };
-        }
 
         private static WcfBoardService.BenchTestBoard MapToWcfBoard(BenchTestBoard board)
         {
@@ -358,6 +443,23 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
                 UserID = wcfBoard.UserID,
                 StartDateTime = wcfBoard.StartDateTime,
                 EndDateTime = wcfBoard.EndDateTime
+            };
+        }
+
+        private static BenchTestBoard MapFromDataModel(BenchTestBoardDataModel dataModel)
+        {
+            if (dataModel == null) return null;
+
+            return new BenchTestBoard
+            {
+                BoardID = dataModel.BoardID,
+                Name = dataModel.Name,
+                LocationCode = dataModel.LocationCode,
+                StatusCode = dataModel.StatusCode,
+                UserID = dataModel.UserID,
+                StartDateTime = dataModel.StartDateTime,
+                EndDateTime = dataModel.EndDateTime,
+                DeviceCount = dataModel.DeviceCount
             };
         }
 

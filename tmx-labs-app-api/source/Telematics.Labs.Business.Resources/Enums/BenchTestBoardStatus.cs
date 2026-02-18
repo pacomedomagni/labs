@@ -3,7 +3,9 @@
 namespace Progressive.Telematics.Labs.Business.Resources.Enums;
 public enum BenchTestBoardStatus
 {
-    Available,
-    Testing,
-    Complete
+    None = 0,
+    Available = 1,
+    Testing = 2,
+    Complete = 3,
+    Loading = 4
 }

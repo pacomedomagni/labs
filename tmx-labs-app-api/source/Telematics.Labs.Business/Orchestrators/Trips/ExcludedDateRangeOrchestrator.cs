@@ -72,6 +72,24 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Trips
 
             var originalRangeStart = command.OriginalRangeStart ?? command.RangeStart;
 
+            if (!command.RangeStart.Equals(originalRangeStart))
+            {
+                await _excludedTripsDal.DeleteExcludedTripAsync(command.ParticipantSeqId, originalRangeStart);
+
+                var inserted = await _excludedTripsDal.InsertExcludedTripAsync(
+                    command.ParticipantSeqId,
+                    command.RangeStart,
+                    command.RangeEnd,
+                    command.Description);
+
+                if (inserted == null)
+                {
+                    throw new InvalidOperationException("Failed to update excluded date range.");
+                }
+
+                return inserted;
+            }
+
             var result = await _excludedTripsDal.UpdateExcludedTripAsync(
                 command.ParticipantSeqId,
                 command.RangeStart,

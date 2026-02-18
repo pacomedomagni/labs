@@ -10,3 +10,10 @@
     flex-direction: column;
     gap: 8px;
 }
+
+.error-message {
+    color: var(--mdc-theme-error, #b00020);
+    font-size: 12px;
+    line-height: 18px;
+    margin-top: 4px;
+}

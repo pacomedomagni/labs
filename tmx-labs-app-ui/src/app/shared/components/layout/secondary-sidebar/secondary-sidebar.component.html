@@ -1,0 +1,34 @@
+@if (sidebarService.config(); as config) {
+  <div class="secondary-sidebar">
+    <div class="secondary-sidebar__header">
+      @if (config.icon) {
+        <mat-icon class="secondary-sidebar__icon">{{ config.icon }}</mat-icon>
+      }
+      @if (config.svgIcon) {
+        <mat-icon class="secondary-sidebar__icon" [svgIcon]="config.svgIcon"></mat-icon>
+      }
+      <span class="secondary-sidebar__title">{{ config.title }}</span>
+    </div>
+    <div class="secondary-sidebar__apps-label">Apps</div>
+    <nav class="secondary-sidebar__nav">
+      @for (app of filteredApps(); track app.id) {
+        <a
+          class="secondary-sidebar__link"
+          [routerLink]="'/' + config.baseRoute + '/' + app.id"
+          routerLinkActive="secondary-sidebar__link--active"
+        >
+          @if (app.icon) {
+            <mat-icon class="secondary-sidebar__link-icon">{{ app.icon }}</mat-icon>
+          }
+          @if (app.svgIcon) {
+            <mat-icon class="secondary-sidebar__link-icon" [svgIcon]="app.svgIcon"></mat-icon>
+          }
+          @if (app.faIcon) {
+            <fa-icon class="secondary-sidebar__link-icon" [icon]="app.faIcon"></fa-icon>
+          }
+          <span class="secondary-sidebar__link-text">{{ app.name }}</span>
+        </a>
+      }
+    </nav>
+  </div>
+}

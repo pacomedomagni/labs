@@ -1,4 +1,6 @@
 <cui-dialog
+    role="dialog"
+    aria-modal="true"
     closeButtonLabel="Close Dialog"
     [showClose]="true"
     [showFooter]="true"
@@ -20,9 +22,7 @@
                     *ngComponentOutlet="data.subtitleComponent; injector: subtitleContentInjector"
                 ></ng-container>
             } @else {
-                <cui-notification-banner type="info">
-                    <span [innerHTML]="data.subtitle"></span>
-                </cui-notification-banner>
+                <tmx-dialog-subtitle [leftContent]="data.subtitle"></tmx-dialog-subtitle>
             }
         }
     </div>

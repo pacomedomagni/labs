@@ -7,6 +7,7 @@ import { VehicleDetails, UpdateVehicleResponse } from 'src/app/shared/data/vehic
 import { NotificationBannerService } from 'src/app/shared/notifications/notification-banner/notification-banner.service';
 import { ParticipantService } from 'src/app/shared/services/api/participant/participant.service';
 import { ResourceMessageService } from 'src/app/shared/services/resources/resource-message.service';
+import { EnrollmentDetailService } from '../enrollment-details/enrollment-details.service';
 
 describe('EditVehicleService', () => {
     let service: EditVehicleService;
@@ -37,6 +38,9 @@ describe('EditVehicleService', () => {
             'getFirstString',
             'getString',
         ]);
+        const enrollmentDetailServiceSpy = jasmine.createSpyObj('EnrollmentDetailService', [
+            'updateParticipantVehicle',
+        ]);
 
         TestBed.configureTestingModule({
             providers: [
@@ -45,6 +49,7 @@ describe('EditVehicleService', () => {
                 { provide: ParticipantService, useValue: participantServiceSpy },
                 { provide: NotificationBannerService, useValue: notificationBannerServiceSpy },
                 { provide: ResourceMessageService, useValue: resourceMessageServiceSpy },
+                { provide: EnrollmentDetailService, useValue: enrollmentDetailServiceSpy },
             ],
         });
 

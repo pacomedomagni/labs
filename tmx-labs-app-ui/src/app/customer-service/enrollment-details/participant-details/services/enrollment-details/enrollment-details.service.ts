@@ -1,7 +1,7 @@
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { AccountService } from 'src/app/shared/services/api/account/account.service';
 import { take } from 'rxjs/internal/operators/take';
-import { AccountDeviceSummary, AccountParticipantSummary, CustomerInfo, EnrollmentDetails } from 'src/app/shared/data/participant/resources';
+import { AccountDeviceSummary, AccountParticipantSummary, AccountVehicleSummary, CustomerInfo, EnrollmentDetails } from 'src/app/shared/data/participant/resources';
 
 @Injectable({ providedIn: 'root' })
 export class EnrollmentDetailService {
@@ -70,6 +70,39 @@ export class EnrollmentDetailService {
       ...updatedAccounts[accountIndex],
       participant: {
         ...updatedAccounts[accountIndex].participant,
+        ...updates,
+      },
+    };
+
+    const updatedDetails: EnrollmentDetails = {
+      customer: current.customer,
+      accounts: updatedAccounts,
+    };
+
+    this.updateEnrollmentDetails(updatedDetails);
+  }
+
+  updateParticipantVehicle(
+    participantSeqID: number,
+    updates: Partial<AccountVehicleSummary>
+  ): void {
+    const current = this._details();
+    if (!current) {
+      return;
+    }
+
+    const accountIndex = current.accounts.findIndex(
+      t => t.participant.participantSeqID === participantSeqID
+    );
+    if (accountIndex === -1) {
+      return;
+    }
+
+    const updatedAccounts = [...current.accounts];
+    updatedAccounts[accountIndex] = {
+      ...updatedAccounts[accountIndex],
+      vehicle: {
+        ...updatedAccounts[accountIndex].vehicle,
         ...updates,
       },
     };

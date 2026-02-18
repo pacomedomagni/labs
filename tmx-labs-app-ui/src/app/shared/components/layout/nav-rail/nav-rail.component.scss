@@ -19,6 +19,15 @@ $sidenav-width: calc(#{base-vars.$side-sheet-width} - #{$navbar-width});
     line-height: $icon-size;
     width: $icon-size;
   }
+
+  .secondary-toggle {
+    position: absolute;
+    top: 0.8rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    background: transparent;
+  }
 }
 
 .nav-rail {

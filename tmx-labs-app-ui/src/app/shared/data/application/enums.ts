@@ -72,3 +72,13 @@ export enum States {
     WV = "WV",
     WY = "WY"
 }
+
+export enum OrderType {
+	All = 'All',
+	Snapshot1Only = 'Snapshot1Only',
+	Snapshot2Only = 'Snapshot2Only',
+	Snapshot3Only = 'Snapshot3Only',
+	CommercialLines = 'CommercialLines',
+	CommercialLinesHeavyTruck = 'CommercialLinesHeavyTruck',
+	CommercialLinesHeavyTruckCable = 'CommercialLinesHeavyTruckCable'
+}

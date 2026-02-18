@@ -56,7 +56,7 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Trips
 
             var tripEvents = await _tripEventsDal.GetTripEventsByTripSeqId(tripSeqId);
 
-            foreach(var tripEvent in tripEvents)
+            foreach (var tripEvent in tripEvents)
             {
                 if (tripEvent.LatitudeNbr != null && tripEvent.LongitudeNbr != null)
                 {
@@ -87,23 +87,30 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Trips
 
         public async Task<List<DayOfWeekTripSummary>> GetWeekDayTripSummary(int participantSeqId)
         {
-            var trips = await _tripsDal.GetTripsByParticipantSeqId(
+            var trips = await GetFilteredTripsByParticipantSeqId(
                 participantSeqId,
                 DateTime.Today.AddYears(-30),
                 DateTime.Now);
 
-            var weekdaySummaries = trips
+            var tripsByDay = trips
                 .Where(t => t.TripStartDateTime.HasValue)
                 .GroupBy(t => t.TripStartDateTime.Value.DayOfWeek)
-                .Select(g => new DayOfWeekTripSummary()
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var weekdaySummaries = Enum.GetValues<DayOfWeek>()
+                .Select(day =>
                 {
-                    DayOfWeek = g.Key,
-                    Trips = g.Count(),
-                    Duration = TimeSpan.FromTicks(g.Sum(t => t.TripDuration?.Ticks ?? 0)),
-                    Mileage = g.Sum(t => t.TripMiles ?? 0),
-                    HardBrakes = g.Sum(t => t.HardBrakes ?? 0),
-                    HardAccels = g.Sum(t => t.HardAccelerations ?? 0),
-                    HighRiskSeconds = g.Sum(t => t.HighRiskSeconds ?? 0)
+                    var dayTrips = tripsByDay.GetValueOrDefault(day, new List<Trip>());
+                    return new DayOfWeekTripSummary()
+                    {
+                        DayOfWeek = day,
+                        Trips = dayTrips.Count,
+                        Duration = TimeSpan.FromTicks(dayTrips.Sum(t => t.TripDuration?.Ticks ?? 0)),
+                        Mileage = dayTrips.Sum(t => t.TripMiles ?? 0),
+                        HardBrakes = dayTrips.Sum(t => t.HardBrakes ?? 0),
+                        HardAccels = dayTrips.Sum(t => t.HardAccelerations ?? 0),
+                        HighRiskSeconds = dayTrips.Sum(t => t.HighRiskSeconds ?? 0)
+                    };
                 })
                 .OrderBy(s => s.DayOfWeek) // Sunday (0) through Saturday (6)
                 .ToList();
@@ -114,10 +121,7 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Trips
         public async Task<TripSummaryResponse> GetTripsByParticipant(int participantSeqId, DateTime? startDate, DateTime? endDate)
         {
             var response = new TripSummaryResponse();
-            var trips = await _tripsDal.GetTripsByParticipantSeqId(
-                participantSeqId,
-                startDate ?? DateTime.Today.AddYears(-30),
-                endDate ?? DateTime.Now);
+            var trips = await GetFilteredTripsByParticipantSeqId(participantSeqId, startDate, endDate);
 
             if (trips == null)
             {
@@ -125,11 +129,8 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Trips
                 return response;
             }
 
-            // Filter out trips that fall within excluded date ranges
-            var excludedDateRanges = await _excludedTripsDal.GetExcludedTripsByParticipantSeqId(participantSeqId);
-            var filteredTrips = FilterExcludedTrips(trips, excludedDateRanges);
 
-            var tripDays = filteredTrips
+            var tripDays = trips
                 .Where(t => t.TripStartDateTime.HasValue)
                 .GroupBy(t => t.TripStartDateTime.Value.Date)
                 .Select(g => new TripDaySummary
@@ -146,6 +147,28 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Trips
         }
 
         /// <summary>
+        /// Retrieves all trips filtered on existing date ranges
+        /// </summary>
+        /// <returns>List of Trips</returns>
+        private async Task<IEnumerable<Trip>> GetFilteredTripsByParticipantSeqId(int participantSeqId, DateTime? startDate, DateTime? endDate)
+        {
+            var trips = await _tripsDal.GetTripsByParticipantSeqId(
+                participantSeqId,
+                startDate ?? DateTime.Today.AddYears(-30),
+                endDate ?? DateTime.Now);
+
+            if (trips == null)
+            {
+                return new List<Trip>();
+            }
+
+            // Filter out trips that fall within excluded date ranges
+            var excludedDateRanges = await _excludedTripsDal.GetExcludedTripsByParticipantSeqId(participantSeqId);
+            var filteredTrips = FilterExcludedTrips(trips, excludedDateRanges);
+            return filteredTrips;
+        }
+
+        /// <summary>
         /// Filters out trips that fall within any of the excluded date ranges.
         /// A trip is excluded if its start date/time falls within an excluded range.
         /// </summary>
@@ -154,7 +177,8 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Trips
         /// <returns>Filtered list of trips excluding those in the excluded date ranges</returns>
         private IEnumerable<Trip> FilterExcludedTrips(IEnumerable<Trip> trips, IEnumerable<ExcludedDateRange> excludedDateRanges)
         {
-            if (trips == null){
+            if (trips == null)
+            {
                 return new List<Trip>();
             }
 
@@ -181,7 +205,7 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Trips
             var tripDetails = new List<TripDetail>();
             foreach (var row in result.GetDetails())
             {
-                
+
                 tripDetails.Add(row);
             }
 

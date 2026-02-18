@@ -446,7 +446,9 @@ describe('ActionDisplayRulesService', () => {
                     participantSeqID: 123,
                     participantStatusCode: 1 // Enrolled
                 },
-                device: {},
+                device: {
+                    deviceExperienceTypeCode: DeviceExperienceValue.get(DeviceExperience.Device)
+                },
                 eligibleSwapCandidatesCount: 0
             };
 
@@ -459,7 +461,9 @@ describe('ActionDisplayRulesService', () => {
                     participantSeqID: 123,
                     participantStatusCode: 2 // Opted out
                 },
-                device: {},
+                device: {
+                    deviceExperienceTypeCode: DeviceExperienceValue.get(DeviceExperience.Device)
+                },
                 eligibleSwapCandidatesCount: 0
             };
 
@@ -472,7 +476,9 @@ describe('ActionDisplayRulesService', () => {
                     participantSeqID: null,
                     participantStatusCode: 1
                 },
-                device: {},
+                device: {
+                    deviceExperienceTypeCode: DeviceExperienceValue.get(DeviceExperience.Device)
+                },
                 eligibleSwapCandidatesCount: 0
             };
 
@@ -485,7 +491,9 @@ describe('ActionDisplayRulesService', () => {
                     participantSeqID: 0,
                     participantStatusCode: 1
                 },
-                device: {},
+                device: {
+                    deviceExperienceTypeCode: DeviceExperienceValue.get(DeviceExperience.Device)
+                },
                 eligibleSwapCandidatesCount: 0
             };
 

@@ -6,10 +6,13 @@
     <AssemblyName>Progressive.Telematics.Labs.Services.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Api\**" />
     <Compile Remove="Database\**" />
     <Compile Remove="Wcf\**" />
+    <EmbeddedResource Remove="Api\**" />
     <EmbeddedResource Remove="Database\**" />
     <EmbeddedResource Remove="Wcf\**" />
+    <None Remove="Api\**" />
     <None Remove="Database\**" />
     <None Remove="Wcf\**" />
   </ItemGroup>
@@ -34,8 +37,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Telematics.Labs.Services\Telematics.Labs.Services.csproj" />
     <ProjectReference Include="..\Telematics.Labs.Shared\Telematics.Labs.Shared.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Api\" />
   </ItemGroup>
 </Project>

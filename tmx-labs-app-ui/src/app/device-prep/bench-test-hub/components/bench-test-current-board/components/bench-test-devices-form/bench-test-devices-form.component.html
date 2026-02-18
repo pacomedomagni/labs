@@ -1,0 +1,12 @@
+<div class="grid grid-cols-5 gap-2 gap-y-12">
+    @for (control of devicesForm.controls; track $index) {
+        <tmx-bench-test-device
+            [formControl]="control"
+            (onTextCleared)="deviceRemoved.emit({ position: $index + 1 })"
+            [displayLoadingPlaceholder]="displayLoadingPlaceholder()"
+            [displayStatus]="displayStatus()"
+            [progress]="getDeviceStatus($index + 1).percentage"
+            [loadingText]="getDeviceStatus($index + 1).description"
+        ></tmx-bench-test-device>
+    }
+</div>

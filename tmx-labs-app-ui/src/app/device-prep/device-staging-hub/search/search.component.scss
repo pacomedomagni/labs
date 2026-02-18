@@ -1,0 +1,11 @@
+/* Styles for Search component */
+:host { display: block; }
+
+// Manually apply mat-mdc-button-disabled to search button when search is disabled
+:host.search-disabled ::ng-deep {
+  cui-search button {
+    cursor: default;
+    pointer-events: none;
+    color: var(--mat-icon-button-disabled-icon-color, color-mix(in srgb, var(--mat-sys-on-surface) 38%, transparent));
+  }
+}

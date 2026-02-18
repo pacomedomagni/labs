@@ -28,8 +28,8 @@ export const DeviceStatusDescription = new Map<DeviceStatus, string>([
   [DeviceStatus.Unavailable, "Unavailable"],
   [DeviceStatus.Defective, "Defective"],
   [DeviceStatus.Batched, "Batched"],
-  [DeviceStatus.ReadyForPrep, "Ready for prep"],
-  [DeviceStatus.ReadyForBenchTest, "Ready for bench test"],
+  [DeviceStatus.ReadyForPrep, "Ready for Prep"],
+  [DeviceStatus.ReadyForBenchTest, "Ready for Bench Test"],
 ]);
 
 

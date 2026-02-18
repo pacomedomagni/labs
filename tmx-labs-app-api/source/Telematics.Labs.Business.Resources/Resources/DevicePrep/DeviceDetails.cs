@@ -17,7 +17,7 @@ public class DeviceDetails : Resource
     [JsonPropertyName("createDateTime")]
     public DateTime CreateDateTime { get; set; }
 
-    [JsonPropertyName("SIM")]
+    [JsonPropertyName("sim")]
     public string SIM { get; set; }
 
     [JsonPropertyName("shipDateTime")]

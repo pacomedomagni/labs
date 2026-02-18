@@ -5,11 +5,12 @@ import {
     GetBoardsByLocationResponse,
     AddBenchTestBoardRequest,
     BenchTestBoardResponse,
-    UpdateBenchTestBoardRequest,
     Resource,
-    AddBenchTestRequest,
     StopIfCompleteBenchTestResponse,
+    BenchTestBoardDevice,
+    Board,
 } from 'src/app/shared/data/bench-test/resources';
+import { VerifyBenchTestRequest, VerifyBenchTestResponse } from 'src/app/shared/data/lot-management/resources';
 
 @Injectable({
     providedIn: 'root',
@@ -25,10 +26,10 @@ export class BenchTestService {
         });
     }
 
-    updateBenchTestBoard(request: UpdateBenchTestBoardRequest): Observable<Resource> {
+    updateBenchTestBoard(board: Partial<Board>): Observable<Resource> {
         return this.api.put<Resource>({
             uri: `${this.controller}/UpdateBoard`,
-            payload: request,
+            payload: { board: board},
         });
     }
 
@@ -50,10 +51,12 @@ export class BenchTestService {
         });
     }
 
-    addBenchTest(request: AddBenchTestRequest): Observable<Resource> {
+    addBenchTest(boardId: number, devices: BenchTestBoardDevice[]): Observable<Resource> {
         return this.api.post<Resource>({
             uri: `${this.controller}/AddTest`,
-            payload: request,
+            payload: {
+                benchTest:{ boardId: boardId, devices: devices }
+            }
         });
     }
 
@@ -74,4 +77,12 @@ export class BenchTestService {
             uri: `${this.controller}/StopIfCompleteTest/${boardId}`,
         });
     }
+
+    verifyBenchTest(request: VerifyBenchTestRequest): Observable<VerifyBenchTestResponse> {
+        return this.api.post<VerifyBenchTestResponse>({
+            uri: `${this.controller}/VerifyBenchTest`,
+            payload: request,
+        });
+    }
+    
 }
