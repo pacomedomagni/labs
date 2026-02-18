@@ -82,6 +82,7 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
     private initialTime = '';
     private isSyncing = false;
     private currentError: string | null = null;
+    private interacted = false;
 
     // CVA callbacks
     private onChangeFn: (value: Date | null) => void = () => {};
@@ -96,6 +97,7 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
     // ControlValueAccessor implementation
     writeValue(value: Date | null): void {
         this.model = value;
+        this.interacted = false;
         this.syncFromModel();
     }
 
@@ -156,6 +158,7 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
     }
 
     onDateChange(value: Date | null): void {
+        this.interacted = true;
         this.dateValue = value ? new Date(value) : null;
         this.invalidDateFormat = this.dateValue ? Number.isNaN(this.dateValue.getTime()) : false;
         this.refreshError();
@@ -194,6 +197,7 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
     }
 
     onDateBlur(): void {
+        this.interacted = true;
         // Revalidate on blur
         if (this.dateValue) {
             this.invalidDateFormat = Number.isNaN(this.dateValue.getTime());
@@ -205,6 +209,7 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
     }
 
     onTimeInputChange(value: any): void {
+        this.interacted = true;
         if (value == null) {
             this.timeInput = '';
         } else if (typeof value === 'string') {
@@ -233,6 +238,7 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
     }
 
     onTimeBlur(): void {
+        this.interacted = true;
         const normalized = this.normalizeTimeString(this.timeInput);
         if (normalized && normalized !== this.timeInput) {
             this.timeInput = normalized;
@@ -415,14 +421,15 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
             return this.error;
         }
 
-        // Check for invalid format errors first (per-field mat-error handles display,
-        // but we still return a message for the unified error area)
-        if (this.invalidDateFormat) {
-            return null; // Shown via per-field mat-error
+        // Format errors are shown via per-field mat-error inside mat-form-field
+        if (this.invalidDateFormat || this.invalidTimeFormat) {
+            return null;
         }
 
-        if (this.invalidTimeFormat) {
-            return null; // Shown via per-field mat-error
+        // Don't show shared error messages until user has interacted.
+        // validate() still returns errors → OK button stays disabled.
+        if (!this.interacted) {
+            return null;
         }
 
         // Date entered but time empty

@@ -19,9 +19,7 @@
             />
             <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
             <mat-datepicker #datePicker></mat-datepicker>
-            @if (invalidDateFormat) {
-                <mat-error>Invalid date format. Please use MM/DD/YYYY.</mat-error>
-            }
+            <mat-error>{{ invalidDateFormat ? 'Invalid date format. Please use MM/DD/YYYY.' : '' }}</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" [hideRequiredMarker]="true">
@@ -41,13 +39,9 @@
             />
             <mat-timepicker-toggle matSuffix [for]="timePicker"></mat-timepicker-toggle>
             <mat-timepicker #timePicker interval="1min" (selected)="onTimeSelected($event)"></mat-timepicker>
-            @if (invalidTimeFormat) {
-                <mat-error>Invalid time format. Please use HH:MM AM/PM.</mat-error>
-            }
+            <mat-error>{{ invalidTimeFormat ? 'Invalid time format. Please use HH:MM AM/PM.' : '' }}</mat-error>
         </mat-form-field>
     </div>
 
-    @if (displayError && errorMessage) {
-        <mat-error>{{ errorMessage }}</mat-error>
-    }
+    <mat-error class="unified-error">{{ displayError && errorMessage ? errorMessage : '&nbsp;' }}</mat-error>
 </div>

@@ -1,6 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { CommonModule, formatDate } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { FORM_DIALOG_CONTENT } from 'src/app/shared/components/dialogs/form-dialog/form-dialog.component';
 import { DateTimeControlComponent } from '../../form-controls/date-time-control/date-time-control.component';
 
@@ -27,9 +27,12 @@ interface DateTimeEditorContent {
         </div>
     `,
 })
-export class DateTimeEditorComponent implements OnInit {
+export class DateTimeEditorComponent implements OnInit, AfterViewInit {
     private readonly injected = inject<DateTimeEditorContent | null>(FORM_DIALOG_CONTENT, { optional: true });
 
+    @ViewChildren(NgModel) controls?: QueryList<NgModel>;
+
+    private parentForm: NgForm | null = null;
     dateValue: Date | null = null;
     label = 'Date';
 
@@ -45,6 +48,8 @@ export class DateTimeEditorComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.parentForm = this.injected?.form ?? null;
+
         // Prefer data.value (Date object) over model.value (ISO string) if available
         const dataValue = this.injected?.data && typeof this.injected.data === 'object'
             ? (this.injected.data as any).value : undefined;
@@ -54,6 +59,14 @@ export class DateTimeEditorComponent implements OnInit {
                 this.dateValue = new Date(preferred);
             }
         }
+    }
+
+    ngAfterViewInit(): void {
+        if (!this.parentForm || !this.controls) {
+            return;
+        }
+
+        this.controls.forEach((control) => this.parentForm?.addControl(control));
     }
 
     onModelChange(value: Date | null): void {
