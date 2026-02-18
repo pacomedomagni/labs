@@ -172,15 +172,8 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         this.setControlError(control, 'required', false);
 
         const start = this.isoToDate(this.formModel.rangeStart);
-        let end = this.isoToDate(this.formModel.rangeEnd);
+        const end = this.isoToDate(this.formModel.rangeEnd);
 
-        // Auto-adjust end date to equal start date if end is before start
-        if (start && end && end.getTime() < start.getTime()) {
-            this.formModel.rangeEnd = this.formModel.rangeStart;
-            end = new Date(start);
-        }
-
-        // Show error and disable OK button when end <= start (including after auto-adjustment)
         if (start && end && end.getTime() <= start.getTime()) {
             this.setControlError(control, 'order', true);
             this.setControlError(control, 'overlap', false);
@@ -270,10 +263,6 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         control.control.setErrors(Object.keys(errors).length > 0 ? errors : null);
         control.control.markAsTouched();
         control.control.markAsDirty();
-
-        if (this.parentForm?.form) {
-            this.parentForm.form.updateValueAndValidity();
-        }
     }
 
 }

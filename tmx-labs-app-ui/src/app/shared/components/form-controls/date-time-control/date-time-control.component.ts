@@ -228,9 +228,17 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
             this.timeInput = String(value ?? '');
         }
 
-        // Check if time format is valid
+        // Check if time format is valid — progressive validation
         if (this.timeInput && this.timeInput.trim()) {
-            this.invalidTimeFormat = !this.parseTime(this.timeInput.trim());
+            const trimmed = this.timeInput.trim();
+            if (trimmed.length >= 5) {
+                this.invalidTimeFormat = !this.parseTime(trimmed);
+            } else if (trimmed.length >= 3) {
+                const partialTimePattern = /^\d{1,2}:?\d{0,2}$/;
+                this.invalidTimeFormat = !partialTimePattern.test(trimmed);
+            } else {
+                this.invalidTimeFormat = false;
+            }
         } else {
             this.invalidTimeFormat = false;
         }
