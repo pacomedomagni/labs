@@ -293,7 +293,6 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
         const el = this.timeInputRef?.nativeElement;
         if (el) {
             el.value = this.timeInput ?? '';
-            el.dispatchEvent(new Event('input', { bubbles: true }));
         }
     }
 
