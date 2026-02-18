@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator } from '@angular/forms';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -55,7 +55,7 @@ export class TimeErrorStateMatcher implements ErrorStateMatcher {
         },
     ],
 })
-export class DateTimeControlComponent implements OnChanges, ControlValueAccessor, Validator {
+export class DateTimeControlComponent implements OnChanges, AfterViewInit, ControlValueAccessor, Validator {
     @Input() model: Date | null = null;
     @Input() min: Date | null = null;
     @Input() max: Date | null = null;
@@ -67,6 +67,7 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
     @Output() modelChange = new EventEmitter<Date | null>();
 
     @ViewChild('timeInputRef') timeInputRef?: ElementRef<HTMLInputElement>;
+    @ViewChild('timePicker') private timePickerRef?: any;
 
     dateValue: Date | null = null;
     timeInput = '';
@@ -83,6 +84,7 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
     private isSyncing = false;
     private currentError: string | null = null;
     private interacted = false;
+    allowTimePickerOpen = false;
 
     // CVA callbacks
     private onChangeFn: (value: Date | null) => void = () => {};
@@ -92,6 +94,10 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
     constructor(private readonly cdr: ChangeDetectorRef) {
         this.dateErrorStateMatcher = new DateErrorStateMatcher(this);
         this.timeErrorStateMatcher = new TimeErrorStateMatcher(this);
+    }
+
+    ngAfterViewInit(): void {
+        this.patchTimepickerOpen();
     }
 
     // ControlValueAccessor implementation
@@ -209,7 +215,9 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
     }
 
     onTimeInputChange(value: any): void {
-        this.interacted = true;
+        if (!this.isSyncing) {
+            this.interacted = true;
+        }
         if (value == null) {
             this.timeInput = '';
         } else if (typeof value === 'string') {
@@ -252,6 +260,7 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
     }
 
     syncFromModel(): void {
+        this.isSyncing = true;
         const source = this.model instanceof Date && !Number.isNaN(this.model.getTime()) ? new Date(this.model) : null;
 
         this.dateValue = source;
@@ -265,7 +274,10 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
         this.tryDetectChanges();
 
         this.syncNativeTimeInput();
-        Promise.resolve().then(() => this.syncNativeTimeInput());
+        Promise.resolve().then(() => {
+            this.syncNativeTimeInput();
+            this.isSyncing = false;
+        });
     }
 
     private tryDetectChanges(): void {
@@ -283,6 +295,18 @@ export class DateTimeControlComponent implements OnChanges, ControlValueAccessor
             el.value = this.timeInput ?? '';
             el.dispatchEvent(new Event('input', { bubbles: true }));
         }
+    }
+
+    private patchTimepickerOpen(): void {
+        const picker = this.timePickerRef as any;
+        if (!picker?.open) return;
+        const originalOpen = picker.open.bind(picker);
+        picker.open = () => {
+            if (this.allowTimePickerOpen) {
+                this.allowTimePickerOpen = false;
+                originalOpen();
+            }
+        };
     }
 
     private updateModel(): void {

@@ -37,11 +37,11 @@
                 (ngModelChange)="onTimeInputChange($event)"
                 (blur)="onTimeBlur()"
             />
-            <mat-timepicker-toggle matSuffix [for]="timePicker"></mat-timepicker-toggle>
+            <mat-timepicker-toggle matSuffix [for]="timePicker" (mousedown)="allowTimePickerOpen = true" (keydown.enter)="allowTimePickerOpen = true" (keydown.space)="allowTimePickerOpen = true"></mat-timepicker-toggle>
             <mat-timepicker #timePicker interval="1min" (selected)="onTimeSelected($event)"></mat-timepicker>
             <mat-error>{{ invalidTimeFormat ? 'Invalid time format. Please use HH:MM AM/PM.' : '' }}</mat-error>
         </mat-form-field>
     </div>
 
-    <mat-error class="unified-error">{{ displayError && errorMessage ? errorMessage : '&nbsp;' }}</mat-error>
+    <mat-error class="unified-error">{{ displayError ? errorMessage : '' }}</mat-error>
 </div>

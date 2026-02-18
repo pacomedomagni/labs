@@ -211,7 +211,6 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         
         if (invalid) {
             this.parentForm.form.setErrors({ invalidRange: true });
-            (this.parentForm.form as any).status = 'INVALID';
         } else {
             const errors = this.parentForm.form.errors;
             if (errors && 'invalidRange' in errors) {
@@ -271,8 +270,7 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         control.control.setErrors(Object.keys(errors).length > 0 ? errors : null);
         control.control.markAsTouched();
         control.control.markAsDirty();
-        control.control.updateValueAndValidity();
-        
+
         if (this.parentForm?.form) {
             this.parentForm.form.updateValueAndValidity();
         }
