@@ -105,7 +105,6 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
 
     // ControlValueAccessor implementation
     writeValue(value: Date | null): void {
-        console.log('[DTC] writeValue', value, 'invalidDateFormat=', this.invalidDateFormat);
         if (this.invalidDateFormat || this.invalidTimeFormat) {
             return;
         }
@@ -162,7 +161,6 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['model'] && !this.isSyncing) {
-            console.log('[DTC] ngOnChanges model', changes['model'].currentValue, 'invalidDateFormat=', this.invalidDateFormat);
             this.syncFromModel();
         }
 
@@ -172,9 +170,7 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
     }
 
     onDateChange(value: Date | null): void {
-        console.log('[DTC] onDateChange', value, 'invalidDateFormat=', this.invalidDateFormat);
         if (this.invalidDateFormat) {
-            console.log('[DTC] onDateChange BLOCKED by invalidDateFormat');
             return;
         }
         this.interacted = true;
@@ -188,9 +184,7 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
     }
 
     onDateInput(event: any): void {
-        console.log('[DTC] onDateInput', event.target?.value, 'isDateBlurring=', this.isDateBlurring);
         if (this.isDateBlurring) {
-            console.log('[DTC] onDateInput BLOCKED by isDateBlurring');
             return;
         }
         const input = event.target?.value;
@@ -225,7 +219,6 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
     }
 
     onDateBlur(): void {
-        console.log('[DTC] onDateBlur', 'invalidDateFormat=', this.invalidDateFormat);
         this.interacted = true;
         this.isDateBlurring = true;
 
@@ -322,7 +315,6 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
     }
 
     syncFromModel(): void {
-        console.log('[DTC] syncFromModel called, invalidDateFormat=', this.invalidDateFormat, new Error().stack?.split('\n').slice(1, 5).join('\n'));
         this.isSyncing = true;
         const source = this.model instanceof Date && !Number.isNaN(this.model.getTime()) ? new Date(this.model) : null;
 

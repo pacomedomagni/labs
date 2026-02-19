@@ -211,6 +211,7 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         const overlaps = start && end ? this.hasOverlap(this.formModel.rangeStart, this.formModel.rangeEnd, this.originalRangeStart) : false;
         if (overlaps) {
             this.rangeStartHighlight = true;
+            this.rangeStartError = 'Selected date range overlaps with an existing exclusion.';
             this.rangeEndValidationError = { overlap: true };
             this.rangeEndError = 'Selected date range overlaps with an existing exclusion.';
             this.rangeEndCtrl?.control?.updateValueAndValidity();
@@ -218,6 +219,7 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         }
 
         this.rangeStartHighlight = false;
+        this.rangeStartError = null;
         this.rangeEndValidationError = null;
         this.rangeEndError = null;
         this.rangeEndCtrl?.control?.updateValueAndValidity();
