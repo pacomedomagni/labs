@@ -8,7 +8,7 @@
                 role="button"
                 placeholder="Range Start Date"
                 [value]="formatDisplayDate(formModel.rangeStart)"
-                [attr.aria-describedby]="shouldShowRangeStartError() ? 'rangeStartError' : null"
+                [errorStateMatcher]="rangeStartErrorMatcher"
                 (click)="openDateTimeEditor('start')"
                 (keydown.enter)="openEditorFromKeyboard($event, 'start')"
                 (keydown.space)="openEditorFromKeyboard($event, 'start')"
@@ -22,10 +22,8 @@
             >
                 <mat-icon>open_in_new</mat-icon>
             </button>
+            <mat-error>{{ rangeStartError }}</mat-error>
         </mat-form-field>
-        <div class="error-message" [class.error-hidden]="!shouldShowRangeStartError()" id="rangeStartError">
-            {{ shouldShowRangeStartError() ? rangeStartError : '' }}
-        </div>
         <input
             type="hidden"
             name="rangeStart"
@@ -44,7 +42,7 @@
                 role="button"
                 placeholder="Range End Date"
                 [value]="formatDisplayDate(formModel.rangeEnd)"
-                [attr.aria-describedby]="shouldShowRangeEndError() ? 'rangeEndError' : null"
+                [errorStateMatcher]="rangeEndErrorMatcher"
                 (click)="openDateTimeEditor('end')"
                 (keydown.enter)="openEditorFromKeyboard($event, 'end')"
                 (keydown.space)="openEditorFromKeyboard($event, 'end')"
@@ -58,10 +56,8 @@
             >
                 <mat-icon>open_in_new</mat-icon>
             </button>
+            <mat-error>{{ rangeEndError }}</mat-error>
         </mat-form-field>
-        <div class="error-message" [class.error-hidden]="!shouldShowRangeEndError()" id="rangeEndError">
-            {{ shouldShowRangeEndError() ? rangeEndError : '' }}
-        </div>
         <input
             type="hidden"
             name="rangeEnd"

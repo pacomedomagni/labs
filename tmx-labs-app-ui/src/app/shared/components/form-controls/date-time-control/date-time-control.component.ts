@@ -66,6 +66,7 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
     @Input() error: string | null = null;
     @Output() modelChange = new EventEmitter<Date | null>();
 
+    @ViewChild('dateInputRef') dateInputRef?: ElementRef<HTMLInputElement>;
     @ViewChild('timeInputRef') timeInputRef?: ElementRef<HTMLInputElement>;
     @ViewChild('timePicker') private timePickerRef?: any;
 
@@ -204,9 +205,12 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
 
     onDateBlur(): void {
         this.interacted = true;
-        // Revalidate on blur
-        if (this.dateValue) {
-            this.invalidDateFormat = Number.isNaN(this.dateValue.getTime());
+        // Revalidate on blur using the raw DOM value — if user typed invalid text,
+        // dateValue is null but the text is still in the input.
+        const rawValue = this.dateInputRef?.nativeElement?.value?.trim() ?? '';
+        if (rawValue) {
+            const parsed = new Date(rawValue);
+            this.invalidDateFormat = Number.isNaN(parsed.getTime());
         } else {
             this.invalidDateFormat = false;
         }
@@ -272,8 +276,18 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
         const normalized = this.normalizeTimeString(this.timeInput);
         if (normalized && normalized !== this.timeInput) {
             this.timeInput = normalized;
+            this.invalidTimeFormat = false;
             this.updateModel();
+        } else {
+            // On blur, validate the raw DOM value — if text is present but unparseable, show error
+            const rawValue = this.timeInputRef?.nativeElement?.value?.trim() ?? '';
+            if (rawValue) {
+                this.invalidTimeFormat = !this.parseTime(rawValue);
+            } else {
+                this.invalidTimeFormat = false;
+            }
         }
+        this.refreshError();
         this.onTouchedFn();
     }
 
@@ -477,11 +491,6 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
             return null;
         }
 
-        // Date entered but time empty
-        if (this.dateValue && !this.timeInput?.trim()) {
-            return 'Time is required.';
-        }
-
         const value = this.model;
 
         if (this.min && value && this.compareDates(value, this.min) < 0) {
@@ -490,10 +499,6 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
 
         if (this.max && value && this.compareDates(value, this.max) > 0) {
             return `Date must be less than ${this.datePipe.transform(this.max, 'M/d/yyyy hh:mm:ss')}`;
-        }
-
-        if (!value && this.isRequired) {
-            return 'Date is required';
         }
 
         return null;

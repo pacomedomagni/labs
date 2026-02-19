@@ -5,8 +5,9 @@ import { FORM_DIALOG_CONTENT } from 'src/app/shared/components/dialogs/form-dial
 import { DialogService } from 'src/app/shared/services/dialogs/primary/dialog.service';
 import { DateTimeEditorComponent } from 'src/app/shared/components/dialogs/date-time-editor/date-time-editor.component';
 import { firstValueFrom } from 'rxjs';
-import { MatFormField } from '@angular/material/form-field';
+import { MatFormField, MatError } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -31,7 +32,7 @@ interface ExcludeTripsDialogContent {
 @Component({
     selector: 'tmx-exclude-trips-form',
     standalone: true,
-    imports: [CommonModule, FormsModule, MatFormField, MatInputModule, MatButtonModule, MatIconModule],
+    imports: [CommonModule, FormsModule, MatFormField, MatError, MatInputModule, MatButtonModule, MatIconModule],
     templateUrl: './exclude-trips-form.component.html',
     styleUrls: ['./exclude-trips-form.component.scss'],
 })
@@ -49,6 +50,8 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
 
     rangeStartError: string | null = null;
     rangeEndError: string | null = null;
+    rangeStartErrorMatcher: ErrorStateMatcher = { isErrorState: () => this.shouldShowRangeStartError() };
+    rangeEndErrorMatcher: ErrorStateMatcher = { isErrorState: () => this.shouldShowRangeEndError() };
     existingRanges: { rangeStart: string; rangeEnd: string }[] = [];
     originalRangeStart?: string;
     private rangeStartInteracted = false;
@@ -90,6 +93,12 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
             this.rangeEndCtrl.control.setValidators(() => this.rangeEndValidationError);
             this.rangeEndCtrl.control.updateValueAndValidity();
         }
+
+        // Re-validate with actual model values — needed for edit mode where fields are pre-filled
+        setTimeout(() => {
+            this.validateRangeStart();
+            this.validateRangeEnd();
+        });
     }
 
     async openDateTimeEditor(kind: 'start' | 'end'): Promise<void> {

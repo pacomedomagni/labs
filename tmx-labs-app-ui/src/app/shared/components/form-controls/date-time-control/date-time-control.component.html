@@ -11,6 +11,7 @@
                 [min]="min"
                 [required]="isRequired"
                 [errorStateMatcher]="dateErrorStateMatcher"
+                #dateInputRef
                 [(ngModel)]="dateValue"
                 [ngModelOptions]="{ standalone: true }"
                 (dateChange)="onDateChange($event.value)"
