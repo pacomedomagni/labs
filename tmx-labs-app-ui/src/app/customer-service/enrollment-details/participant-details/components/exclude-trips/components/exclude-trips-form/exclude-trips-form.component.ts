@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule, formatDate } from '@angular/common';
 import { FormsModule, NgForm, NgModel, ValidationErrors } from '@angular/forms';
 import { FORM_DIALOG_CONTENT } from 'src/app/shared/components/dialogs/form-dialog/form-dialog.component';
@@ -44,7 +44,6 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
     };
     @Input() mode: 'create' | 'edit' = 'create';
 
-    @ViewChildren(NgModel) controls?: QueryList<NgModel>;
     @ViewChild('rangeStartCtrl') rangeStartCtrl?: NgModel;
     @ViewChild('rangeEndCtrl') rangeEndCtrl?: NgModel;
 
@@ -75,13 +74,19 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        if (!this.parentForm || !this.controls) {
+        if (!this.parentForm) {
             return;
         }
 
-        this.controls.forEach((control) => {
-            this.parentForm?.addControl(control);
-        });
+        // Register only the hidden input controls with the parent form.
+        // Do NOT use @ViewChildren(NgModel) — it would also pick up the
+        // standalone ngModels on the readonly display inputs.
+        if (this.rangeStartCtrl) {
+            this.parentForm.addControl(this.rangeStartCtrl);
+        }
+        if (this.rangeEndCtrl) {
+            this.parentForm.addControl(this.rangeEndCtrl);
+        }
 
         // Attach validator functions that Angular re-runs on every updateValueAndValidity.
         // They read from rangeStartValidationError / rangeEndValidationError which we control.

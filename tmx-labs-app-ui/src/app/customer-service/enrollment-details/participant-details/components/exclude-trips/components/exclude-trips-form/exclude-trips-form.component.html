@@ -7,7 +7,8 @@
                 readonly
                 role="button"
                 placeholder="Range Start Date"
-                [value]="formatDisplayDate(formModel.rangeStart)"
+                [ngModel]="formatDisplayDate(formModel.rangeStart)"
+                [ngModelOptions]="{ standalone: true }"
                 [errorStateMatcher]="rangeStartErrorMatcher"
                 (click)="openDateTimeEditor('start')"
                 (keydown.enter)="openEditorFromKeyboard($event, 'start')"
@@ -41,7 +42,8 @@
                 readonly
                 role="button"
                 placeholder="Range End Date"
-                [value]="formatDisplayDate(formModel.rangeEnd)"
+                [ngModel]="formatDisplayDate(formModel.rangeEnd)"
+                [ngModelOptions]="{ standalone: true }"
                 [errorStateMatcher]="rangeEndErrorMatcher"
                 (click)="openDateTimeEditor('end')"
                 (keydown.enter)="openEditorFromKeyboard($event, 'end')"
