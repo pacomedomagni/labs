@@ -49,7 +49,8 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
 
     rangeStartError: string | null = null;
     rangeEndError: string | null = null;
-    rangeStartErrorMatcher: ErrorStateMatcher = { isErrorState: () => this.shouldShowRangeStartError() };
+    private rangeStartHighlight = false;
+    rangeStartErrorMatcher: ErrorStateMatcher = { isErrorState: () => this.shouldShowRangeStartError() || this.rangeStartHighlight };
     rangeEndErrorMatcher: ErrorStateMatcher = { isErrorState: () => this.shouldShowRangeEndError() };
     existingRanges: { rangeStart: string; rangeEnd: string }[] = [];
     originalRangeStart?: string;
@@ -189,6 +190,7 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         const hasValue = !!this.formModel.rangeEnd;
 
         if (!hasValue) {
+            this.rangeStartHighlight = false;
             this.rangeEndValidationError = { required: true };
             this.rangeEndError = 'Date is required.';
             this.rangeEndCtrl?.control?.updateValueAndValidity();
@@ -199,6 +201,7 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         const end = this.isoToDate(this.formModel.rangeEnd);
 
         if (start && end && end.getTime() <= start.getTime()) {
+            this.rangeStartHighlight = false;
             this.rangeEndValidationError = { order: true };
             this.rangeEndError = 'End date must be later than start date.';
             this.rangeEndCtrl?.control?.updateValueAndValidity();
@@ -207,12 +210,14 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
 
         const overlaps = start && end ? this.hasOverlap(this.formModel.rangeStart, this.formModel.rangeEnd, this.originalRangeStart) : false;
         if (overlaps) {
+            this.rangeStartHighlight = true;
             this.rangeEndValidationError = { overlap: true };
             this.rangeEndError = 'Selected date range overlaps with an existing exclusion.';
             this.rangeEndCtrl?.control?.updateValueAndValidity();
             return;
         }
 
+        this.rangeStartHighlight = false;
         this.rangeEndValidationError = null;
         this.rangeEndError = null;
         this.rangeEndCtrl?.control?.updateValueAndValidity();
