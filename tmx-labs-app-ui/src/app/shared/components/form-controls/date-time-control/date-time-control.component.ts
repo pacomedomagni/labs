@@ -212,22 +212,15 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
 
     onDateBlur(): void {
         this.interacted = true;
-        // MatDatepickerInput reformats/clears the input on blur via change detection.
-        // Use setTimeout to run AFTER Angular's full CD cycle completes.
-        const wasInvalid = this.invalidDateFormat;
-        const rawText = this.lastRawDateInput;
-
-        setTimeout(() => {
-            if (wasInvalid && rawText) {
-                this.invalidDateFormat = true;
-                const el = this.dateInputRef?.nativeElement;
-                if (el) {
-                    el.value = rawText;
-                }
+        // If the date format is invalid, restore the user's raw text into the DOM.
+        // MatDatepickerInput clears/reformats the input on blur.
+        if (this.invalidDateFormat && this.lastRawDateInput) {
+            const el = this.dateInputRef?.nativeElement;
+            if (el) {
+                el.value = this.lastRawDateInput;
             }
-            this.refreshError();
-            this.tryDetectChanges();
-        });
+        }
+        this.refreshError();
         this.onTouchedFn();
     }
 
@@ -359,6 +352,13 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
 
     private updateModel(): void {
         if (this.isSyncing) {
+            return;
+        }
+
+        // Don't emit model changes while there are format errors —
+        // emitModel triggers a CVA round-trip (onChangeFn → writeValue → syncFromModel)
+        // which resets invalidDateFormat/invalidTimeFormat to false.
+        if (this.invalidDateFormat || this.invalidTimeFormat) {
             return;
         }
 
