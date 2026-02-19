@@ -86,6 +86,7 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
     private currentError: string | null = null;
     private interacted = false;
     private lastRawDateInput = '';
+    private isDateBlurring = false;
     allowTimePickerOpen = false;
 
     // CVA callbacks
@@ -104,6 +105,11 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
 
     // ControlValueAccessor implementation
     writeValue(value: Date | null): void {
+        // If user typed an invalid format, don't let a CVA round-trip
+        // (our own emitModel → parent → writeValue) reset the error state.
+        if (this.invalidDateFormat || this.invalidTimeFormat) {
+            return;
+        }
         this.model = value;
         this.interacted = false;
         this.syncFromModel();
@@ -166,10 +172,13 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
     }
 
     onDateChange(value: Date | null): void {
+        // MatDatepickerInput also fires dateChange during blur reformat.
+        // Ignore it to preserve invalidDateFormat state.
+        if (this.isDateBlurring) {
+            return;
+        }
         this.interacted = true;
         this.dateValue = value ? new Date(value) : null;
-        // When MatDatepickerInput can't parse, it emits null. If onDateInput
-        // already flagged invalidDateFormat, preserve that — don't clear it.
         if (value) {
             this.invalidDateFormat = Number.isNaN(this.dateValue!.getTime());
             this.lastRawDateInput = '';
@@ -179,6 +188,11 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
     }
 
     onDateInput(event: any): void {
+        // MatDatepickerInput fires synthetic input events when reformatting on blur.
+        // Ignore those to preserve our invalidDateFormat state.
+        if (this.isDateBlurring) {
+            return;
+        }
         const input = event.target?.value;
         this.lastRawDateInput = input ?? '';
         if (!input || !input.trim()) {
@@ -212,15 +226,22 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
 
     onDateBlur(): void {
         this.interacted = true;
-        // If the date format is invalid, restore the user's raw text into the DOM.
-        // MatDatepickerInput clears/reformats the input on blur.
-        if (this.invalidDateFormat && this.lastRawDateInput) {
-            const el = this.dateInputRef?.nativeElement;
-            if (el) {
-                el.value = this.lastRawDateInput;
+        // Block MatDatepickerInput's reformat from clearing our error state.
+        // The directive fires synthetic input/dateChange events during blur.
+        this.isDateBlurring = true;
+
+        // Use setTimeout to restore state AFTER MatDatepickerInput finishes.
+        setTimeout(() => {
+            if (this.invalidDateFormat && this.lastRawDateInput) {
+                const el = this.dateInputRef?.nativeElement;
+                if (el) {
+                    el.value = this.lastRawDateInput;
+                }
             }
-        }
-        this.refreshError();
+            this.isDateBlurring = false;
+            this.refreshError();
+            this.tryDetectChanges();
+        });
         this.onTouchedFn();
     }
 
