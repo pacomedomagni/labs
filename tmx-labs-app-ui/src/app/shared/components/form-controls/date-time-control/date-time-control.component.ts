@@ -85,6 +85,7 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
     private isSyncing = false;
     private currentError: string | null = null;
     private interacted = false;
+    private lastRawDateInput = '';
     allowTimePickerOpen = false;
 
     // CVA callbacks
@@ -167,13 +168,19 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
     onDateChange(value: Date | null): void {
         this.interacted = true;
         this.dateValue = value ? new Date(value) : null;
-        this.invalidDateFormat = this.dateValue ? Number.isNaN(this.dateValue.getTime()) : false;
+        // When MatDatepickerInput can't parse, it emits null. If onDateInput
+        // already flagged invalidDateFormat, preserve that — don't clear it.
+        if (value) {
+            this.invalidDateFormat = Number.isNaN(this.dateValue!.getTime());
+            this.lastRawDateInput = '';
+        }
         this.refreshError();
         this.updateModel();
     }
 
     onDateInput(event: any): void {
         const input = event.target?.value;
+        this.lastRawDateInput = input ?? '';
         if (!input || !input.trim()) {
             this.invalidDateFormat = false;
             this.refreshError();
@@ -205,14 +212,14 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
 
     onDateBlur(): void {
         this.interacted = true;
-        // Revalidate on blur using the raw DOM value — if user typed invalid text,
-        // dateValue is null but the text is still in the input.
-        const rawValue = this.dateInputRef?.nativeElement?.value?.trim() ?? '';
-        if (rawValue) {
-            const parsed = new Date(rawValue);
-            this.invalidDateFormat = Number.isNaN(parsed.getTime());
-        } else {
-            this.invalidDateFormat = false;
+        // If the date format is invalid, restore the user's raw text into the DOM.
+        // MatDatepickerInput tries to reformat/clear the input on blur, which would
+        // hide the error and the user's original text.
+        if (this.invalidDateFormat && this.lastRawDateInput) {
+            const el = this.dateInputRef?.nativeElement;
+            if (el) {
+                el.value = this.lastRawDateInput;
+            }
         }
         this.refreshError();
         this.onTouchedFn();
