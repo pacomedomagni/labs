@@ -1,0 +1,19 @@
+<div class="flex flex-col p-xs pb-0"> 
+	
+	<tmx-data-list>
+		<tmx-data-list-row labelSpan="40" label="Current PPro Guid:">
+			{{ participant.snapshotDetails.participantId }}
+		</tmx-data-list-row>
+	</tmx-data-list>
+
+	<!-- <tmx-guid-control #tmxPolicySearchMobileIdentifier id="tmx-ppro-guid" label="New PolicyPro Guid"
+		[(ngModel)]="model.guid" name="new-guid" (keyup)="isDuplicateGuid()">
+	</tmx-guid-control> -->
+
+	<mat-form-field appearance="outline" [hideRequiredMarker]="true" class="mt-s">
+		<mat-label>New PolicyPro Guid</mat-label>
+		<input [(ngModel)]="model.guid" name="guid" id="tmx-ppro-guid" type="text" matInput required guidFormat minlength="36" maxlength="36" (keyup)="isDuplicateGuid()">
+		<mat-error>Please enter a new Guid</mat-error>
+	</mat-form-field>
+
+</div>

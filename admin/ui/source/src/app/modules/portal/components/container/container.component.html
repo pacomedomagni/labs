@@ -1,0 +1,21 @@
+<div class="flex flex-wrap justify-center">
+  @for (app of apps; track app) {
+    @if (shouldDisplay(app)) {
+      <a [routerLink]="'/' + app.id" class="m-xs card-container" matRipple>
+        @if (app.icon) {
+          <mat-icon class="material-icons-icon">{{app.icon}}</mat-icon>
+        }
+        @if (app.svgIcon) {
+          <mat-icon class="material-icons-icon" svgIcon="{{app.svgIcon}}"></mat-icon>
+        }
+        <div class="ml-xxs">
+          <div class="cui-h3 mb-2">{{app.name}}</div>
+          <span class="cui-label">{{app.description}}</span>
+        </div>
+        @if (!app.isReady && app.externalInfo) {
+          <mat-icon class="external-link-icon">launch</mat-icon>
+        }
+      </a>
+    }
+  }
+</div>

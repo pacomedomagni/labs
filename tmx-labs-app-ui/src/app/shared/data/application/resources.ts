@@ -1,4 +1,4 @@
-import { MessageCode, OrderType } from "./enums";
+import { MessageCode } from "./enums";
 
 export interface Resource {
     extenders: Map<string, unknown>[];
@@ -143,51 +143,6 @@ export interface TimeSpan {
 	totalMilliseconds: number;
 	totalMinutes: number;
 	totalSeconds: number;
-}
-
-export interface Orders {
-	searchOrderNumber: string;
-	searchBeginDate: string;
-	searchEndDate: string;
-	type: OrderType;
-	openSnapshotOrders: number;
-	processedSnapshotOrders: number;
-	snapshotDevicesNeeded: number;
-	openCommercialLinesOrders: number;
-	processedCommercialLinesOrders: number;
-	commercialLinesDevicesNeeded: number;
-}
-
-export interface StateOrder {
-	state: string;
-	numberOfOrders: number;
-	numberOfDevices: number;
-	numberOfOldOrders: number;
-	oldestOrder: Date;
-	numberDaysForOldOrders: number;
-}
-
-export interface OrderSearch {
-	type: OrderType;
-	orderId: string;
-}
-
-export interface OrdersByState {
-	type: OrderType;
-	stateOrders: StateOrder[];
-}
-
-export interface OrderDetails {
-	orderId: string;
-	orderNumber: string;
-	orderDate: Date;
-	state: string;
-	deviceCount: number;
-	deviceType: string;
-	status: string;
-	vehicleInfo?: string;
-	deviceVersion?: string;
-	shippingDetails?: string;
 }
 
 export interface Resource {

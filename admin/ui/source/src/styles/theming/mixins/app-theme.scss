@@ -1,0 +1,36 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+@use '@pgr-cla/core-ui-components' as cui;
+@use "mixins/theming/cui-theme";
+
+@use "../mixins/body-theme";
+@use "../mixins/breadcrumb-theme";
+@use "../mixins/data-list-row-theme";
+@use "../mixins/home-theme";
+@use "../mixins/mat-dialog-theme";
+@use "../mixins/nav-rail-theme";
+@use "../mixins/page-header-theme";
+@use "../mixins/preloader-theme";
+@use "../mixins/sidenav-theme";
+@use "../mixins/snackbar-theme";
+@use "../mixins/tab-theme";
+@use "../mixins/table-theme";
+@use "../mixins/xml-theme";
+
+
+@mixin admin-theme($theme) {
+	@include cui.cui-theme($theme);
+	@include body-theme.body-theme($theme);
+	@include breadcrumb-theme.breadcrumb-theme($theme);
+	@include data-list-row-theme.data-list-row-theme($theme);
+	@include home-theme.home-theme($theme);
+	@include mat-dialog-theme.mat-dialog-theme($theme);
+	@include nav-rail-theme.nav-rail-theme($theme);
+	@include page-header-theme.page-header-theme($theme);
+	@include preloader-theme.preloader-theme($theme);
+	@include sidenav-theme.sidenav-theme($theme);
+	@include snackbar-theme.snackbar-theme($theme);
+	@include tab-theme.tab-theme($theme);
+	@include table-theme.table-theme($theme);
+	@include xml-theme.xml-theme($theme);
+}

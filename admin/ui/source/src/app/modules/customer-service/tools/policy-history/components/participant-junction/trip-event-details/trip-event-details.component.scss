@@ -1,0 +1,13 @@
+:host{
+	::ng-deep {
+			.mat-mdc-table-sticky{
+			bottom: -20px !important;
+		}
+	}
+}
+
+cui-spinner {
+	left: auto;
+	top: auto;
+	min-height: 300px;
+}

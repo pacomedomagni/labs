@@ -1,12 +1,11 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin, Subscription } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { PendingOrdersComponent } from './components/pending-orders/pending-orders.component';
 import { CompletedOrdersComponent } from './components/completed-orders/completed-orders.component';
 import { FulfillmentService } from '../shared/services/api/fulfillment/fulfillment.services';
-import { Orders } from '../shared/data/application/resources';
-import { OrderType } from '../shared/data/application/enums';
 
 @Component({
   selector: 'tmx-customer-service-fulfillment',
@@ -21,8 +20,10 @@ import { OrderType } from '../shared/data/application/enums';
   templateUrl: './fulfillment.component.html',
   styleUrl: './fulfillment.component.scss'
 })
-export class CustomerServiceFulfillmentComponent implements OnInit {
+export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
   private fulfillmentService = inject(FulfillmentService);
+  private refreshInterval?: number;
+  private subscription?: Subscription;
 
   // Summary statistics
   pendingOrders = signal(0);
@@ -33,27 +34,35 @@ export class CustomerServiceFulfillmentComponent implements OnInit {
 
   ngOnInit() {
     this.loadOrderCounts();
+    // Refresh order counts every 10 minutes
+    this.refreshInterval = window.setInterval(() => {
+      this.loadOrderCounts();
+    }, 10 * 60 * 1000);
+  }
+
+  ngOnDestroy() {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   private loadOrderCounts() {
-    const ordersModel: Orders = {
-      searchOrderNumber: '',
-      searchBeginDate: '',
-      searchEndDate: '',
-      type: OrderType.All,
-      openSnapshotOrders: 0,
-      processedSnapshotOrders: 0,
-      snapshotDevicesNeeded: 0,
-      openCommercialLinesOrders: 0,
-      processedCommercialLinesOrders: 0,
-      commercialLinesDevicesNeeded: 0
-    };
+    // Unsubscribe from previous request if still pending
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
 
-    this.fulfillmentService.getOrderCounts(ordersModel).subscribe({
-      next: (data: Orders) => {
-        this.pendingOrders.set(data.openSnapshotOrders);
-        this.devicesNeeded.set(data.snapshotDevicesNeeded);
-        this.completedToday.set(data.processedSnapshotOrders);
+    this.subscription = forkJoin({
+      pendingOrders: this.fulfillmentService.getOrdersByStatus(1, 1, false),
+      processedCount: this.fulfillmentService.getProcessedOrdersCount()
+    }).subscribe({
+      next: (result) => {
+        this.pendingOrders.set(result.pendingOrders.numberOfOrders);
+        this.devicesNeeded.set(result.pendingOrders.numberOfDevices);
+        this.completedToday.set(result.processedCount);
       },
       error: (error) => {
         console.error('Error loading order counts:', error);

@@ -1,0 +1,24 @@
+<div class="flex p-xxs pb-xxs justify-center mx-auto"> 
+
+	<tmx-data-list class="w-1/2 mr-l">
+		<tmx-data-list-row labelSpan="40" label="Serial Number">{{ device.deviceSerialNumber }}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="SeqID">{{ device.deviceSeqId }}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="SIM">{{ device.sim }}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="Device Status">{{ device.status }}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="Wireless Status">{{ device.wirelessStatus }}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="Version SeqID">{{ device.deviceVersion }}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="Import Status">{{ helper.getExtender(device, 'ImportStatus') }}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="Reported VIN">{{ device.reportedVIN }}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="Lot ID">{{ helper.getExtender(device, 'LotID') }}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="Calc Version">{{ helper.getExtender(device, 'CalculatorVersion') }}</tmx-data-list-row>
+	</tmx-data-list>
+
+	<tmx-data-list class="w-1/2">
+		<tmx-data-list-row labelSpan="40" label="Create Date">{{ helper.getExtender(device, 'CreateDate') | date: formats.DATE_TIME_LONG}}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="First Contact">{{ helper.getExtender(device, 'FirstContact') | date: formats.DATE_TIME_LONG}}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="Last Contact">{{ helper.getExtender(device, 'LastContact') | date: formats.DATE_TIME_LONG}}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="Last Upload">{{ helper.getExtender(device, 'LastUpload') | date: formats.DATE_TIME_LONG}}</tmx-data-list-row>
+		<tmx-data-list-row labelSpan="40" label="Ship Date">{{ device.shipDateTime | date: formats.DATE_TIME_LONG}}</tmx-data-list-row>
+	</tmx-data-list>
+
+</div>

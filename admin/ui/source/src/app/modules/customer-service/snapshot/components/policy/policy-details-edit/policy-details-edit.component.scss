@@ -1,0 +1,12 @@
+:host {
+	mat-icon {
+		margin: 1.5rem 0;
+		cursor: help;
+	}
+	
+	::ng-deep {
+		.dialog-footer {
+			justify-content: flex-end !important;
+		}
+	}
+}

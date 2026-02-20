@@ -368,9 +368,6 @@ export class DateTimeControlComponent implements OnChanges, AfterViewInit, Contr
             return;
         }
 
-        // Don't emit model changes while there are format errors —
-        // emitModel triggers a CVA round-trip (onChangeFn → writeValue → syncFromModel)
-        // which resets invalidDateFormat/invalidTimeFormat to false.
         if (this.invalidDateFormat || this.invalidTimeFormat) {
             return;
         }

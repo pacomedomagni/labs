@@ -1,0 +1,68 @@
+<div id="table-interaction-description" aria-hidden="true" class="screen-reader-only">
+	Select a KBA to begin
+</div>
+
+<table mat-table [dataSource]="dataSource" class="cui-table">
+	<ng-container matColumnDef="kba">
+		<th mat-header-cell *matHeaderCellDef class="cui-cell-20">
+			<div>
+				<mat-form-field appearance="outline" class="cui-cell-14 filter">
+					<mat-label>KBA Id</mat-label>
+					<input #filter id="tmx-inc-res-kba-filter" type="text" matInput [(ngModel)]="kbaFilter">
+				</mat-form-field>
+			</div>
+		</th>
+		<td mat-cell *matCellDef="let item">{{ item.kbaId }}</td>
+	</ng-container>
+	<ng-container matColumnDef="description">
+		<th mat-header-cell *matHeaderCellDef>KBA Description</th>
+		<td mat-cell *matCellDef="let item">{{ item.kbaDescription }}</td>
+	</ng-container>
+	<ng-container matColumnDef="step">
+		<th mat-header-cell *matHeaderCellDef class="cui-cell-10 text-center">Step #</th>
+		<td mat-cell *matCellDef="let item" class="text-center">{{ item.stepNumber }}</td>
+	</ng-container>
+	<ng-container matColumnDef="storedProc">
+		<th mat-header-cell *matHeaderCellDef>Command Name</th>
+		<td mat-cell *matCellDef="let item">{{ item.storedProcedureName }}</td>
+	</ng-container>
+<!-- 	<ng-container matColumnDef="create">
+		<th mat-header-cell *matHeaderCellDef class="cui-cell-12">Create Date</th>
+		<td mat-cell *matCellDef="let item">{{ item.createDateTime | date: 'M/d/yyyy h:mm:ss a' }}</td>
+	</ng-container>
+	<ng-container matColumnDef="lastChange">
+		<th mat-header-cell *matHeaderCellDef class="cui-cell-12">Last Change Date</th>
+		<td mat-cell *matCellDef="let item">{{ item.lastChangeDateTime | date: 'M/d/yyyy h:mm:ss a' }}</td>
+	</ng-container>
+	<ng-container matColumnDef="lastUser">
+		<th mat-header-cell *matHeaderCellDef class="cui-cell-16">Last Change User Id</th>
+		<td mat-cell *matCellDef="let item">{{ item.lastChangeUserId }}</td>
+	</ng-container> -->
+	<ng-container matColumnDef="execute">
+		<th mat-header-cell *matHeaderCellDef class="cui-cell-16 cui-cell-border-right"></th>
+		<td mat-cell *matCellDef="let item" [ngClass]="{'cui-cell-actions': selectedItem !== item}" class="cui-cell-16 cui-cell-border-right">
+			<button mat-flat-button color="primary" (click)="setCurrentItem(undefined, item); execute(selectedItem)" aria-label="Execute Stored Procedure">Execute</button>
+		</td>
+	</ng-container>
+	<tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+	<tr mat-row tabindex="0" [ngClass]="'cui-row-selectable' + (currentIndex === i ? ' cui-row-active' : '')"
+		aria-describedby="table-interaction-description" (click)="setCurrentItem(i, item)" (keydown.enter)="setCurrentItem(i, item)"
+		(keydown.space)="setCurrentItem(i, item)" *matRowDef="let i = index; let item; let row; columns: columns;">
+	</tr>
+</table>
+
+<div class="flex justify-between table-actions">
+	<div class="my-auto">
+		<button mat-stroked-button class="ml-xxs mr-xxs cui-bordered-icon-button" id="btn-add" (click)="add()" aria-label="Add Item" matTooltip="Add Item" matTooltipPosition="above">
+			<mat-icon>add</mat-icon>
+		</button>
+		<button mat-stroked-button class="mr-xxs cui-bordered-icon-button" id="btn-edit" (click)="edit(selectedItem)" aria-label="Edit Item" [disabled]="!isRowSelected()" matTooltip="Edit Item" matTooltipPosition="above">
+			<mat-icon>edit</mat-icon>
+		</button>
+		<button mat-stroked-button class="mr-xxs cui-bordered-icon-button" id="btn-delete" (click)="delete(selectedItem)" aria-label="Delete Item" [disabled]="!isRowSelected()" matTooltip="Delete Item" matTooltipPosition="above">
+			<mat-icon>delete_forever</mat-icon>
+		</button>
+	</div>
+	<mat-paginator [pageSizeOptions]="[10, 20, 30]" showFirstLastButtons></mat-paginator>
+</div>
+

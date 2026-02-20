@@ -1,0 +1,35 @@
+<button mat-icon-button class="mt-xxs" (click)="toggleSideNav()"
+  [disabled]="!showMenu()" aria-label="Toggle Sub Menu">
+  <mat-icon>menu</mat-icon>
+</button>
+<nav class="nav-rail grow" aria-label="Main Navigation">
+  <ul class="flex flex-col py-bl-2">
+    @for (link of navLinks; track link) {
+      <li>
+        @if (shouldDisplay(link)) {
+          <a mat-icon-button class="nav-rail-link flex justify-center items-center"
+            #rla="routerLinkActive" [routerLinkActive]="['active']" [routerLink]="link.route">
+            <div class="flex flex-col items-center">
+              @if (link.icon) {
+                <mat-icon
+                class="material-icons-icon">{{link.icon}}</mat-icon>
+              }
+              @if (link.svgIcon) {
+                <mat-icon class="material-icons-icon"
+                svgIcon="{{link.svgIcon}}"></mat-icon>
+              }
+              @if (!link.isReady && link.externalInfo) {
+                <mat-icon
+                class="external-link-icon">launch</mat-icon>
+              }
+              <span class="nav-rail-link-label mt-bl-1">{{link.label}}</span>
+            </div>
+          </a>
+        }
+      </li>
+    }
+  </ul>
+  <div class="grow flex-col text-white flex items-center justify-end pb-bl-2">
+    <cui-theme-picker class="mb-xs"></cui-theme-picker>
+  </div>
+</nav>

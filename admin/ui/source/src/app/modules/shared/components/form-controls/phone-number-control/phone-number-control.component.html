@@ -1,0 +1,17 @@
+<mat-form-field appearance="outline" [hideRequiredMarker]="true" class="w-full">
+	<mat-label>{{ label }}</mat-label>
+	<input 
+		matInput
+		phoneNumberFormat
+		type="text"
+		[disabled]="isDisabled"	
+		[id]="id" 
+		[minlength]="14"
+		[maxlength]="14" 
+		[name]="name ? name : id" 
+		[required]="isRequired" 
+		(ngModelChange)="onChangeEvent($event)"
+		(keyup.enter)="onKeyEnterEvent($event)"
+		[(ngModel)]="model"	>
+	<mat-error>{{ getErrorMessage() }}</mat-error>
+</mat-form-field>

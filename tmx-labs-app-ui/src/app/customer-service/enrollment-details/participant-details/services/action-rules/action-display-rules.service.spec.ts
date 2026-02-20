@@ -27,7 +27,7 @@ describe('ActionDisplayRulesService', () => {
         });
         service = TestBed.inject(ActionDisplayRulesService);
         userInfoService = TestBed.inject(UserInfoService);
-        userInfoService.userInfo.next({ isLabsAdmin: false, isLabsUser: false, lanId: 'tester', name: 'Tester' });
+        userInfoService.userInfo.next({ isLabsAdmin: false, isLabsUser: false, lanId: 'tester', name: 'Tester' } as any);
     });
 
     it('should be created', () => {
@@ -269,7 +269,7 @@ describe('ActionDisplayRulesService', () => {
         });
 
         it('should return true when user has access and device is eligible', () => {
-            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: false, lanId: 'admin', name: 'Admin' });
+            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: false, lanId: 'admin', name: 'Admin' } as any);
 
             const context = buildContext();
 
@@ -277,7 +277,7 @@ describe('ActionDisplayRulesService', () => {
         });
 
         it('should return false when user lacks access', () => {
-            userInfoService.userInfo.next({ isLabsAdmin: false, isLabsUser: false, lanId: 'user', name: 'User' });
+            userInfoService.userInfo.next({ isLabsAdmin: false, isLabsUser: false, lanId: 'user', name: 'User' } as any);
 
             const context = buildContext();
 
@@ -285,7 +285,7 @@ describe('ActionDisplayRulesService', () => {
         });
 
         it('should return false when user is Labs user but not Labs admin', () => {
-            userInfoService.userInfo.next({ isLabsAdmin: false, isLabsUser: true, lanId: 'labsuser', name: 'Labs User' });
+            userInfoService.userInfo.next({ isLabsAdmin: false, isLabsUser: true, lanId: 'labsuser', name: 'Labs User' } as any);
 
             const context = buildContext();
 
@@ -293,7 +293,7 @@ describe('ActionDisplayRulesService', () => {
         });
 
         it('should return false when device has been returned', () => {
-            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: false, lanId: 'admin', name: 'Admin' });
+            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: false, lanId: 'admin', name: 'Admin' } as any);
 
             const context = buildContext();
             context.device.deviceReceivedDateTime = new Date().toISOString();
@@ -302,7 +302,7 @@ describe('ActionDisplayRulesService', () => {
         });
 
         it('should return false when deviceSeqID is missing', () => {
-            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: false, lanId: 'admin', name: 'Admin' });
+            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: false, lanId: 'admin', name: 'Admin' } as any);
 
             const context = buildContext();
             delete (context.device as { deviceSeqID?: number }).deviceSeqID;
@@ -565,7 +565,7 @@ describe('ActionDisplayRulesService', () => {
         });
 
         it('should return true for Labs admin with an enrolled plug-in participant', () => {
-            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: true, lanId: 'admin', name: 'Admin' });
+            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: true, lanId: 'admin', name: 'Admin' } as any);
 
             const context = buildContext();
 
@@ -573,7 +573,7 @@ describe('ActionDisplayRulesService', () => {
         });
 
         it('should return false when user is not a Labs admin', () => {
-            userInfoService.userInfo.next({ isLabsAdmin: false, isLabsUser: true, lanId: 'user', name: 'User' });
+            userInfoService.userInfo.next({ isLabsAdmin: false, isLabsUser: true, lanId: 'user', name: 'User' } as any);
 
             const context = buildContext();
 
@@ -581,7 +581,7 @@ describe('ActionDisplayRulesService', () => {
         });
 
         it('should return false when participant is not enrolled', () => {
-            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: true, lanId: 'admin', name: 'Admin' });
+            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: true, lanId: 'admin', name: 'Admin' } as any);
 
             const context = buildContext({
                 participant: { participantStatusCode: 2, participantSeqID: 456 },
@@ -591,7 +591,7 @@ describe('ActionDisplayRulesService', () => {
         });
 
         it('should ignore device type when user is admin and participant enrolled', () => {
-            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: true, lanId: 'admin', name: 'Admin' });
+            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: true, lanId: 'admin', name: 'Admin' } as any);
 
             const context = buildContext({
                 device: {

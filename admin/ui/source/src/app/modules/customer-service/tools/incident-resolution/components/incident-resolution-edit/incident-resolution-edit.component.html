@@ -1,0 +1,6 @@
+<div class="flex flex-col p-xs pb-0"> 
+	<tmx-text-control id="kbaId" label="KBA Id" [(model)]="model.kbaId" [isRequired]="true"></tmx-text-control>
+	<tmx-text-control id="kbaDesc" label="KBA Description" [(model)]="model.kbaDescription" [isRequired]="true"></tmx-text-control>
+	<tmx-numeric-control id="stepNum" label="Step #" [(model)]="model.stepNumber" [min]="1" [isRequired]="true"></tmx-numeric-control>
+	<tmx-text-control id="spName" label="Command Name" [(model)]="model.storedProcedureName" [isRequired]="true"></tmx-text-control>
+</div>

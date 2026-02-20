@@ -1,0 +1,24 @@
+<mat-card appearance="outlined" class="mb-xxs">
+  <tmx-device-prep-search-activation></tmx-device-prep-search-activation>
+</mat-card>
+
+@if ((query.devices$ | async) === undefined) {
+  <mat-card appearance="outlined" [@fadeAnim]>
+    <tmx-empty-state icon="search" primaryText="Please search for a device"
+      secondaryText="Please provide the device SIM to begin your search">
+    </tmx-empty-state>
+  </mat-card>
+}
+
+@if ((query.deviceSearchHasErrors$ | async)) {
+  <mat-card appearance="outlined" [@fadeAnim]>
+    <tmx-empty-state svgIcon="ubi_sadcone" primaryText="Uh oh..." [secondaryText]="(query.searchError$ | async)">
+    </tmx-empty-state>
+  </mat-card>
+}
+
+@if ((query.devices$ | async) !== undefined && (query.deviceSearchHasErrors$ | async) === false) {
+  <mat-card appearance="outlined" [@fadeAnim]>
+    <tmx-device-prep-device-details ></tmx-device-prep-device-details>
+  </mat-card>
+}

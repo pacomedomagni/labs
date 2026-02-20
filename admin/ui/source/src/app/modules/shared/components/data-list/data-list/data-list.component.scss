@@ -1,0 +1,47 @@
+:host ::ng-deep table {
+  border-spacing: 0;
+  width: 100%;
+
+  &[data-density='condensed'] {
+    font-size: 1.2rem;
+
+    td {
+      padding: 0.4rem 0;
+    }
+
+    .decorator-icon {
+      font-size: 1.2rem;
+      top: .7rem;
+    }
+  }
+
+  &[data-density='normal'] {
+    font-size: 1.4rem;
+
+    td {
+      padding: 0.6rem 0;
+    }
+
+    .decorator-icon {
+      font-size: 1.4rem;
+      top: .9rem;
+    }
+  }
+
+  &[data-border='true'] {
+    tr:not(:last-child) td {
+      border-bottom-style: solid;
+      border-bottom-width: 1px;
+    }
+  }
+
+  &[data-border='false'] {
+    td {
+      padding: 0;
+    }
+
+    .decorator-icon {
+      top: .3rem;
+    }
+  }
+}

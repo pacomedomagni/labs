@@ -1,0 +1,41 @@
+<div class="flex flex-col p-xs pb-0">
+
+  @for (sp of model; track sp) {
+    @if (isDateControl(sp.dataType)) {
+      <tmx-date-time-control
+        [id]="getLabel(sp)"
+        [label]="getLabel(sp)"
+        [(model)]="sp.value"
+      [isRequired]="true"></tmx-date-time-control>
+    }
+    @if (isGuidControl(sp.dataType)) {
+      <tmx-guid-control
+        [id]="getLabel(sp)"
+        [label]="getLabel(sp)"
+        [(model)]="sp.value"
+      [isRequired]="true"></tmx-guid-control>
+    }
+    @if (isNumericControl(sp.dataType)) {
+      <tmx-numeric-control
+        [id]="getLabel(sp)"
+        [label]="getLabel(sp)"
+        [(model)]="sp.value"
+      [isRequired]="true"></tmx-numeric-control>
+    }
+    @if (isTextControl(sp.dataType) && !isPhoneNumberControl(sp)) {
+      <tmx-text-control
+        [id]="getLabel(sp)"
+        [label]="getLabel(sp)"
+        [(model)]="sp.value"
+      [maxlength]="sp.length" [isRequired]="true"></tmx-text-control>
+    }
+    @if (isPhoneNumberControl(sp)) {
+      <tmx-text-control
+        [id]="getLabel(sp)"
+        [label]="getLabel(sp)"
+        [(model)]="sp.value"
+      [maxlength]="14" [isRequired]="true"></tmx-text-control>
+    }
+  }
+
+</div>

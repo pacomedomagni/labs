@@ -1,0 +1,28 @@
+:host {
+	.participant-header {
+		flex: auto;
+		margin: auto;
+	}
+
+	.participant-card {
+		padding: 10px 25px;
+		width: 50%;
+		min-width: 420px;
+	}
+
+	.mat-mdc-card {
+		margin: 10px 25px;
+		display: flex;
+		flex-direction: column;
+	}
+
+	::ng-deep {
+		td {
+			vertical-align: middle !important;
+		}
+	}
+}
+
+.nonCommInput {
+	width: 225px;
+}

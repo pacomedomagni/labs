@@ -1,0 +1,24 @@
+<div class="date-time-control">
+<tmx-date-control
+	[id]="id + '-date'"
+	[label]="label"
+	[max]="max"
+	[min]="min"
+	[name]="name ? name + '-date' : id + '-date'"
+	[isDisabled]="isDisabled"
+	[model]="model"
+	(modelChange)="onDateChange($event)"
+></tmx-date-control>
+
+<tmx-time-control
+	id="{{id}}-time"
+	name="{{name ? name + '-time' : id + '-time'}}"
+	label="Time"
+	[isDisabled]="isDisabled"
+	[model]="model"
+	(modelChange)="onTimeChange($event)"
+></tmx-time-control>
+<mat-error>{{ getErrorMessage() }}</mat-error>
+
+</div>
+

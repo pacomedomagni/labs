@@ -1,0 +1,37 @@
+:host {
+	::ng-deep {
+		tmx-text-control {
+			display: inline-flex;
+		}
+
+		tmx-text-control {
+			:first {
+				margin-top: 10px;
+			}
+		}
+
+		.mat-form-field-appearance-outline {
+			:first {
+				margin-top: 20px;
+				margin-bottom: 20px;
+			}
+
+			width: 300px !important;
+		}
+		/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
+		/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
+		/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
+		/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
+		.mat-form-field-infix {
+			border-top-width: 0px !important;
+		}
+	}
+
+	.columns {
+		flex-direction: column;
+	}
+
+	.mat-mdc-checkbox {
+		margin-bottom: 25px !important;
+	}
+}

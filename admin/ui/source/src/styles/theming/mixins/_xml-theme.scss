@@ -1,0 +1,21 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+
+@mixin xml-theme($theme) {
+	$color-config: mat.m2-get-color-config($theme);
+	$accent: map.get($color-config, 'accent');
+	$primary: map.get($color-config, 'primary');
+	$is-dark: map.get($color-config, 'is-dark');
+
+	.xml {
+		display: block;
+		font-family: monospace;
+		white-space-collapse: preserve;
+		text-wrap: nowrap;
+		margin: 1em 0px;
+
+		.tag {
+			color: mat.m2-get-color-from-palette($accent) !important;
+		}
+	}
+}

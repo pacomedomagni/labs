@@ -148,7 +148,7 @@ describe('ParticipantActionButtonsService', () => {
 
         it('should include exclude trips action for Labs admins with eligible participants', () => {
             const userInfoService = TestBed.inject(UserInfoService);
-            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: true, lanId: 'admin', name: 'Admin' });
+            userInfoService.userInfo.next({ isLabsAdmin: true, isLabsUser: true, lanId: 'admin', name: 'Admin' } as any);
 
             const context: ActionVisibilityContext = {
                 participant: {

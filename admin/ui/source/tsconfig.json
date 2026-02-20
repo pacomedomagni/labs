@@ -1,0 +1,45 @@
+{
+	"compileOnSave": false,
+	"buildOnSave": false,
+	"compilerOptions": {
+    "baseUrl": "src",
+    "importHelpers": true,
+    "module": "es2020",
+    "outDir": "dist/admin",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "ES2022",
+    "types": [
+      "jest",
+      "node"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "es2020",
+      "dom"
+    ],
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "paths": {
+      "@modules/*": [
+        "app/modules/*"
+      ],
+      "autoSpy": [
+        "auto-spy"
+      ]
+    },
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "useDefineForClassFields": false
+  },
+	"angularCompilerOptions": {
+		"fullTemplateTypeCheck": true,
+		"strictInjectionParameters": true
+	}
+}

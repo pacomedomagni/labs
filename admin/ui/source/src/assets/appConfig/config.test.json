@@ -1,0 +1,29 @@
+{
+	"environment": {
+		"name": "test",
+		"isProduction": false,
+		"prefix": "t"
+	},
+	"build": {
+		"version": "${BUILD_DEFINITIONVERSION}",
+		"buildId": "${BUILD_BUILDID}",
+		"buildNumber": "${BUILD_BUILDNUMBER}",
+		"branch": "${BUILD_SOURCEBRANCHNAME}"
+	},
+	"auth": {
+		"issuer": "qa-tokenservice.proghszq.com",
+		"discoveryDoc": "/assets/oidc.discovery.json",
+		"redirectUri": "/oauth_sso",
+		"clientId": "ubi-ui-admin",
+		"responseType": "code",
+		"scope": "openid",
+		"skipIssuerCheck": true,
+		"strictDiscoveryDocumentValidation": false
+	},
+	"apiKeys": {
+		"googleMaps": "AIzaSyDhPPbW0jMFZN7S6NruSVloEyRRCRPtoXw"
+	},
+	"connections": {
+		"apiUrl": "https://ubi-api-admin-master-pro-homebase-test.np.glb.pgrcloud.app/Api"
+	}
+}

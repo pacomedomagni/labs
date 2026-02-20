@@ -79,9 +79,6 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
             return;
         }
 
-        // Register only the hidden input controls with the parent form.
-        // Do NOT use @ViewChildren(NgModel) — it would also pick up the
-        // standalone ngModels on the readonly display inputs.
         if (this.rangeStartCtrl) {
             this.parentForm.addControl(this.rangeStartCtrl);
         }
@@ -89,8 +86,6 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
             this.parentForm.addControl(this.rangeEndCtrl);
         }
 
-        // Attach validator functions that Angular re-runs on every updateValueAndValidity.
-        // They read from rangeStartValidationError / rangeEndValidationError which we control.
         if (this.rangeStartCtrl?.control) {
             this.rangeStartCtrl.control.setValidators(() => this.rangeStartValidationError);
             this.rangeStartCtrl.control.updateValueAndValidity();
@@ -100,7 +95,6 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
             this.rangeEndCtrl.control.updateValueAndValidity();
         }
 
-        // Re-validate with actual model values — needed for edit mode where fields are pre-filled
         setTimeout(() => {
             this.validateRangeStart();
             this.validateRangeEnd();
