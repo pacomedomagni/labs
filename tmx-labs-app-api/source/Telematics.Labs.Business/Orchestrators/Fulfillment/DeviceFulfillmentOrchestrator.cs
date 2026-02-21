@@ -158,88 +158,165 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
             deviceOrderSummaryRequest.ParticipantGroupTypeCode = orderList.ParticipantGroupTypeCode;
 
         var deviceOrderSummaryResponse = await _wCFDeviceOrderSummaryService.GetByStatus(deviceOrderSummaryRequest);
-        if (deviceOrderSummaryResponse.ResponseStatus == WCFDeviceOrderSummaryService.ResponseStatus.Success)
-        {
-            orderList.NumberOfOrders = deviceOrderSummaryResponse.RecordCount;
-
-            // Calculate total number of devices across all device orders
-            orderList.NumberOfDevices = deviceOrderSummaryResponse.DeviceOrderSummaryList
-                .Sum(s => s.DeviceOrderDetailCount);
-
-            //get list of customers from keys
-            var uids = deviceOrderSummaryResponse.DeviceOrderSummaryList.Select(s => s.ParticipantGroupExternalKey).Distinct().ToArray();
-
-            var resp = await _userManagementService.GetUsersByUIDs(uids);
-            if (resp.ResponseStatus != WcfUserManagementService.ResponseStatus.Success)
-            {
-                var errMessage = string.Format("Failure on UserManagementService GetUsersByUIDs. [DeviceOrderStatusCode = {0}]", orderList.DeviceOrderStatusCode);
-                throw new ApplicationException(errMessage);
-            }
-
-            // TEMPORARY: Log missing ParticipantGroupExternalKey values for debugging
-            var missingKeys = deviceOrderSummaryResponse.DeviceOrderSummaryList
-                .Where(s => !resp.Users.ContainsKey(s.ParticipantGroupExternalKey))
-                .Select(s => s.ParticipantGroupExternalKey)
-                .ToList();
-
-            if (missingKeys.Any())
-            {
-                Console.WriteLine($"WARNING: {missingKeys.Count} ParticipantGroupExternalKey(s) not found in Users dictionary:");
-                foreach (var key in missingKeys)
-                {
-                    Console.WriteLine($"  - Missing Key: '{key}'");
-                }
-            }
-
-            //populate model with user info
-            orderList.DeviceOrders = (from s in deviceOrderSummaryResponse.DeviceOrderSummaryList
-                                  where resp.Users.ContainsKey(s.ParticipantGroupExternalKey)
-                                  let u = resp.Users[s.ParticipantGroupExternalKey]
-                                  select new Resources.Resources.FulFillment.DeviceOrder
-                                  {
-                                      DeviceOrderSeqID = s.DeviceOrderSeqID,
-                                      NbrDevicesNeeded = s.DeviceOrderDetailCount,
-                                      Name = u.LastName,
-                                      Email = u.Email
-                                  }).ToList();
-        }
-        else
+        if (deviceOrderSummaryResponse.ResponseStatus != WCFDeviceOrderSummaryService.ResponseStatus.Success)
         {
             var errMessage = string.Format("Failure on DeviceOrderSummaryService GetByStatus. [DeviceOrderStatusCode = {0}]",
                                        orderList.DeviceOrderStatusCode);
             throw new ApplicationException(errMessage);
         }
+
+        orderList.NumberOfOrders = deviceOrderSummaryResponse.RecordCount;
+
+        // Calculate total number of devices across all device orders
+        orderList.NumberOfDevices = deviceOrderSummaryResponse.DeviceOrderSummaryList
+            .Sum(s => s.DeviceOrderDetailCount);
+
+        //get list of customers from keys
+        var uids = deviceOrderSummaryResponse.DeviceOrderSummaryList.Select(s => s.ParticipantGroupExternalKey).Distinct().ToArray();
+
+        if (uids.Length == 0)
+        {
+            orderList.DeviceOrders = new List<Resources.Resources.FulFillment.DeviceOrder>();
+            return orderList;
+        }
+
+        var resp = await _userManagementService.GetUsersByUIDs(uids);
+        if (resp.ResponseStatus != WcfUserManagementService.ResponseStatus.Success)
+        {
+            var errMessage = string.Format("Failure on UserManagementService GetUsersByUIDs. [DeviceOrderStatusCode = {0}]", orderList.DeviceOrderStatusCode);
+            throw new ApplicationException(errMessage);
+        }
+
+        // Get detailed business device order data for enrichment (OrderDate, DeviceType, SnapshotVersion)
+        var detailResponse = await _wCFBusinessDeviceOrderService.GetBusinessDeviceOrderByOrderStatus(
+            new GetBusinessDeviceOrderByOrderStatusRequest { OrderStatus = orderList.DeviceOrderStatusCode });
+
+        var detailLookup = new Dictionary<int, WCFBusinessDeviceOrderService.BusinessDeviceOrder>();
+        if (detailResponse.ResponseStatus == WCFBusinessDeviceOrderService.ResponseStatus.Success)
+        {
+            detailLookup = detailResponse.BusinessDeviceOrderList
+                .ToDictionary(b => b.DeviceOrder.DeviceOrderSeqID);
+        }
+
+        // Load device type descriptions from code tables
+        var deviceSpecLookup = GetDeviceSpecLookup();
+
+        // Build the status description from status code
+        var statusDescription = GetStatusDescription(orderList.DeviceOrderStatusCode);
+
+        //populate model with user and detail info
+        orderList.DeviceOrders = (from s in deviceOrderSummaryResponse.DeviceOrderSummaryList
+                              where resp.Users.ContainsKey(s.ParticipantGroupExternalKey)
+                              let u = resp.Users[s.ParticipantGroupExternalKey]
+                              let detail = detailLookup.ContainsKey(s.DeviceOrderSeqID) ? detailLookup[s.DeviceOrderSeqID] : null
+                              select BuildDeviceOrder(s, u, detail, deviceSpecLookup, statusDescription)).ToList();
+
         return orderList;
     }
 
     public async Task<OrdersList> GetPendingOrderList()
     {
-        // Fetch all pending orders (status 1=New and 2=DevicesAssigned) from the database
-        var newOrders = await _deviceOrderDAL.GetPendingOrderSummaries(1);
-        var assignedOrders = await _deviceOrderDAL.GetPendingOrderSummaries(2);
+        // Fetch pending orders for both statuses by reusing GetOrdersByStatusCommand
+        var newOrderList = new OrdersList { DeviceOrderStatusCode = 1 };
+        var assignedOrderList = new OrdersList { DeviceOrderStatusCode = 2 };
 
-        var allRows = newOrders.Concat(assignedOrders).ToList();
+        newOrderList = await GetOrdersByStatusCommand(newOrderList);
+        assignedOrderList = await GetOrdersByStatusCommand(assignedOrderList);
 
-        var orderList = new OrdersList
+        var allOrders = newOrderList.DeviceOrders
+            .Concat(assignedOrderList.DeviceOrders)
+            .OrderBy(o => o.OrderDate)
+            .ToList();
+
+        return new OrdersList
         {
-            NumberOfOrders = allRows.Count,
-            NumberOfDevices = allRows.Sum(r => r.NbrDevicesNeeded),
-            DeviceOrders = allRows.Select(r => new Resources.Resources.FulFillment.DeviceOrder
-            {
-                DeviceOrderSeqID = r.DeviceOrderSeqID,
-                OrderNumber = r.OrderNumber,
-                OrderDate = r.OrderDate,
-                State = r.State,
-                NbrDevicesNeeded = r.NbrDevicesNeeded,
-                DeviceType = r.DeviceType,
-                SnapshotVersion = r.SnapshotVersion,
-                DeviceOrderStatusDescription = r.DeviceOrderStatusCode == 1 ? "Pending Assignment" : "Ready to Print",
-                Name = r.Name,
-                Email = r.Email
-            }).OrderBy(o => o.OrderDate).ToList()
+            NumberOfOrders = allOrders.Count,
+            NumberOfDevices = allOrders.Sum(o => o.NbrDevicesNeeded),
+            DeviceOrders = allOrders
         };
+    }
 
-        return orderList;
+    private Resources.Resources.FulFillment.DeviceOrder BuildDeviceOrder(
+        WCFDeviceOrderSummaryService.DeviceOrderSummary summary,
+        WcfUserManagementService.User user,
+        WCFBusinessDeviceOrderService.BusinessDeviceOrder detail,
+        Dictionary<int, string> deviceSpecLookup,
+        string statusDescription)
+    {
+        var deviceType = "";
+        var snapshotVersion = "";
+        var orderDate = DateTime.MinValue;
+
+        if (detail != null)
+        {
+            orderDate = detail.DeviceOrder.CreateDateTime;
+
+            var participants = detail.DeviceOrderDetails
+                .Select(d => d.Participant)
+                .Where(p => p != null)
+                .ToList();
+
+            if (participants.Any())
+            {
+                // Device type from DeviceExperienceTypeCode
+                var expCodes = participants.Select(p => p.DeviceExperienceTypeCode).Distinct().ToList();
+                var deviceTypeDescriptions = expCodes
+                    .Where(c => deviceSpecLookup.ContainsKey(c))
+                    .Select(c => deviceSpecLookup[c])
+                    .Distinct()
+                    .ToList();
+                deviceType = deviceTypeDescriptions.Any() ? string.Join(", ", deviceTypeDescriptions) : "";
+
+                // Snapshot version from MobileSummarizerVersionCode
+                var versionCode = participants
+                    .Where(p => p.MobileSummarizerVersionCode.HasValue)
+                    .Select(p => p.MobileSummarizerVersionCode.Value)
+                    .FirstOrDefault();
+                snapshotVersion = versionCode > 0 ? $"{versionCode}.0" : "";
+            }
+        }
+
+        return new Resources.Resources.FulFillment.DeviceOrder
+        {
+            DeviceOrderSeqID = summary.DeviceOrderSeqID,
+            OrderNumber = summary.ParticipantGroupExternalKey,
+            OrderDate = orderDate,
+            State = user.State ?? "",
+            NbrDevicesNeeded = summary.DeviceOrderDetailCount,
+            DeviceType = deviceType,
+            SnapshotVersion = snapshotVersion,
+            DeviceOrderStatusDescription = statusDescription,
+            Name = user.LastName ?? "",
+            Email = user.Email ?? ""
+        };
+    }
+
+    private Dictionary<int, string> GetDeviceSpecLookup()
+    {
+        try
+        {
+            var dataset = _homeBaseCodeTableManager.TypedDataSet;
+            if (dataset != null && dataset.Tables.Contains("DeviceSpec"))
+            {
+                return dataset.Tables["DeviceSpec"].AsEnumerable()
+                    .ToDictionary(row => row.Field<int>("Code"), row => row.Field<string>("Description"));
+            }
+        }
+        catch
+        {
+            // If code table loading fails, return empty lookup
+        }
+        return new Dictionary<int, string>();
+    }
+
+    private static string GetStatusDescription(int statusCode)
+    {
+        return statusCode switch
+        {
+            1 => "Pending Assignment",
+            2 => "Ready to Print",
+            _ => "Unknown"
+        };
     }
 
     public async Task<int> GetProcessedOrderCount()
