@@ -25,6 +25,7 @@ public interface IDeviceFulfillmentOrchestrator
     Task<OrderDetailsModel> AssignDevicesToOrder(MyScoreVehicle myScoreVehicle, OrderDetailsModel orderDetails);
     Task<OrderDetailsModel> GetOrderDetails(OrderDetailsModel orderDetails);
     Task<OrdersList> GetOrdersByStatusCommand(OrdersList orderList);
+    Task<OrdersList> GetPendingOrderList();
     Task<int> GetProcessedOrderCount();
 }
 public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
@@ -208,6 +209,36 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
                                        orderList.DeviceOrderStatusCode);
             throw new ApplicationException(errMessage);
         }
+        return orderList;
+    }
+
+    public async Task<OrdersList> GetPendingOrderList()
+    {
+        // Fetch all pending orders (status 1=New and 2=DevicesAssigned) from the database
+        var newOrders = await _deviceOrderDAL.GetPendingOrderSummaries(1);
+        var assignedOrders = await _deviceOrderDAL.GetPendingOrderSummaries(2);
+
+        var allRows = newOrders.Concat(assignedOrders).ToList();
+
+        var orderList = new OrdersList
+        {
+            NumberOfOrders = allRows.Count,
+            NumberOfDevices = allRows.Sum(r => r.NbrDevicesNeeded),
+            DeviceOrders = allRows.Select(r => new Resources.Resources.FulFillment.DeviceOrder
+            {
+                DeviceOrderSeqID = r.DeviceOrderSeqID,
+                OrderNumber = r.OrderNumber,
+                OrderDate = r.OrderDate,
+                State = r.State,
+                NbrDevicesNeeded = r.NbrDevicesNeeded,
+                DeviceType = r.DeviceType,
+                SnapshotVersion = r.SnapshotVersion,
+                DeviceOrderStatusDescription = r.DeviceOrderStatusCode == 1 ? "Pending Assignment" : "Ready to Print",
+                Name = r.Name,
+                Email = r.Email
+            }).OrderBy(o => o.OrderDate).ToList()
+        };
+
         return orderList;
     }
 

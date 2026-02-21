@@ -1,9 +1,15 @@
 
-export interface DeviceOrder{
+export interface DeviceOrder {
     pdeviceOrderSeqID: number;
     nbrDevicesNeeded: number;
     name: string;
-    email: string;  
+    email: string;
+    orderNumber: string;
+    orderDate: string;
+    state: string;
+    deviceType: string;
+    snapshotVersion: string;
+    deviceOrderStatusDescription: string;
 }
 
 export interface OrderListDetails {

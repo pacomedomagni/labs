@@ -31,6 +31,12 @@ export class FulfillmentService {
         });
     }
 
+    getPendingOrderList(): Observable<OrderListDetails> {
+        return this.apiService.get<OrderListDetails>({
+            uri: `${this.controller}/PendingOrderList`,
+        });
+    }
+
     getProcessedOrdersCount(): Observable<number> {
         return this.apiService.get<number>({
             uri: `${this.controller}/ProcessedOrderCount`,

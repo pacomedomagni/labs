@@ -80,6 +80,17 @@ public class FulfillmentController : ControllerBase
     }
 
     /// <summary>
+    /// Gets all pending orders with full details for the Pending Orders table
+    /// </summary>
+    /// <returns>List of pending orders with order number, date, state, device info, and status</returns>
+    [HttpGet("PendingOrderList")]
+    public async Task<ActionResult<OrdersList>> GetPendingOrderList()
+    {
+        var result = await _orchestrator.GetPendingOrderList();
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Gets the count of device orders processed today
     /// </summary>
     /// <returns>Count of processed orders</returns>

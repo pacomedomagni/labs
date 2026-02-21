@@ -6,6 +6,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { PendingOrdersComponent } from './components/pending-orders/pending-orders.component';
 import { CompletedOrdersComponent } from './components/completed-orders/completed-orders.component';
 import { FulfillmentService } from '../shared/services/api/fulfillment/fulfillment.services';
+import { DeviceOrder } from '../shared/data/fulfillment/resources';
 
 @Component({
   selector: 'tmx-customer-service-fulfillment',
@@ -29,7 +30,8 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
   pendingOrders = signal(0);
   devicesNeeded = signal(0);
   completedToday = signal(0);
-  
+  pendingOrderData = signal<DeviceOrder[]>([]);
+
   selectedTab = signal(0);
 
   ngOnInit() {
@@ -56,12 +58,13 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
     }
 
     this.subscription = forkJoin({
-      pendingOrders: this.fulfillmentService.getOrdersByStatus(1, 1, false),
+      pendingOrders: this.fulfillmentService.getPendingOrderList(),
       processedCount: this.fulfillmentService.getProcessedOrdersCount()
     }).subscribe({
       next: (result) => {
         this.pendingOrders.set(result.pendingOrders.numberOfOrders);
         this.devicesNeeded.set(result.pendingOrders.numberOfDevices);
+        this.pendingOrderData.set(result.pendingOrders.deviceOrders);
         this.completedToday.set(result.processedCount);
       },
       error: (error) => {
@@ -72,5 +75,10 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
 
   onTabChange(index: number) {
     this.selectedTab.set(index);
+  }
+
+  onOrderSelected(order: DeviceOrder) {
+    // TODO: Open Order Details modal (PBI 6478014)
+    console.log('Order selected:', order.orderNumber);
   }
 }
