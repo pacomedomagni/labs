@@ -198,9 +198,6 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
                 .ToDictionary(b => b.DeviceOrder.DeviceOrderSeqID);
         }
 
-        // Load device type descriptions from code tables
-        var deviceSpecLookup = GetDeviceSpecLookup();
-
         // Build the status description from status code
         var statusDescription = GetStatusDescription(orderList.DeviceOrderStatusCode);
 
@@ -209,7 +206,7 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
                               where resp.Users.ContainsKey(s.ParticipantGroupExternalKey)
                               let u = resp.Users[s.ParticipantGroupExternalKey]
                               let detail = detailLookup.ContainsKey(s.DeviceOrderSeqID) ? detailLookup[s.DeviceOrderSeqID] : null
-                              select BuildDeviceOrder(s, u, detail, deviceSpecLookup, statusDescription)).ToList();
+                              select BuildDeviceOrder(s, u, detail, statusDescription)).ToList();
 
         return orderList;
     }
@@ -240,40 +237,40 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
         WCFDeviceOrderSummaryService.DeviceOrderSummary summary,
         WcfUserManagementService.User user,
         WCFBusinessDeviceOrderService.BusinessDeviceOrder detail,
-        Dictionary<int, string> deviceSpecLookup,
         string statusDescription)
     {
         var deviceType = "";
         var snapshotVersion = "";
         var orderDate = DateTime.MinValue;
+        var nbrDevicesNeeded = summary.DeviceOrderDetailCount;
 
         if (detail != null)
         {
             orderDate = detail.DeviceOrder.CreateDateTime;
+            nbrDevicesNeeded = detail.DeviceOrderDetails.Length;
 
-            var participants = detail.DeviceOrderDetails
-                .Select(d => d.Participant)
-                .Where(p => p != null)
+            // Device type abbreviations from DeviceSerialNbr first character, with counts
+            // e.g. "J(2), X(1)" per PBI spec
+            var serialPrefixes = detail.DeviceOrderDetails
+                .Where(d => !string.IsNullOrEmpty(d.DeviceSerialNbr))
+                .Select(d => d.DeviceSerialNbr[0].ToString().ToUpper())
                 .ToList();
 
-            if (participants.Any())
+            if (serialPrefixes.Any())
             {
-                // Device type from DeviceExperienceTypeCode
-                var expCodes = participants.Select(p => p.DeviceExperienceTypeCode).Distinct().ToList();
-                var deviceTypeDescriptions = expCodes
-                    .Where(c => deviceSpecLookup.ContainsKey(c))
-                    .Select(c => deviceSpecLookup[c])
-                    .Distinct()
-                    .ToList();
-                deviceType = deviceTypeDescriptions.Any() ? string.Join(", ", deviceTypeDescriptions) : "";
-
-                // Snapshot version from MobileSummarizerVersionCode
-                var versionCode = participants
-                    .Where(p => p.MobileSummarizerVersionCode.HasValue)
-                    .Select(p => p.MobileSummarizerVersionCode.Value)
-                    .FirstOrDefault();
-                snapshotVersion = versionCode > 0 ? $"{versionCode}.0" : "";
+                deviceType = string.Join(", ", serialPrefixes
+                    .GroupBy(p => p)
+                    .OrderBy(g => g.Key)
+                    .Select(g => $"{g.Key}({g.Count()})"));
             }
+
+            // Snapshot version from MobileSummarizerVersionCode on participants
+            var versionCode = detail.DeviceOrderDetails
+                .Select(d => d.Participant)
+                .Where(p => p != null && p.MobileSummarizerVersionCode.HasValue)
+                .Select(p => p.MobileSummarizerVersionCode.Value)
+                .FirstOrDefault();
+            snapshotVersion = versionCode > 0 ? $"{versionCode}.0" : "";
         }
 
         return new Resources.Resources.FulFillment.DeviceOrder
@@ -281,32 +278,14 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
             DeviceOrderSeqID = summary.DeviceOrderSeqID,
             OrderNumber = summary.ParticipantGroupExternalKey,
             OrderDate = orderDate,
-            State = user.State ?? "",
-            NbrDevicesNeeded = summary.DeviceOrderDetailCount,
+            State = (user.State ?? "").Trim(),
+            NbrDevicesNeeded = nbrDevicesNeeded,
             DeviceType = deviceType,
             SnapshotVersion = snapshotVersion,
             DeviceOrderStatusDescription = statusDescription,
-            Name = user.LastName ?? "",
-            Email = user.Email ?? ""
+            Name = (user.LastName ?? "").Trim(),
+            Email = (user.Email ?? "").Trim()
         };
-    }
-
-    private Dictionary<int, string> GetDeviceSpecLookup()
-    {
-        try
-        {
-            var dataset = _homeBaseCodeTableManager.TypedDataSet;
-            if (dataset != null && dataset.Tables.Contains("DeviceSpec"))
-            {
-                return dataset.Tables["DeviceSpec"].AsEnumerable()
-                    .ToDictionary(row => row.Field<int>("Code"), row => row.Field<string>("Description"));
-            }
-        }
-        catch
-        {
-            // If code table loading fails, return empty lookup
-        }
-        return new Dictionary<int, string>();
     }
 
     private static string GetStatusDescription(int statusCode)

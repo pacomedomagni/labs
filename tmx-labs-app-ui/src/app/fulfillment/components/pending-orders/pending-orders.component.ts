@@ -47,7 +47,7 @@ export class PendingOrdersComponent implements AfterViewInit {
 
   // Computed: available states from unfiltered data
   availableStates = computed(() => {
-    const stateSet = new Set(this.orders().map(o => o.state));
+    const stateSet = new Set(this.orders().map(o => o.state?.trim()).filter(s => s));
     return [...stateSet].sort();
   });
 
@@ -72,7 +72,7 @@ export class PendingOrdersComponent implements AfterViewInit {
     // State filter
     const states = this.selectedStates();
     if (states.length > 0) {
-      result = result.filter(o => states.includes(o.state));
+      result = result.filter(o => states.includes(o.state?.trim()));
     }
 
     // Snapshot version filter
@@ -176,8 +176,10 @@ export class PendingOrdersComponent implements AfterViewInit {
 
   private matchesDeviceType(order: DeviceOrder, filterValue: string): boolean {
     const dt = order.deviceType.toUpperCase();
+    // W8/W9 family device types: J, V, W, Y, Z
     const hasW8W9 = /[JVWYZ]/.test(dt);
-    const hasWX = dt.includes('X');
+    // WX family device type: X
+    const hasWX = /X/.test(dt);
 
     switch (filterValue) {
       case 'w8w9': return hasW8W9 && !hasWX;
