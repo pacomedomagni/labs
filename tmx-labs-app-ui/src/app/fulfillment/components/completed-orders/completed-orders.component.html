@@ -51,93 +51,87 @@
 
   <!-- Orders Table -->
   <div class="orders-content">
-    @if (loading()) {
-      <div class="loading-container">
-        <mat-spinner diameter="48"></mat-spinner>
+    <!-- Subheader -->
+    <div class="orders-header">
+      <div class="orders-count">
+        <span>Completed Orders: <strong>{{ completedOrderCount().toLocaleString() }}</strong></span>
       </div>
-    } @else {
-      <!-- Subheader -->
-      <div class="orders-header">
-        <div class="orders-count">
-          <span>Completed Orders: <strong>{{ completedOrderCount().toLocaleString() }}</strong></span>
-        </div>
-        <div class="orders-actions">
-          <button mat-flat-button color="primary" (click)="downloadCsv()" [disabled]="completedOrderCount() === 0">
-            DOWNLOAD
-          </button>
-          <button mat-flat-button color="primary" (click)="printOrders()" [disabled]="completedOrderCount() === 0">
-            PRINT
-          </button>
-        </div>
+      <div class="orders-actions">
+        <button mat-flat-button color="primary" (click)="downloadCsv()" [disabled]="completedOrderCount() === 0">
+          DOWNLOAD
+        </button>
+        <button mat-flat-button color="primary" (click)="printOrders()" [disabled]="completedOrderCount() === 0">
+          PRINT
+        </button>
       </div>
+    </div>
 
-      <!-- Table -->
-      <div class="table-container">
-        <table mat-table [dataSource]="dataSource" matSort class="cui-table orders-table">
-          <!-- Order Number Column -->
-          <ng-container matColumnDef="orderNumber">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Order #</th>
-            <td mat-cell *matCellDef="let order">
-              <a href="#" class="order-link" (click)="onOrderClick($event, order)">{{ order.orderNumber }}</a>
-            </td>
-          </ng-container>
+    <!-- Table -->
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort class="cui-table orders-table">
+        <!-- Order Number Column -->
+        <ng-container matColumnDef="orderNumber">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Order #</th>
+          <td mat-cell *matCellDef="let order">
+            <a href="#" class="order-link" (click)="onOrderClick($event, order)">{{ order.orderNumber }}</a>
+          </td>
+        </ng-container>
 
-          <!-- Processed Date Column -->
-          <ng-container matColumnDef="processedDateTime">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Processed Date</th>
-            <td mat-cell *matCellDef="let order">
-              {{ order.processedDateTime | date:'M/d/yyyy' }}
-            </td>
-          </ng-container>
+        <!-- Processed Date Column -->
+        <ng-container matColumnDef="processedDateTime">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Processed Date</th>
+          <td mat-cell *matCellDef="let order">
+            {{ order.processedDateTime | date:'M/d/yyyy' }}
+          </td>
+        </ng-container>
 
-          <!-- Shipped Date Column -->
-          <ng-container matColumnDef="shipDateTime">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Shipped Date</th>
-            <td mat-cell *matCellDef="let order">
-              {{ order.shipDateTime | date:'M/d/yyyy' }}
-            </td>
-          </ng-container>
+        <!-- Shipped Date Column -->
+        <ng-container matColumnDef="shipDateTime">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Shipped Date</th>
+          <td mat-cell *matCellDef="let order">
+            {{ order.shipDateTime | date:'M/d/yyyy' }}
+          </td>
+        </ng-container>
 
-          <!-- Processed By Column -->
-          <ng-container matColumnDef="processedBy">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Processed By</th>
-            <td mat-cell *matCellDef="let order">{{ order.processedBy }}</td>
-          </ng-container>
+        <!-- Processed By Column -->
+        <ng-container matColumnDef="processedBy">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Processed By</th>
+          <td mat-cell *matCellDef="let order">{{ order.processedBy }}</td>
+        </ng-container>
 
-          <!-- State Column -->
-          <ng-container matColumnDef="state">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>State</th>
-            <td mat-cell *matCellDef="let order">{{ order.state }}</td>
-          </ng-container>
+        <!-- State Column -->
+        <ng-container matColumnDef="state">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>State</th>
+          <td mat-cell *matCellDef="let order">{{ order.state }}</td>
+        </ng-container>
 
-          <!-- Device Count Column -->
-          <ng-container matColumnDef="deviceCount">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Device Count</th>
-            <td mat-cell *matCellDef="let order">{{ order.deviceCount }}</td>
-          </ng-container>
+        <!-- Device Count Column -->
+        <ng-container matColumnDef="deviceCount">
+          <th mat-header-cell *matHeaderCellDef>Device Count</th>
+          <td mat-cell *matCellDef="let order">{{ order.deviceCount }}</td>
+        </ng-container>
 
-          <!-- Devices Column -->
-          <ng-container matColumnDef="devices">
-            <th mat-header-cell *matHeaderCellDef>Devices</th>
-            <td mat-cell *matCellDef="let order">{{ (order.deviceSerialNumbers ?? []).join(', ') }}</td>
-          </ng-container>
+        <!-- Devices Column -->
+        <ng-container matColumnDef="devices">
+          <th mat-header-cell *matHeaderCellDef>Devices</th>
+          <td mat-cell *matCellDef="let order">{{ (order.deviceSerialNumbers ?? []).join(', ') }}</td>
+        </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"
-              tabindex="0"
-              [attr.aria-label]="'Order ' + row.orderNumber + ', processed by ' + row.processedBy + ', ' + row.state + ', ' + row.deviceCount + ' devices'">
-          </tr>
-        </table>
-      </div>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"
+            tabindex="0"
+            [attr.aria-label]="'Order ' + row.orderNumber + ', processed by ' + row.processedBy + ', ' + row.state + ', ' + row.deviceCount + ' devices'">
+        </tr>
+      </table>
+    </div>
 
-      <!-- Paginator -->
-      <mat-paginator
-        [pageSizeOptions]="[10, 25, 50, 100]"
-        [pageSize]="10"
-        showFirstLastButtons
-        aria-label="Select page of completed orders">
-      </mat-paginator>
-    }
+    <!-- Paginator -->
+    <mat-paginator
+      [pageSizeOptions]="[10, 25, 50, 100]"
+      [pageSize]="10"
+      showFirstLastButtons
+      aria-label="Select page of completed orders">
+    </mat-paginator>
   </div>
 </div>
 

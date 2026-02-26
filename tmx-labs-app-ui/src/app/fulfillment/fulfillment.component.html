@@ -36,7 +36,6 @@
       <mat-tab label="COMPLETED ORDERS">
         <tmx-completed-orders
           [orderData]="completedOrderData()"
-          [loading]="completedOrdersLoading()"
           (orderSelected)="onOrderSelected($event)">
         </tmx-completed-orders>
       </mat-tab>

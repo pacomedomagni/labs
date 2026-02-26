@@ -36,7 +36,6 @@ export class CompletedOrdersComponent implements AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   orderData = input<CompletedOrdersList | null>(null);
-  loading = input<boolean>(false);
   orderSelected = output<CompletedDeviceOrder>();
 
   displayedColumns: string[] = ['orderNumber', 'processedDateTime', 'shipDateTime', 'processedBy', 'state', 'deviceCount', 'devices'];
@@ -73,12 +72,12 @@ export class CompletedOrdersComponent implements AfterViewInit {
     // Date range filter
     const start = this.startDate();
     const end = this.endDate();
+    const startDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
     result = result.filter(o => {
       if (!o.processedDateTime) return false;
       const processed = new Date(o.processedDateTime);
       const processedDate = new Date(processed.getFullYear(), processed.getMonth(), processed.getDate());
-      const startDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-      const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
       return processedDate >= startDate && processedDate <= endDate;
     });
 
@@ -183,7 +182,7 @@ export class CompletedOrdersComponent implements AfterViewInit {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
 
-    const dateStr = this.formatDateForFilename(new Date());
+    const dateStr = this.formatDateForFilename(this.startDate());
     const selectedUsers = this.selectedProcessedBy();
     const userPart = selectedUsers.length === 1 ? selectedUsers[0] : 'ALL';
 

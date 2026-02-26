@@ -34,7 +34,6 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
 
   // Completed orders
   completedOrderData = signal<CompletedOrdersList | null>(null);
-  completedOrdersLoading = signal(false);
 
   selectedTab = signal(0);
 
@@ -60,8 +59,6 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
       this.subscription.unsubscribe();
     }
 
-    this.completedOrdersLoading.set(true);
-
     this.subscription = forkJoin({
       pendingOrders: this.fulfillmentService.getPendingOrderList(),
       processedCount: this.fulfillmentService.getProcessedOrdersCount(),
@@ -73,11 +70,9 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
         this.pendingOrderData.set(result.pendingOrders.deviceOrders);
         this.completedToday.set(result.processedCount);
         this.completedOrderData.set(result.completedOrders);
-        this.completedOrdersLoading.set(false);
       },
       error: (error) => {
         console.error('Error loading fulfillment data:', error);
-        this.completedOrdersLoading.set(false);
       }
     });
   }
