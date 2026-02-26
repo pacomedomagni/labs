@@ -3,7 +3,7 @@
         <div class="device-lot-details text-3xl">Lot Details</div>
         <tmx-menu-button-group
             class="ml-auto my-auto"
-            [actions]="actions"
+            [actions]="actions()"
             (actionClicked)="actionButtonClicked($event)"
         ></tmx-menu-button-group>
     </div>
@@ -26,7 +26,7 @@
             <div class="grid grid-cols-5 gap-x-4 text-2xl">
                 <div class="col-span-2 font-semibold">Lot Status</div>
                 <div class="col-span-3">
-                    {{ getStatusText(deviceLot().statusCode) }} ({{ deviceLot().statusCode }})
+                    {{ lotStatusDescription() }} ({{ deviceLot().statusCode }})
                 </div>
             </div>
             <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2" />

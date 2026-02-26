@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { LotBenchtestProgressCalculationService } from './lot-benchtest-progress-calculation.service';
 import { BenchTestDeviceStatus } from 'src/app/shared/data/bench-test/enums';
+import { BenchTestBoardDeviceStatus } from 'src/app/shared/data/bench-test/resources';
 
 describe('LotBenchtestProgressCalculationService', () => {
     let service: LotBenchtestProgressCalculationService;
@@ -24,7 +25,7 @@ describe('LotBenchtestProgressCalculationService', () => {
                 { benchTestStatusCode: BenchTestDeviceStatus.ConfigUpdating },
             ];
 
-            const result = service.calculateDeviceCounts(devices);
+            const result = service.calculateDeviceCounts(devices as BenchTestBoardDeviceStatus[]);
 
             expect(result.successCount).toBe(2);
             expect(result.testedCount).toBe(2);
@@ -37,7 +38,7 @@ describe('LotBenchtestProgressCalculationService', () => {
                 { benchTestStatusCode: BenchTestDeviceStatus.Completed },
             ];
 
-            const result = service.calculateDeviceCounts(devices);
+            const result = service.calculateDeviceCounts(devices as BenchTestBoardDeviceStatus[]);
 
             expect(result.successCount).toBe(1);
             expect(result.testedCount).toBe(3);
@@ -49,7 +50,7 @@ describe('LotBenchtestProgressCalculationService', () => {
                 { benchTestStatusCode: BenchTestDeviceStatus.Running },
             ];
 
-            const result = service.calculateDeviceCounts(devices);
+            const result = service.calculateDeviceCounts(devices as BenchTestBoardDeviceStatus[]);
 
             expect(result.successCount).toBe(0);
             expect(result.testedCount).toBe(0);
@@ -70,7 +71,7 @@ describe('LotBenchtestProgressCalculationService', () => {
                 { benchTestStatusCode: BenchTestDeviceStatus.Running },
                 { benchTestStatusCode: BenchTestDeviceStatus.Completed },
                 { benchTestStatusCode: BenchTestDeviceStatus.ConfigUpdating },
-            ];
+            ] as BenchTestBoardDeviceStatus[];
 
             const result = service.calculateDeviceCounts(devices);
 
@@ -79,7 +80,9 @@ describe('LotBenchtestProgressCalculationService', () => {
         });
 
         it('should only count FirmwareError status as tested', () => {
-            const devices = [{ benchTestStatusCode: BenchTestDeviceStatus.FirmwareError }];
+            const devices = [
+                { benchTestStatusCode: BenchTestDeviceStatus.FirmwareError },
+            ] as BenchTestBoardDeviceStatus[];
 
             const result = service.calculateDeviceCounts(devices);
 
@@ -88,7 +91,7 @@ describe('LotBenchtestProgressCalculationService', () => {
         });
 
         it('should only count Error status as tested', () => {
-            const devices = [{ benchTestStatusCode: BenchTestDeviceStatus.Error }];
+            const devices = [{ benchTestStatusCode: BenchTestDeviceStatus.Error }]  as BenchTestBoardDeviceStatus[];;
 
             const result = service.calculateDeviceCounts(devices);
 

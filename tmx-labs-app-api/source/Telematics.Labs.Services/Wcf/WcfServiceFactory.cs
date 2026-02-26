@@ -2,7 +2,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Progressive.Telematics.Labs.Shared.Attributes;
 using Progressive.Telematics.Labs.Shared.Configs;
-using Progressive.Telematics.Labs.Shared.Extensions;
 using System;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -25,9 +24,13 @@ using WcfXirgoService;
 using WcfXirgoSessionService;
 using BenchTestBoardService;
 using BenchTestServices;
-using DiscountFulfillment = DiscountFulfillmentService;
-using PreviewFulfillment = PreviewFulfillmentService;
-using CLBusinessDeviceOrderService;
+using WCFBusinessDeviceOrderService;
+using MyScoreCodeTablesClient = WCFCodeTablesService.CodeTablesServiceClient;
+using WCFDeviceOrderSummaryService;
+using HomeBaseCodeTablesClient = WCFHomeBaseCodeTablesService.CodeTablesServiceClient;
+using WCFMobileDeviceOrderService;
+using DeviceOrderClient = WCFDeviceOrderService.DeviceOrderServiceClient;
+using AppConfigClient = WCFAppConfigService.AppConfigServiceClient;
 
 namespace Progressive.Telematics.Labs.Services.Wcf
 {
@@ -50,13 +53,16 @@ namespace Progressive.Telematics.Labs.Services.Wcf
 		XirgoSessionServiceClient CreateXirgoSessionServiceClient();
         VinPicklistServiceClient CreateVinPicklistServiceClient();
         ParticipantGroupServiceClient CreateParticipantGroupServiceClient();
-        BenchTestBoardServiceClient CreateBenchTestBoardServiceClient();
-        BenchTestServiceClient CreateBenchTestServiceClient();
-        DiscountFulfillment.FulfillmentServiceClient CreateDiscountFulfillmentServiceClient();
-        PreviewFulfillment.FulfillmentServiceClient CreatePreviewFulfillmentServiceClient();
-        BusinessDeviceOrderServiceClient CreateCLBusinessDeviceOrderServiceClient();
-
-    }
+		BenchTestBoardServiceClient CreateBenchTestBoardServiceClient();
+			BenchTestServiceClient CreateBenchTestServiceClient();
+			AppConfigClient CreateWCFAppConfigServiceClient();
+			BusinessDeviceOrderServiceClient CreateWCFBusinessDeviceOrderServiceClient();
+			MyScoreCodeTablesClient CreateWCFCodeTablesServiceClient();
+			DeviceOrderClient CreateWCFDeviceOrderServiceClient();
+			DeviceOrderSummaryServiceClient CreateWCFDeviceOrderSummaryServiceClient();
+			HomeBaseCodeTablesClient CreateWCFHomeBaseCodeTablesServiceClient();
+			MobileDeviceOrderServiceClient CreateWCFMobileDeviceOrderServiceClient();
+	}
 	public class WcfServiceFactory : IWcfServiceFactory
 	{
 		ServicesConfig _config;
@@ -223,65 +229,124 @@ namespace Progressive.Telematics.Labs.Services.Wcf
             return client;
         }
 
-        public BenchTestServiceClient CreateBenchTestServiceClient()
-        {
-            var endpoint = new EndpointAddress(_config.WcfServices["BenchTest"].FormatServiceUrl());
-            var binding = new WSHttpBinding
-            {
-                ReaderQuotas = XmlDictionaryReaderQuotas.Max,
-                MaxReceivedMessageSize = int.MaxValue,
-                AllowCookies = true,
-                Security = { Mode = SecurityMode.None }
-            };
-            var client = new BenchTestServiceClient(binding, endpoint);
-            client.Endpoint.AddTokenEndpoint(_configuration);
-            return client;
-        }
+		public BenchTestServiceClient CreateBenchTestServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["BenchTest"].FormatServiceUrl());
+			var binding = new WSHttpBinding
+			{
+				ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true,
+				Security = { Mode = SecurityMode.None }
+			};
+			var client = new BenchTestServiceClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
 
-        public DiscountFulfillment.FulfillmentServiceClient CreateDiscountFulfillmentServiceClient()
-        {
-            var endpoint = new EndpointAddress(_config.WcfServices["DiscountFulfillment"].FormatServiceUrl());
-            var binding = new BasicHttpBinding
-            {
-                MaxBufferSize = int.MaxValue,
-                ReaderQuotas = XmlDictionaryReaderQuotas.Max,
-                MaxReceivedMessageSize = int.MaxValue,
-                AllowCookies = true
-            };
-            var client = new DiscountFulfillment.FulfillmentServiceClient(binding, endpoint);
-            client.Endpoint.AddTokenEndpoint(_configuration);
-            return client;
-        }
+		public AppConfigClient CreateWCFAppConfigServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["WCFAppConfig"].FormatServiceUrl());
+			var binding = new BasicHttpBinding
+			{
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true,
+				Security = { Mode = BasicHttpSecurityMode.TransportCredentialOnly, Transport = { ClientCredentialType = HttpClientCredentialType.Windows } }
+			};
+			var client = new AppConfigClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
 
-        public PreviewFulfillment.FulfillmentServiceClient CreatePreviewFulfillmentServiceClient()
-        {
-            var endpoint = new EndpointAddress(_config.WcfServices["PreviewFulfillment"].FormatServiceUrl());
-            var binding = new BasicHttpBinding
-            {
-                MaxBufferSize = int.MaxValue,
-                ReaderQuotas = XmlDictionaryReaderQuotas.Max,
-                MaxReceivedMessageSize = int.MaxValue,
-                AllowCookies = true
-            };
-            var client = new PreviewFulfillment.FulfillmentServiceClient(binding, endpoint);
-            client.Endpoint.AddTokenEndpoint(_configuration);
-            return client;
-        }
+		public BusinessDeviceOrderServiceClient CreateWCFBusinessDeviceOrderServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["WCFBusinessDeviceOrder"].FormatServiceUrl());
+			var binding = new WSHttpBinding
+			{
+				ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true,
+				Security = { Mode = SecurityMode.None }
+			};
+			var client = new BusinessDeviceOrderServiceClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
 
-        public BusinessDeviceOrderServiceClient CreateCLBusinessDeviceOrderServiceClient()
-        {
-            var endpoint = new EndpointAddress(_config.WcfServices["CLBusinessDeviceOrder"].FormatServiceUrl());
-            var binding = new WSHttpBinding
-            {
-                ReaderQuotas = XmlDictionaryReaderQuotas.Max,
-                MaxReceivedMessageSize = int.MaxValue,
-                AllowCookies = true,
-                Security = { Mode = SecurityMode.None }
-            };
-            var client = new BusinessDeviceOrderServiceClient(binding, endpoint);
-            client.Endpoint.AddTokenEndpoint(_configuration);
-            return client;
-        }
-    }
+		public MyScoreCodeTablesClient CreateWCFCodeTablesServiceClient()
+			{
+				var endpoint = new EndpointAddress(_config.WcfServices["WCFCodeTables"].FormatServiceUrl());
+				var binding = new WSHttpBinding
+				{
+					ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+					MaxReceivedMessageSize = int.MaxValue,
+					AllowCookies = true,
+					Security = { Mode = SecurityMode.None }
+				};
+				var client = new MyScoreCodeTablesClient(binding, endpoint);
+				client.Endpoint.AddTokenEndpoint(_configuration);
+				return client;
+			}
+
+			public DeviceOrderClient CreateWCFDeviceOrderServiceClient()
+			{
+				var endpoint = new EndpointAddress(_config.WcfServices["WCFDeviceOrder"].FormatServiceUrl());
+				var binding = new WSHttpBinding
+				{
+					ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+					MaxReceivedMessageSize = int.MaxValue,
+					AllowCookies = true,
+					Security = { Mode = SecurityMode.None }
+				};
+				var client = new DeviceOrderClient(binding, endpoint);
+				client.Endpoint.AddTokenEndpoint(_configuration);
+				return client;
+			}
+
+			public DeviceOrderSummaryServiceClient CreateWCFDeviceOrderSummaryServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["WCFDeviceOrderSummary"].FormatServiceUrl());
+			var binding = new WSHttpBinding
+			{
+				ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true,
+				Security = { Mode = SecurityMode.None }
+			};
+			var client = new DeviceOrderSummaryServiceClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
+
+		public HomeBaseCodeTablesClient CreateWCFHomeBaseCodeTablesServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["WCFHomeBaseCodeTables"].FormatServiceUrl());
+			var binding = new WSHttpBinding
+			{
+				ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true,
+				Security = { Mode = SecurityMode.None }
+			};
+			var client = new HomeBaseCodeTablesClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
+
+		public MobileDeviceOrderServiceClient CreateWCFMobileDeviceOrderServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["WCFMobileDeviceOrder"].FormatServiceUrl());
+			var binding = new WSHttpBinding
+			{
+				ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true,
+				Security = { Mode = SecurityMode.None }
+			};
+			var client = new MobileDeviceOrderServiceClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
+	}
 }
 

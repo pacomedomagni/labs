@@ -16,9 +16,11 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
         public LotManagementOrchestratorTests()
         {
             Orchestrator = new LotManagementOrchestrator(
+                Logger.Object,
                 Databases.LotManagement.Object,
                 Services.DeviceLot.Object,
                 Services.XirgoDevice.Object,
+                Databases.ConfigValues.Object,
                 Mapper);
         }
 

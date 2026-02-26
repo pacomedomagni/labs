@@ -2,63 +2,80 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { FulfillmentService } from './fulfillment.services';
 import { ApiService } from '../api.service';
-import { OrderType } from '../../../data/application/enums';
-import { Orders, OrdersByState, OrderDetails, StateOrder } from '../../../data/application/resources';
+import { OrderListDetails, OrderDetails, AssingDeviceRequest } from '../../../data/fulfillment/resources';
 
 describe('FulfillmentService', () => {
   let service: FulfillmentService;
   let apiServiceSpy: jasmine.SpyObj<ApiService>;
 
-  const mockOrders: Orders = {
-    searchOrderNumber: '',
-    searchBeginDate: '',
-    searchEndDate: '',
-    type: OrderType.Snapshot1Only,
-    openSnapshotOrders: 150,
-    processedSnapshotOrders: 45,
-    snapshotDevicesNeeded: 300,
-    openCommercialLinesOrders: 75,
-    processedCommercialLinesOrders: 20,
-    commercialLinesDevicesNeeded: 150
+  const mockOrderListDetails: OrderListDetails = {
+    deviceOrders: [
+      {
+        deviceOrderSeqID: 1,
+        nbrDevicesNeeded: 3,
+        name: 'John Doe',
+        email: 'john@example.com',
+        orderNumber: 'ORD-0001',
+        orderDate: '2024-01-01T00:00:00Z',
+        state: 'CA',
+        deviceType: 'J(2), X(1)',
+        snapshotVersion: '1.0.0',
+        deviceOrderStatusDescription: 'Pending Assignment'
+      },
+      {
+        deviceOrderSeqID: 2,
+        nbrDevicesNeeded: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        orderNumber: 'ORD-0002',
+        orderDate: '2024-02-01T00:00:00Z',
+        state: 'NY',
+        deviceType: 'X(2)',
+        snapshotVersion: '1.0.0',
+        deviceOrderStatusDescription: 'Ready to Print'
+      }
+    ],
+    deviceOrderStatusCode: 1,
+    numberOfOrders: 2,
+    numberOfDevices: 5,
+    participantGroupTypeCode: 1,
+    canOnlyViewOrdersForOwnGroup: false
   };
 
-  const mockStateOrder: StateOrder = {
-    state: 'OH',
-    numberOfOrders: 25,
-    numberOfDevices: 50,
-    numberOfOldOrders: 5,
-    oldestOrder: new Date('2026-01-15'),
-    numberDaysForOldOrders: 28
+  const mockOrderDetails: OrderDetails = {
+    customerName: 'John Doe',
+    email: 'john@example.com',
+    fulfilledByUserID: 'user123',
+    deviceOrderSeqID: 1,
+    participantGroupSeqID: 10,
+    devicesAssigned: false,
+    hasErrors: false,
+    deviceTypes: [
+      { deviceTypeCode: 1, description: 'Type A' },
+      { deviceTypeCode: 2, description: 'Type B' }
+    ],
+    mobileOSNames: ['iOS', 'Android'],
+    vehicles: []
   };
 
-  const mockOrdersByState: OrdersByState = {
-    type: OrderType.Snapshot1Only,
-    stateOrders: [mockStateOrder]
-  };
-
-  const mockOrderDetails: OrderDetails[] = [
-    {
-      orderId: '12345',
-      orderNumber: '28303829-NEW',
-      orderDate: new Date('2026-01-15T11:12:37'),
-      state: 'GA',
-      deviceCount: 3,
-      deviceType: 'J, V, W, Y, Z',
-      status: 'Pending Assignment',
-      vehicleInfo: '2024 Toyota Camry',
-      deviceVersion: '3.0',
-      shippingDetails: 'Standard Shipping'
+  const mockAssignDeviceRequest: AssingDeviceRequest = {
+    myScoreVehicle: {
+      year: 2024,
+      make: 'Toyota',
+      model: 'Camry',
+      message: '',
+      deviceOrderDetailSeqID: 1,
+      participantSeqID: 100,
+      deviceTypeSelected: 1,
+      newDeviceSerialNumber: 'SN123456',
+      newDeviceRegistrationKey: 'test@example.com',
+      mobileOSName: 'iOS',
+      mobileDeviceModelName: 'iPhone 14',
+      mobileOSVersionName: '17.0',
+      mobileAppVersionName: '1.0.0'
     },
-    {
-      orderId: '12346',
-      orderNumber: '82739283-NEW',
-      orderDate: new Date('2026-01-17T02:11:10'),
-      state: 'CT',
-      deviceCount: 1,
-      deviceType: 'J, V, W',
-      status: 'Ready to Print'
-    }
-  ];
+    orderDetails: mockOrderDetails
+  };
 
   beforeEach(() => {
     apiServiceSpy = jasmine.createSpyObj('ApiService', ['post', 'get']);
@@ -77,183 +94,135 @@ describe('FulfillmentService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('getOrderCounts', () => {
-    it('should call ApiService.post with correct endpoint and payload', () => {
-      apiServiceSpy.post.and.returnValue(of(mockOrders));
-
-      service.getOrderCounts(mockOrders).subscribe();
-
-      expect(apiServiceSpy.post).toHaveBeenCalledWith({
-        uri: '/Fulfillment/OrderCounts',
-        payload: mockOrders
-      });
-    });
-
-    it('should return order counts data', (done) => {
-      apiServiceSpy.post.and.returnValue(of(mockOrders));
-
-      service.getOrderCounts(mockOrders).subscribe(result => {
-        expect(result).toEqual(mockOrders);
-        expect(result.openSnapshotOrders).toBe(150);
-        expect(result.snapshotDevicesNeeded).toBe(300);
-        expect(result.processedSnapshotOrders).toBe(45);
-        done();
-      });
-    });
-
-    it('should handle commercial lines orders', (done) => {
-      const commercialOrders: Orders = {
-        ...mockOrders,
-        type: OrderType.CommercialLines,
-        openCommercialLinesOrders: 75,
-        commercialLinesDevicesNeeded: 150,
-        processedCommercialLinesOrders: 20
-      };
-
-      apiServiceSpy.post.and.returnValue(of(commercialOrders));
-
-      service.getOrderCounts(commercialOrders).subscribe(result => {
-        expect(result.type).toBe(OrderType.CommercialLines);
-        expect(result.openCommercialLinesOrders).toBe(75);
-        expect(result.commercialLinesDevicesNeeded).toBe(150);
-        done();
-      });
-    });
-  });
-
-  describe('getStateOrderCounts', () => {
-    it('should call ApiService.post with correct endpoint and payload', () => {
-      apiServiceSpy.post.and.returnValue(of(mockOrdersByState));
-
-      service.getStateOrderCounts(mockOrdersByState).subscribe();
-
-      expect(apiServiceSpy.post).toHaveBeenCalledWith({
-        uri: '/Fulfillment/StateOrderCounts',
-        payload: mockOrdersByState
-      });
-    });
-
-    it('should return state order counts data', (done) => {
-      apiServiceSpy.post.and.returnValue(of(mockOrdersByState));
-
-      service.getStateOrderCounts(mockOrdersByState).subscribe(result => {
-        expect(result).toEqual(mockOrdersByState);
-        expect(result.stateOrders.length).toBe(1);
-        expect(result.stateOrders[0].state).toBe('OH');
-        expect(result.stateOrders[0].numberOfOrders).toBe(25);
-        done();
-      });
-    });
-
-    it('should handle multiple state orders', (done) => {
-      const multiStateOrders: OrdersByState = {
-        type: OrderType.Snapshot2Only,
-        stateOrders: [
-          mockStateOrder,
-          { ...mockStateOrder, state: 'PA', numberOfOrders: 30 }
-        ]
-      };
-
-      apiServiceSpy.post.and.returnValue(of(multiStateOrders));
-
-      service.getStateOrderCounts(multiStateOrders).subscribe(result => {
-        expect(result.stateOrders.length).toBe(2);
-        expect(result.stateOrders[0].state).toBe('OH');
-        expect(result.stateOrders[1].state).toBe('PA');
-        done();
-      });
-    });
-  });
-
-  describe('getNewOrders', () => {
-    it('should call ApiService.get with correct endpoint and orderType parameter', () => {
+  describe('getOrderDetails', () => {
+    it('should call ApiService.get with correct endpoint and deviceOrderSeqId parameter', () => {
       apiServiceSpy.get.and.returnValue(of(mockOrderDetails));
 
-      service.getNewOrders(OrderType.Snapshot1Only).subscribe();
+      service.getOrderDetails(1).subscribe();
 
       expect(apiServiceSpy.get).toHaveBeenCalledWith({
-        uri: '/Fulfillment/NewOrders',
-        payload: {
-          orderType: OrderType.Snapshot1Only.toString()
-        }
+        uri: '/Fulfillment/OrderDetails?deviceOrderSeqID=1'
       });
     });
 
-    it('should include orderState parameter when provided', () => {
+    it('should return order details', (done) => {
       apiServiceSpy.get.and.returnValue(of(mockOrderDetails));
 
-      service.getNewOrders(OrderType.Snapshot1Only, 'OH').subscribe();
-
-      expect(apiServiceSpy.get).toHaveBeenCalledWith({
-        uri: '/Fulfillment/NewOrders',
-        payload: {
-          orderType: OrderType.Snapshot1Only.toString(),
-          orderState: 'OH'
-        }
-      });
-    });
-
-    it('should include orderId parameter when provided', () => {
-      apiServiceSpy.get.and.returnValue(of(mockOrderDetails));
-
-      service.getNewOrders(OrderType.Snapshot1Only, undefined, '12345').subscribe();
-
-      expect(apiServiceSpy.get).toHaveBeenCalledWith({
-        uri: '/Fulfillment/NewOrders',
-        payload: {
-          orderType: OrderType.Snapshot1Only.toString(),
-          orderId: '12345'
-        }
-      });
-    });
-
-    it('should include both orderState and orderId when provided', () => {
-      apiServiceSpy.get.and.returnValue(of(mockOrderDetails));
-
-      service.getNewOrders(OrderType.CommercialLines, 'GA', '12345').subscribe();
-
-      expect(apiServiceSpy.get).toHaveBeenCalledWith({
-        uri: '/Fulfillment/NewOrders',
-        payload: {
-          orderType: OrderType.CommercialLines.toString(),
-          orderState: 'GA',
-          orderId: '12345'
-        }
-      });
-    });
-
-    it('should return list of order details', (done) => {
-      apiServiceSpy.get.and.returnValue(of(mockOrderDetails));
-
-      service.getNewOrders(OrderType.Snapshot1Only).subscribe(result => {
+      service.getOrderDetails(1).subscribe(result => {
         expect(result).toEqual(mockOrderDetails);
-        expect(result.length).toBe(2);
-        expect(result[0].orderNumber).toBe('28303829-NEW');
-        expect(result[0].state).toBe('GA');
+        expect(result.customerName).toBe('John Doe');
+        expect(result.email).toBe('john@example.com');
+        expect(result.deviceOrderSeqID).toBe(1);
         done();
       });
     });
 
-    it('should handle empty order list', (done) => {
-      apiServiceSpy.get.and.returnValue(of([]));
-
-      service.getNewOrders(OrderType.Snapshot1Only, 'XX').subscribe(result => {
-        expect(result).toEqual([]);
-        expect(result.length).toBe(0);
-        done();
-      });
-    });
-
-    it('should handle different order types', () => {
+    it('should handle different deviceOrderSeqId values', () => {
       apiServiceSpy.get.and.returnValue(of(mockOrderDetails));
 
-      service.getNewOrders(OrderType.CommercialLinesHeavyTruck).subscribe();
+      service.getOrderDetails(12345).subscribe();
 
       expect(apiServiceSpy.get).toHaveBeenCalledWith({
-        uri: '/Fulfillment/NewOrders',
-        payload: {
-          orderType: OrderType.CommercialLinesHeavyTruck.toString()
+        uri: '/Fulfillment/OrderDetails?deviceOrderSeqID=12345'
+      });
+    });
+  });
+
+  describe('getOrdersByStatus', () => {
+    it('should call ApiService.get with correct endpoint and parameters', () => {
+      apiServiceSpy.get.and.returnValue(of(mockOrderListDetails));
+
+      service.getOrdersByStatus(1, 1, false).subscribe();
+
+      expect(apiServiceSpy.get).toHaveBeenCalledWith({
+        uri: '/Fulfillment/OrdersByStatus?deviceOrderStatusCode=1&participantGroupTypeCode=1&canOnlyViewOrdersForOwnGroup=false'
+      });
+    });
+
+    it('should return order list details', (done) => {
+      apiServiceSpy.get.and.returnValue(of(mockOrderListDetails));
+
+      service.getOrdersByStatus(1, 1, false).subscribe(result => {
+        expect(result).toEqual(mockOrderListDetails);
+        expect(result.numberOfOrders).toBe(2);
+        expect(result.numberOfDevices).toBe(5);
+        expect(result.deviceOrders.length).toBe(2);
+        done();
+      });
+    });
+
+    it('should handle different status codes', () => {
+      apiServiceSpy.get.and.returnValue(of(mockOrderListDetails));
+
+      service.getOrdersByStatus(2, 1, false).subscribe();
+
+      expect(apiServiceSpy.get).toHaveBeenCalledWith({
+        uri: '/Fulfillment/OrdersByStatus?deviceOrderStatusCode=2&participantGroupTypeCode=1&canOnlyViewOrdersForOwnGroup=false'
+      });
+    });
+
+    it('should handle canOnlyViewOrdersForOwnGroup set to true', () => {
+      apiServiceSpy.get.and.returnValue(of(mockOrderListDetails));
+
+      service.getOrdersByStatus(1, 2, true).subscribe();
+
+      expect(apiServiceSpy.get).toHaveBeenCalledWith({
+        uri: '/Fulfillment/OrdersByStatus?deviceOrderStatusCode=1&participantGroupTypeCode=2&canOnlyViewOrdersForOwnGroup=true'
+      });
+    });
+  });
+
+  describe('assignDevicesToOrder', () => {
+    it('should call ApiService.post with correct endpoint and payload', () => {
+      apiServiceSpy.post.and.returnValue(of(undefined));
+
+      service.assignDevicesToOrder(mockAssignDeviceRequest).subscribe();
+
+      expect(apiServiceSpy.post).toHaveBeenCalledWith({
+        uri: '/Fulfillment/AssignDevices',
+        payload: mockAssignDeviceRequest
+      });
+    });
+
+    it('should complete successfully', (done) => {
+      apiServiceSpy.post.and.returnValue(of(undefined));
+
+      service.assignDevicesToOrder(mockAssignDeviceRequest).subscribe({
+        next: () => {
+          expect(true).toBe(true);
+          done();
         }
+      });
+    });
+  });
+
+  describe('getProcessedOrdersCount', () => {
+    it('should call ApiService.get with correct endpoint', () => {
+      apiServiceSpy.get.and.returnValue(of(42));
+
+      service.getProcessedOrdersCount().subscribe();
+
+      expect(apiServiceSpy.get).toHaveBeenCalledWith({
+        uri: '/Fulfillment/ProcessedOrderCount'
+      });
+    });
+
+    it('should return the processed orders count', (done) => {
+      const mockCount = 123;
+      apiServiceSpy.get.and.returnValue(of(mockCount));
+
+      service.getProcessedOrdersCount().subscribe(result => {
+        expect(result).toBe(123);
+        done();
+      });
+    });
+
+    it('should handle zero count', (done) => {
+      apiServiceSpy.get.and.returnValue(of(0));
+
+      service.getProcessedOrdersCount().subscribe(result => {
+        expect(result).toBe(0);
+        done();
       });
     });
   });

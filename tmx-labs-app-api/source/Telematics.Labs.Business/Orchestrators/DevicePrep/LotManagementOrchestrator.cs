@@ -1,13 +1,18 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Progressive.Telematics.Labs.Business.Resources;
 using Progressive.Telematics.Labs.Business.Resources.DevicePrep;
 using Progressive.Telematics.Labs.Business.Resources.Enums;
+using Progressive.Telematics.Labs.Business.Resources.Shared;
 using Progressive.Telematics.Labs.Services.Database;
 using Progressive.Telematics.Labs.Services.Wcf;
+using Progressive.Telematics.Labs.Shared;
 using Progressive.Telematics.Labs.Shared.Attributes;
+using WcfXirgoService;
 
 namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
 {
@@ -20,25 +25,56 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
         Task<Resource> Checkin(string query);
         Task<DeviceLot> GetDeviceLot(string lotName);
         Task<Progressive.Telematics.Labs.Business.Resources.DevicePrep.GetDevicesByLotResponse> GetDevicesByLot(int lotSeqId, DeviceLotType lotType);
+        Task<Resource> UpdateLotActivationStatus(int lotSeqId, ActivationAction action);
+        Task<Resource> UpdateLotStatus(int lotSeqId, DeviceLotType typeCode, LotStatus? statusCode, string name);
+        Task<int> GetBenchtestQuotaPercentage();
     }
 
     public class LotManagementOrchestrator : ILotManagementOrchestrator
     {
+        private const int DEFAULT_BENCHTEST_QUOTA = 2;
+
+        private readonly ILogger<LotManagementOrchestrator> _logger;
         private readonly ILotManagementDAL _lotManagementDAL;
         private readonly IDeviceLotService _deviceLotService;
         private readonly IXirgoDeviceService _xirgoDeviceService;
+        private readonly IConfigValuesDAL _configValuesDAL;
         private readonly IMapper _mapper;
 
         public LotManagementOrchestrator(
+            ILogger<LotManagementOrchestrator> logger,
             ILotManagementDAL lotManagementDAL,
             IDeviceLotService deviceLotService,
             IXirgoDeviceService xirgoDeviceService,
+            IConfigValuesDAL configValuesDAL,
             IMapper mapper)
         {
+            _logger = logger;
             _lotManagementDAL = lotManagementDAL;
             _deviceLotService = deviceLotService;
             _xirgoDeviceService = xirgoDeviceService;
+            _configValuesDAL = configValuesDAL;
             _mapper = mapper;
+        }
+
+        public async Task<int> GetBenchtestQuotaPercentage()
+        {
+            try {
+                var configValue = await _configValuesDAL.GetConfigValueByKey("BenchtestQuotaPercentage");
+
+                if (configValue != null && int.TryParse(configValue.ConfigValue, out var percentage))
+                {
+                    return percentage;
+                }
+
+                return DEFAULT_BENCHTEST_QUOTA;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error retrieving bench test quota percentage from config values. Returning default value of {DefaultValue}%.", DEFAULT_BENCHTEST_QUOTA);
+                return DEFAULT_BENCHTEST_QUOTA;
+            }
+
         }
 
         public async Task<IEnumerable<DeviceLot>> GetLotsForMarkBenchTestComplete()
@@ -86,7 +122,7 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
                 {
                     var returnLotResponse = await _deviceLotService.GetDeviceLot(xirgoDevice.Device.ReturnLotSeqID.Value);
                     var returnLot = returnLotResponse.DeviceLot;
-                    
+
                     if (returnLot.Name.Length > 0 && returnLot.CreateDateTime >= lot.CreateDate)
                     {
                         lot.Type = DeviceLotType.Returned;
@@ -102,7 +138,7 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
         {
             var resource = new Resource();
             var lot = await _deviceLotService.GetDeviceLot(query);
-            
+
             if (lot?.DeviceLot != null)
             {
                 if (lot.DeviceLot.StatusCode == (int)DeviceLotStatus.ShippedToDistributor)
@@ -125,7 +161,7 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
         public async Task<DeviceLot> GetDeviceLot(string lotName)
         {
             var response = await _deviceLotService.GetDeviceLot(lotName);
-            
+
             if (response.DeviceLot == null)
             {
                 return null;
@@ -138,9 +174,9 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
         public async Task<Progressive.Telematics.Labs.Business.Resources.DevicePrep.GetDevicesByLotResponse> GetDevicesByLot(int lotSeqId, DeviceLotType lotType)
         {
             var wcfResponse = await _xirgoDeviceService.GetDevicesByLot(lotSeqId, lotType);
-            
+
             var response = new Progressive.Telematics.Labs.Business.Resources.DevicePrep.GetDevicesByLotResponse();
-            
+
             if (wcfResponse.Devices != null && wcfResponse.Devices.Length > 0)
             {
                 response.Devices = _mapper.Map<DeviceDetails[]>(wcfResponse.Devices);
@@ -151,8 +187,69 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
                 response.Devices = System.Array.Empty<DeviceDetails>();
                 response.DeviceCount = 0;
             }
-            
+
             return response;
+        }
+
+        public async Task<Resource> UpdateLotActivationStatus(int lotSeqId, ActivationAction action)
+        {
+            var resource = new Resource();
+            var isSIMActive = action == ActivationAction.Activate;
+
+            var devicesResponse = await _xirgoDeviceService.GetDevicesByLot(lotSeqId, DeviceLotType.Manufacturer);
+
+            if (devicesResponse.Devices == null || devicesResponse.Devices.Length == 0)
+            {
+                resource.AddMessage(MessageCode.ErrorCode, "NotFound");
+                resource.AddMessage(MessageCode.ErrorDetails, $"No devices found for lot {lotSeqId}");
+                return resource;
+            }
+
+            foreach (var device in devicesResponse.Devices)
+            {
+                await _xirgoDeviceService.ActivateXirgoDevice(device.DeviceSerialNumber, device.SIM, isSIMActive);
+            }
+
+            resource.AddMessage(MessageCode.StatusDescription,
+                $"{(isSIMActive ? "Activated" : "Deactivated")} {devicesResponse.Devices.Length} device(s) in lot {lotSeqId}");
+
+            return resource;
+        }
+
+        /// <summary>
+        /// Update lot status code/name for the given lotSeqId and type
+        /// </summary>
+        /// <param name="lotSeqId"></param>
+        /// <param name="typeCode">Type of lot we are updating (for lookup - will not be updated)</param>
+        /// <param name="statusCode">Status code to update the lot with</param>
+        /// <returns>Resource with relevant statuses</returns>
+        public async Task<Resource> UpdateLotStatus(int lotSeqId, DeviceLotType typeCode, LotStatus? statusCode, string name)
+        {
+            var resource = new Resource();
+            await _lotManagementDAL.UpdateLot(lotSeqId, name, (int?)statusCode, null);
+
+            // If we are updating lot status to ShipmentReceivedByDistributor, update the device locations
+            if (statusCode == LotStatus.ShipmentReceivedByDistributor)
+            {
+                var deviceResponse = await _xirgoDeviceService.GetDevicesByLot(lotSeqId, typeCode);
+                if (deviceResponse.ResponseStatus == WcfXirgoService.ResponseStatus.Success && deviceResponse.resultCount > 0)
+                {
+                    foreach (var device in deviceResponse.Devices)
+                    {
+                        var updateRequest = new UpdateDeviceRequest();
+                        updateRequest.Device = new XirgoDevice
+                        {
+                            DeviceSeqID = device.DeviceSeqID,
+                            LocationCode = (int)DeviceLocation.Distributor
+                        };
+
+                        await _xirgoDeviceService.UpdateAsync(updateRequest);
+                    }
+                }
+            }
+
+            resource.AddMessage(MessageCode.StatusDescription, $"Successfully updated lot {lotSeqId}");
+            return resource;
         }
     }
 }

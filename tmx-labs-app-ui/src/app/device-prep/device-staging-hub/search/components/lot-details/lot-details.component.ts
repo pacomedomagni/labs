@@ -1,17 +1,19 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCard } from '@angular/material/card';
-import { DeviceLot, DeviceLotStatus } from 'src/app/shared/data/lot-management/resources';
 import { FallbackValuePipe } from 'src/app/shared/pipes/fallback-value.pipe';
 import { MenuButtonGroupComponent } from 'src/app/shared/components/menu-button-group/menu-button-group.component';
 import { MenuButtonGroupFactory } from 'src/app/shared/components/menu-button-group/menu-button-group.service';
 import { MenuButtonGroupItem } from 'src/app/shared/components/menu-button-group/models/menu-button-group.models';
 import { DeviceLotStatusDescription } from 'src/app/shared/data/lot-management/constants';
+import { LotDetailActionsService } from './services/lot-detail-actions.service';
+import { DeviceDetailsStateService, DeviceLotStateService } from '../../services';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-enum actionItems {
+enum ActionItems {
     ActivateLot = 'activate-lot',
     DeactivateLot = 'deactivate-lot',
-    UpdateLotStatus = 'update-lot-status'
+    UpdateLotStatus = 'update-lot-status',
 }
 
 @Component({
@@ -19,37 +21,74 @@ enum actionItems {
     standalone: true,
     imports: [CommonModule, MatCard, FallbackValuePipe, MenuButtonGroupComponent],
     templateUrl: './lot-details.component.html',
-    styleUrl: './lot-details.component.scss',
+    styleUrls: ['./lot-details.component.scss'],
 })
 export class LotDetailsComponent {
-    deviceLot = input.required<DeviceLot>();
+    private readonly deviceLotState = inject(DeviceLotStateService);
+    private readonly deviceDetailsState = inject(DeviceDetailsStateService);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly lotDetailActionsService = inject(LotDetailActionsService);
 
-    actions: MenuButtonGroupItem[] = [
-        MenuButtonGroupFactory.createButton({ id: actionItems.ActivateLot, label: 'Activate Lot' }),
-        MenuButtonGroupFactory.createButton({ id: actionItems.DeactivateLot, label: 'Deactivate Lot' }),
-        MenuButtonGroupFactory.createButton({ id: actionItems.UpdateLotStatus, label: 'Update Lot Status' })
-    ];
+    // Expose deviceLot from state service
+    readonly deviceLot = this.deviceLotState.deviceLot;
 
-    getStatusText(status?: DeviceLotStatus): string {
-        return DeviceLotStatusDescription.get(status) || '--';
-    }
+    lotStatusDescription = computed(() => {
+        const lot = this.deviceLot();
+        return lot ? DeviceLotStatusDescription.get(lot.statusCode) || '--' : '--';
+    });
+
+    // Dynamically build actions based on device state
+    actions = computed<MenuButtonGroupItem[]>(() => {
+        const actions: MenuButtonGroupItem[] = [];
+        
+        if (this.deviceDetailsState.hasInactiveSimDevices()) {
+            actions.push(MenuButtonGroupFactory.createButton({
+                id: ActionItems.ActivateLot,
+                label: 'Activate Lot',
+            }));
+        }
+        
+        if (this.deviceDetailsState.hasActiveSimDevices()) {
+            actions.push(MenuButtonGroupFactory.createButton({
+                id: ActionItems.DeactivateLot,
+                label: 'Deactivate Lot',
+            }));
+        }
+        
+        actions.push(MenuButtonGroupFactory.createButton({
+            id: ActionItems.UpdateLotStatus,
+            label: 'Update Lot Status',
+        }));
+        
+        return actions;
+    });
 
     actionButtonClicked($event: MenuButtonGroupItem) {
+        const lot = this.deviceLot();
+        if (!lot) return;
+        
         switch ($event.id) {
-            case actionItems.ActivateLot:
-                console.log('Activate Lot clicked for:', this.deviceLot().name);
-                // TODO: Implement activate lot logic
+            case ActionItems.ActivateLot:
+                this.lotDetailActionsService
+                    .activateLot(lot.lotSeqID, lot.name)
+                    .pipe(takeUntilDestroyed(this.destroyRef))
+                    .subscribe();
                 break;
-            case actionItems.DeactivateLot:
-                console.log('Deactivate Lot clicked for:', this.deviceLot().name);
-                // TODO: Implement deactivate lot logic
+            case ActionItems.DeactivateLot:
+                this.lotDetailActionsService
+                    .deactivateLot(lot.lotSeqID, lot.name)
+                    .pipe(takeUntilDestroyed(this.destroyRef))
+                    .subscribe();
                 break;
-            case actionItems.UpdateLotStatus:
-                console.log('Update Lot Status clicked for:', this.deviceLot().name);
-                // TODO: Implement update lot status logic
+            case ActionItems.UpdateLotStatus:
+                this.lotDetailActionsService
+                    .updateLotStatus(lot.lotSeqID, lot.typeCode, lot.name)
+                    .pipe(takeUntilDestroyed(this.destroyRef))
+                    .subscribe();
                 break;
             default:
                 console.warn('Unknown action:', $event.id);
         }
     }
+
 }

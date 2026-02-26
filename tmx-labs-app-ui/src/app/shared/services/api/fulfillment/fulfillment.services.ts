@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../api.service';
-import { OrderType } from '../../../data/application/enums';
-import { Orders, OrdersByState, OrderDetails } from '../../../data/application/resources';
+
+import { OrderListDetails, OrderDetails, AssingDeviceRequest } from '../../../data/fulfillment/resources';
 
 @Injectable({
     providedIn: 'root'
@@ -11,40 +11,35 @@ export class FulfillmentService {
     private apiService = inject(ApiService);
     private readonly controller = '/Fulfillment';
 
-    getOrderCounts(ordersModel: Orders): Observable<Orders> {
-        return this.apiService.post<Orders>({
-            uri: `${this.controller}/OrderCounts`,
-            payload: ordersModel
+    getOrderDetails(deviceOrderSeqId: number): Observable<OrderDetails> {
+        return this.apiService.get<OrderDetails>({
+            uri: `${this.controller}/OrderDetails?deviceOrderSeqID=${deviceOrderSeqId}`,
+            });
+    }
+
+    getOrdersByStatus(deviceOrderStatusCode: number,participantGroupTypeCode: number, canOnlyViewOrdersForOwnGroup: boolean): Observable<OrderListDetails> {
+        return this.apiService.get<OrderListDetails>({
+            uri: `${this.controller}/OrdersByStatus?deviceOrderStatusCode=${deviceOrderStatusCode}&participantGroupTypeCode=${participantGroupTypeCode}&canOnlyViewOrdersForOwnGroup=${canOnlyViewOrdersForOwnGroup}`,
+
+            });
+    }
+    
+    assignDevicesToOrder(request: AssingDeviceRequest): Observable<void> {
+        return this.apiService.post<void>({
+            uri: `${this.controller}/AssignDevices`,
+            payload: request
         });
     }
 
-    getStateOrderCounts(ordersByState: OrdersByState): Observable<OrdersByState> {
-        return this.apiService.post<OrdersByState>({
-            uri: `${this.controller}/StateOrderCounts`,
-            payload: ordersByState
+    getPendingOrderList(): Observable<OrderListDetails> {
+        return this.apiService.get<OrderListDetails>({
+            uri: `${this.controller}/PendingOrderList`,
         });
     }
 
-    getNewOrders(
-        orderType: OrderType,
-        orderState?: string,
-        orderId?: string
-    ): Observable<OrderDetails[]> {
-        const params: Record<string, string> = {
-            orderType: orderType.toString()
-        };
-
-        if (orderState) {
-            params['orderState'] = orderState;
-        }
-
-        if (orderId) {
-            params['orderId'] = orderId;
-        }
-
-        return this.apiService.get<OrderDetails[]>({
-            uri: `${this.controller}/NewOrders`,
-            payload: params
+    getProcessedOrdersCount(): Observable<number> {
+        return this.apiService.get<number>({
+            uri: `${this.controller}/ProcessedOrderCount`,
         });
     }
 }

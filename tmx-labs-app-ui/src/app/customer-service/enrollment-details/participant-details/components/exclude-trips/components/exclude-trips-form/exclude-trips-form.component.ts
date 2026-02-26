@@ -1,12 +1,13 @@
-import { AfterViewInit, Component, Input, OnInit, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule, formatDate } from '@angular/common';
-import { FormsModule, NgForm, NgModel } from '@angular/forms';
+import { FormsModule, NgForm, NgModel, ValidationErrors } from '@angular/forms';
 import { FORM_DIALOG_CONTENT } from 'src/app/shared/components/dialogs/form-dialog/form-dialog.component';
 import { DialogService } from 'src/app/shared/services/dialogs/primary/dialog.service';
 import { DateTimeEditorComponent } from 'src/app/shared/components/dialogs/date-time-editor/date-time-editor.component';
 import { firstValueFrom } from 'rxjs';
-import { MatFormField } from '@angular/material/form-field';
+import { MatFormField, MatError } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -31,7 +32,7 @@ interface ExcludeTripsDialogContent {
 @Component({
     selector: 'tmx-exclude-trips-form',
     standalone: true,
-    imports: [CommonModule, FormsModule, MatFormField, MatInputModule, MatButtonModule, MatIconModule],
+    imports: [CommonModule, FormsModule, MatFormField, MatError, MatInputModule, MatButtonModule, MatIconModule],
     templateUrl: './exclude-trips-form.component.html',
     styleUrls: ['./exclude-trips-form.component.scss'],
 })
@@ -43,14 +44,20 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
     };
     @Input() mode: 'create' | 'edit' = 'create';
 
-    @ViewChildren(NgModel) controls?: QueryList<NgModel>;
     @ViewChild('rangeStartCtrl') rangeStartCtrl?: NgModel;
     @ViewChild('rangeEndCtrl') rangeEndCtrl?: NgModel;
 
     rangeStartError: string | null = null;
     rangeEndError: string | null = null;
+    private rangeStartHighlight = false;
+    rangeStartErrorMatcher: ErrorStateMatcher = { isErrorState: () => this.shouldShowRangeStartError() || this.rangeStartHighlight };
+    rangeEndErrorMatcher: ErrorStateMatcher = { isErrorState: () => this.shouldShowRangeEndError() };
     existingRanges: { rangeStart: string; rangeEnd: string }[] = [];
     originalRangeStart?: string;
+    private rangeStartInteracted = false;
+    private rangeEndInteracted = false;
+    private rangeStartValidationError: ValidationErrors | null = { required: true };
+    private rangeEndValidationError: ValidationErrors | null = { required: true };
     private readonly dialogService = inject(DialogService);
 
     private readonly injectedContent = inject<ExcludeTripsDialogContent>(FORM_DIALOG_CONTENT, {
@@ -65,21 +72,30 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
             this.existingRanges = this.injectedContent.data?.existingRanges ?? [];
             this.originalRangeStart = this.injectedContent.data?.originalRangeStart;
         }
-
-        this.validateRangeStart();
-        this.validateRangeEnd();
     }
 
     ngAfterViewInit(): void {
-        if (!this.parentForm || !this.controls) {
+        if (!this.parentForm) {
             return;
         }
 
-        this.controls.forEach((control) => {
-            this.parentForm?.addControl(control);
-        });
+        if (this.rangeStartCtrl) {
+            this.parentForm.addControl(this.rangeStartCtrl);
+        }
+        if (this.rangeEndCtrl) {
+            this.parentForm.addControl(this.rangeEndCtrl);
+        }
 
-        Promise.resolve().then(() => {
+        if (this.rangeStartCtrl?.control) {
+            this.rangeStartCtrl.control.setValidators(() => this.rangeStartValidationError);
+            this.rangeStartCtrl.control.updateValueAndValidity();
+        }
+        if (this.rangeEndCtrl?.control) {
+            this.rangeEndCtrl.control.setValidators(() => this.rangeEndValidationError);
+            this.rangeEndCtrl.control.updateValueAndValidity();
+        }
+
+        setTimeout(() => {
             this.validateRangeStart();
             this.validateRangeEnd();
         });
@@ -101,7 +117,21 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
         });
 
         const result = await firstValueFrom(dialogRef.afterClosed());
+
+        // Mark as interacted regardless of OK/Cancel
+        if (kind === 'start') {
+            this.rangeStartInteracted = true;
+        } else {
+            this.rangeEndInteracted = true;
+        }
+
         if (!result) {
+            // Cancel: still validate to show "Date is required" if empty
+            if (kind === 'start') {
+                this.validateRangeStart();
+            } else {
+                this.validateRangeEnd();
+            }
             return;
         }
 
@@ -136,81 +166,57 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
     }
 
     shouldShowRangeStartError(): boolean {
-        return !!this.rangeStartError && this.isControlInteracted(this.rangeStartCtrl);
+        return !!this.rangeStartError && this.rangeStartInteracted;
     }
 
     shouldShowRangeEndError(): boolean {
-        return !!this.rangeEndError && this.isControlInteracted(this.rangeEndCtrl);
+        return !!this.rangeEndError && this.rangeEndInteracted;
     }
 
     private validateRangeStart(): void {
         const missing = !this.formModel.rangeStart;
-        this.setControlError(this.rangeStartCtrl, 'required', missing);
+        this.rangeStartValidationError = missing ? { required: true } : null;
         this.rangeStartError = missing ? 'Date is required.' : null;
+        this.rangeStartCtrl?.control?.updateValueAndValidity();
     }
 
     private validateRangeEnd(): void {
-        const control = this.rangeEndCtrl;
         const hasValue = !!this.formModel.rangeEnd;
 
         if (!hasValue) {
-            this.setControlError(control, 'required', true);
-            this.setControlError(control, 'order', false);
-            this.setControlError(control, 'overlap', false);
+            this.rangeStartHighlight = false;
+            this.rangeEndValidationError = { required: true };
             this.rangeEndError = 'Date is required.';
+            this.rangeEndCtrl?.control?.updateValueAndValidity();
             return;
         }
 
-        this.setControlError(control, 'required', false);
-
         const start = this.isoToDate(this.formModel.rangeStart);
-        let end = this.isoToDate(this.formModel.rangeEnd);
+        const end = this.isoToDate(this.formModel.rangeEnd);
 
-        // Auto-adjust end date to equal start date if end is before start
-        if (start && end && end.getTime() < start.getTime()) {
-            this.formModel.rangeEnd = this.formModel.rangeStart;
-            end = new Date(start);
-        }
-
-        // Show error and disable OK button when end <= start (including after auto-adjustment)
         if (start && end && end.getTime() <= start.getTime()) {
-            this.setControlError(control, 'order', true);
-            this.setControlError(control, 'overlap', false);
+            this.rangeStartHighlight = false;
+            this.rangeEndValidationError = { order: true };
             this.rangeEndError = 'End date must be later than start date.';
-            this.setParentFormInvalid(true);
+            this.rangeEndCtrl?.control?.updateValueAndValidity();
             return;
         }
 
         const overlaps = start && end ? this.hasOverlap(this.formModel.rangeStart, this.formModel.rangeEnd, this.originalRangeStart) : false;
         if (overlaps) {
-            this.setControlError(control, 'order', false);
-            this.setControlError(control, 'overlap', true);
+            this.rangeStartHighlight = true;
+            this.rangeStartError = 'Selected date range overlaps with an existing exclusion.';
+            this.rangeEndValidationError = { overlap: true };
             this.rangeEndError = 'Selected date range overlaps with an existing exclusion.';
-            this.setParentFormInvalid(true);
+            this.rangeEndCtrl?.control?.updateValueAndValidity();
             return;
         }
 
-        this.setControlError(control, 'order', false);
-        this.setControlError(control, 'overlap', false);
+        this.rangeStartHighlight = false;
+        this.rangeStartError = null;
+        this.rangeEndValidationError = null;
         this.rangeEndError = null;
-        this.setParentFormInvalid(false);
-    }
-
-    private setParentFormInvalid(invalid: boolean): void {
-        if (!this.parentForm?.form) {
-            return;
-        }
-        
-        if (invalid) {
-            this.parentForm.form.setErrors({ invalidRange: true });
-            (this.parentForm.form as any).status = 'INVALID';
-        } else {
-            const errors = this.parentForm.form.errors;
-            if (errors && 'invalidRange' in errors) {
-                delete errors['invalidRange'];
-                this.parentForm.form.setErrors(Object.keys(errors).length > 0 ? errors : null);
-            }
-        }
+        this.rangeEndCtrl?.control?.updateValueAndValidity();
     }
 
     private isoToDate(iso?: string): Date | null {
@@ -245,33 +251,5 @@ export class ExcludeTripsFormComponent implements OnInit, AfterViewInit {
 
         control.control.markAsDirty();
         control.control.markAsTouched();
-        control.control.updateValueAndValidity({ emitEvent: false });
-    }
-
-    private setControlError(control: NgModel | undefined, key: string, hasError: boolean): void {
-        if (!control?.control) {
-            return;
-        }
-
-        const errors = { ...(control.control.errors ?? {}) };
-        if (hasError) {
-            errors[key] = true;
-        } else {
-            delete errors[key];
-        }
-
-        control.control.setErrors(Object.keys(errors).length > 0 ? errors : null);
-        control.control.markAsTouched();
-        control.control.markAsDirty();
-        control.control.updateValueAndValidity();
-        
-        if (this.parentForm?.form) {
-            this.parentForm.form.updateValueAndValidity();
-        }
-    }
-
-    private isControlInteracted(control?: NgModel): boolean {
-        const formControl = control?.control;
-        return !!formControl && (formControl.touched || formControl.dirty);
     }
 }

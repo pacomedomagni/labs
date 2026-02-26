@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BenchTestDeviceStatus } from 'src/app/shared/data/bench-test/enums';
+import { BenchTestBoardDeviceStatus } from 'src/app/shared/data/bench-test/resources';
+import { DeviceDetails } from 'src/app/shared/data/lot-management/resources';
 
 export interface DeviceCountResult {
     successCount: number;
@@ -15,7 +17,7 @@ export class LotBenchtestProgressCalculationService {
      * @param devices - Array of devices with benchTestStatusCode
      * @returns Object containing successCount and testedCount
      */
-    calculateDeviceCounts(devices: any[]): DeviceCountResult {
+    calculateDeviceCounts(devices: BenchTestBoardDeviceStatus[] | DeviceDetails[]): DeviceCountResult {
         let successCount = 0;
         let testedCount = 0;
 

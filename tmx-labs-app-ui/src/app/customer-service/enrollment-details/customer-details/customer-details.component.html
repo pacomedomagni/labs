@@ -11,43 +11,43 @@
         <cui-accordion-body>
             <div class="customer-section" role="list" aria-label="Customer information">
                 <div>
-                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" tabindex="0" [attr.aria-label]="'Name: ' + (customer().user?.fullName | tmxFallbackValue)">
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" [attr.aria-label]="'Name: ' + (customer().user?.fullName | tmxFallbackValue)">
                         <div class="col-span-2 font-semibold">Name</div>
                         <div class="col-span-3" >{{ customer().user?.fullName | tmxFallbackValue }}</div>
                     </div>
                     <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2" aria-labelledby="customer-details">
                     
-                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" tabindex="0" [attr.aria-label]="'Email Address: ' + (customer().user?.email | tmxFallbackValue)">
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" [attr.aria-label]="'Email Address: ' + (customer().user?.email | tmxFallbackValue)">
                         <div class="col-span-2 font-semibold">Email Address</div>
                         <div class="col-span-3" >{{ customer().user?.email | tmxFallbackValue }}</div>
                     </div>
                     <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2" aria-labelledby="customer-details">
                     
-                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" tabindex="0" [attr.aria-label]="'Address: ' + (customer().user?.address | tmxFallbackValue)">
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" [attr.aria-label]="'Address: ' + (customer().user?.address | tmxFallbackValue)">
                         <div class="col-span-2 font-semibold">Address</div>
                         <div class="col-span-3" >{{ customer().user?.address | tmxFallbackValue }}</div>
                     </div>
                     <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2">
                     
-                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" tabindex="0" [attr.aria-label]="'City: ' + (customer().user?.city | tmxFallbackValue)">
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" [attr.aria-label]="'City: ' + (customer().user?.city | tmxFallbackValue)">
                         <div class="col-span-2 font-semibold">City</div>
                         <div class="col-span-3" >{{ customer().user?.city | tmxFallbackValue }}</div>
                     </div>
                     <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2">
 
-                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" tabindex="0" [attr.aria-label]="'State: ' + (customer().user?.state | tmxFallbackValue)">
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" [attr.aria-label]="'State: ' + (customer().user?.state | tmxFallbackValue)">
                         <div class="col-span-2 font-semibold">State</div>
                         <div class="col-span-3">{{ customer().user?.state | tmxFallbackValue }}</div>
                     </div>
                     <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2">
                     
-                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" tabindex="0" [attr.aria-label]="'Zip: ' + (customer().user?.zip | tmxFallbackValue)">
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" [attr.aria-label]="'Zip: ' + (customer().user?.zip | tmxFallbackValue)">
                         <div class="col-span-2 font-semibold" >Zip</div>
                         <div class="col-span-3">{{ customer().user?.zip | tmxFallbackValue }}</div>
                     </div>
                     <hr aria-hidden="true" class="border-t-2 border-gray-400 my-2">
                     
-                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" tabindex="0" [attr.aria-label]="'Create Date: ' + (customer().participantGroup?.createDateTime | tmxDisplayDate | tmxFallbackValue)">
+                    <div class="grid grid-cols-5 gap-x-4 text-2xl" role="listitem" [attr.aria-label]="'Create Date: ' + (customer().participantGroup?.createDateTime | tmxDisplayDate | tmxFallbackValue)">
                         <div class="col-span-2 font-semibold">Create Date</div>
                         <div class="col-span-3">{{ customer().participantGroup?.createDateTime | tmxDisplayDate | tmxFallbackValue }}</div>
                     </div>

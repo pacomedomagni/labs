@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
+using Dapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Progressive.Telematics.Labs.Services.Database.Models;
@@ -12,6 +14,7 @@ namespace Progressive.Telematics.Labs.Services.Database
     public interface ILotManagementDAL
     {
         Task<IEnumerable<DeviceLotDataModel>> GetLotsForMarkBenchTestComplete();
+        Task UpdateLot(int lotSeqId, string name, int? statusCode, int? typeCode);
     }
 
     public class LotManagementDAL : DbContext, ILotManagementDAL
@@ -29,6 +32,19 @@ namespace Progressive.Telematics.Labs.Services.Database
             const string storedProc = "dbo.usp_XirgoLot_SelectLotsForMarkBenchTestComplete";
 
             return await ExecuteStoredProcedureAsync<DeviceLotDataModel>(storedProc, null);
+        }
+
+        public async Task UpdateLot(int lotSeqId, string name, int? statusCode, int? typeCode)
+        {
+            const string storedProc = "[dbo].[usp_XirgoLot_UpdateByPrimaryKey]";
+
+            var parms = new DynamicParameters()
+                .Parameter("@Parm_LotSeqID", lotSeqId, dbType: DbType.Int32)
+                .Parameter("@Parm_Name", name, dbType: DbType.String)
+                .Parameter("@Parm_StatusCode", statusCode, dbType: DbType.Int16)
+                .Parameter("@Parm_TypeCode", typeCode, dbType: DbType.Int16);
+
+            await ExecuteNonQueryAsync(storedProc, parms);
         }
     }
 }

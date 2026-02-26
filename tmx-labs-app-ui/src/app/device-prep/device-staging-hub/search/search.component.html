@@ -10,10 +10,10 @@
                 (keydown.enter)="onSubmitClicked()"
             />
             @if (searchQuery.hasError('required')) {
-                <mat-error>This field is required.</mat-error>
+                <mat-error class="whitespace-nowrap">This field is required.</mat-error>
             }
-            @if (searchQuery.hasError('invalidLotID') || searchQuery.hasError('invalidDeviceSerialNumber')) {
-                <mat-error>The provided Lot ID or Device Serial Number includes invalid character(s).</mat-error>
+            @if (searchQuery.hasError('invalidCharacters') || searchQuery.hasError('invalidDeviceSerialNumber')) {
+                <mat-error class="whitespace-nowrap">The provided Lot ID or Device Serial Number includes invalid character(s).</mat-error>
             }
         </mat-form-field>
         <button class="ml-3xs mb-mat-error-offset" mat-flat-button color="primary" (click)="onSubmitClicked()" [disabled]="!searchQuery.valid">Submit</button>
@@ -38,8 +38,8 @@
         </mat-card>
     } @else {
         <div class="flex flex-col xl:flex-row gap-16">
-            <tmx-lot-details class="w-full xl:w-1/3" [deviceLot]="deviceLot()"></tmx-lot-details>
-            <tmx-device-details class="w-full xl:w-2/3" [deviceLot]="deviceLot()"></tmx-device-details>
+            <tmx-lot-details class="w-full xl:w-1/3"></tmx-lot-details>
+            <tmx-device-details class="w-full xl:w-2/3"></tmx-device-details>
         </div>
     }
 </div>

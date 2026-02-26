@@ -83,7 +83,7 @@ describe('UserInfoService', () => {
     service.getUserInfo().subscribe(result => {
       expect(result).toEqual(mockUserInfo);
       expect(service.data).toEqual(mockUserInfo);
-      expect(cookieServiceSpy.set).toHaveBeenCalledWith('tmxuser', 'Test User', 1);
+      expect(cookieServiceSpy.set).toHaveBeenCalledWith('tmxuser', 'Test User', jasmine.anything());
       done();
     });
 

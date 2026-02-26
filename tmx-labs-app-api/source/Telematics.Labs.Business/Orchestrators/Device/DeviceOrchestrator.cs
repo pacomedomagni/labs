@@ -20,6 +20,8 @@ using WcfDeviceActivityService;
 using WcfXirgoService;
 using BusinessPingDeviceRequest = Progressive.Telematics.Labs.Business.Resources.Resources.Device.PingDeviceRequest;
 using BusinessResetDeviceRequest = Progressive.Telematics.Labs.Business.Resources.Resources.Device.ResetDeviceRequest;
+using BusinessActivateDeviceRequest = Progressive.Telematics.Labs.Business.Resources.Resources.Device.ActivateDeviceRequest;
+using BusinessDeactivateDeviceRequest = Progressive.Telematics.Labs.Business.Resources.Resources.Device.DeactivateDeviceRequest;
 
 #nullable enable
 
@@ -37,6 +39,8 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Device
         Task<Resource> GetAudioStatusAWS(GetAudioStatusAWSRequest request);
         Task<Resource> SetAudioStatusAWS(SetAudioStatusAWSRequest request);
         Task<Resource> UpdateAudio(UpdateAudioRequest request);
+        Task<Resource> ActivateDevice(BusinessActivateDeviceRequest request);
+        Task<Resource> DeactivateDevice(BusinessDeactivateDeviceRequest request);
     }
 
     public class DeviceOrchestrator(ILogger<DeviceOrchestrator> logger,
@@ -734,5 +738,59 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Device
 
             return null;
         }
-}
+
+        public async Task<Resource> ActivateDevice(BusinessActivateDeviceRequest request)
+        {
+            var resource = new Resource();
+
+            if (string.IsNullOrWhiteSpace(request?.DeviceSerialNumber))
+            {
+                resource.AddMessage(MessageCode.ErrorCode, "InvalidRequest");
+                resource.AddMessage(MessageCode.ErrorDetails, "Device serial number is required");
+                return resource;
+            }
+
+            var deviceResponse = await deviceService.GetDeviceBySerialNumber(request.DeviceSerialNumber);
+            
+            if (deviceResponse?.Device == null)
+            {
+                resource.AddMessage(MessageCode.ErrorCode, "NotFound");
+                resource.AddMessage(MessageCode.ErrorDetails, $"Device not found for serial number {request.DeviceSerialNumber}");
+                return resource;
+            }
+
+            var device = deviceResponse.Device;
+            await deviceService.ActivateXirgoDevice(device.DeviceSerialNumber, device.SIM, true);
+
+            resource.AddMessage(MessageCode.StatusDescription, $"Activated device {request.DeviceSerialNumber}");
+            return resource;
+        }
+
+        public async Task<Resource> DeactivateDevice(BusinessDeactivateDeviceRequest request)
+        {
+            var resource = new Resource();
+
+            if (string.IsNullOrWhiteSpace(request?.DeviceSerialNumber))
+            {
+                resource.AddMessage(MessageCode.ErrorCode, "InvalidRequest");
+                resource.AddMessage(MessageCode.ErrorDetails, "Device serial number is required");
+                return resource;
+            }
+
+            var deviceResponse = await deviceService.GetDeviceBySerialNumber(request.DeviceSerialNumber);
+            
+            if (deviceResponse?.Device == null)
+            {
+                resource.AddMessage(MessageCode.ErrorCode, "NotFound");
+                resource.AddMessage(MessageCode.ErrorDetails, $"Device not found for serial number {request.DeviceSerialNumber}");
+                return resource;
+            }
+
+            var device = deviceResponse.Device;
+            await deviceService.ActivateXirgoDevice(device.DeviceSerialNumber, device.SIM, false);
+
+            resource.AddMessage(MessageCode.StatusDescription, $"Deactivated device {request.DeviceSerialNumber}");
+            return resource;
+        }
+    }
 }

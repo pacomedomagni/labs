@@ -66,6 +66,11 @@ export class BenchTestDeviceStatusService implements OnDestroy {
         }
     }
 
+    /** Reset the status of all devices */
+    reset() {
+        this.deviceStatusesSubject$.next([]);
+    }
+
     private startAutoStopTimer(): void {
         this.autoStopTimer = setTimeout(() => {
             this.notificationService.warning(

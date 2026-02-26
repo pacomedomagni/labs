@@ -30,7 +30,7 @@
     <!-- Tabs -->
     <mat-tab-group (selectedIndexChange)="onTabChange($event)" class="fulfillment-tabs">
       <mat-tab label="PENDING ORDERS">
-        <tmx-pending-orders></tmx-pending-orders>
+        <tmx-pending-orders [orders]="pendingOrderData()" (orderSelected)="onOrderSelected($event)"></tmx-pending-orders>
       </mat-tab>
       
       <mat-tab label="COMPLETED ORDERS">

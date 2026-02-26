@@ -1,13 +1,29 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { AfterViewInit, Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator } from '@angular/forms';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { ErrorStateMatcher, MatNativeDateModule } from '@angular/material/core';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import type { MatTimepickerSelected } from '@angular/material/timepicker';
+
+export class DateErrorStateMatcher implements ErrorStateMatcher {
+    constructor(private component: DateTimeControlComponent) {}
+
+    isErrorState(): boolean {
+        return this.component.invalidDateFormat;
+    }
+}
+
+export class TimeErrorStateMatcher implements ErrorStateMatcher {
+    constructor(private component: DateTimeControlComponent) {}
+
+    isErrorState(): boolean {
+        return this.component.invalidTimeFormat;
+    }
+}
 
 @Component({
     selector: 'tmx-date-time-control',
@@ -26,34 +42,122 @@ import type { MatTimepickerSelected } from '@angular/material/timepicker';
     ],
     templateUrl: './date-time-control.component.html',
     styleUrls: ['./date-time-control.component.scss'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => DateTimeControlComponent),
+            multi: true,
+        },
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => DateTimeControlComponent),
+            multi: true,
+        },
+    ],
 })
-export class DateTimeControlComponent implements OnChanges {
+export class DateTimeControlComponent implements OnChanges, AfterViewInit, ControlValueAccessor, Validator {
     @Input() model: Date | null = null;
     @Input() min: Date | null = null;
     @Input() max: Date | null = null;
     @Input() label = '';
     @Input() id = 'date-time';
-    @Input() name?: string;
     @Input() isRequired = false;
     @Input() isDisabled = false;
     @Input() error: string | null = null;
     @Output() modelChange = new EventEmitter<Date | null>();
 
+    @ViewChild('dateInputRef') dateInputRef?: ElementRef<HTMLInputElement>;
     @ViewChild('timeInputRef') timeInputRef?: ElementRef<HTMLInputElement>;
+    @ViewChild('timePicker') private timePickerRef?: any;
 
     dateValue: Date | null = null;
     timeInput = '';
     displayError = false;
+    invalidTimeFormat = false;
+    invalidDateFormat = false;
+
+    dateErrorStateMatcher: DateErrorStateMatcher;
+    timeErrorStateMatcher: TimeErrorStateMatcher;
 
     private readonly datePipe = new DatePipe('en-US');
     private initialDate: Date | null = null;
     private initialTime = '';
     private isSyncing = false;
     private currentError: string | null = null;
-    private invalidTimeFormat = false;
-    private invalidDateFormat = false;
+    private interacted = false;
+    private lastRawDateInput = '';
+    private isDateBlurring = false;
+    allowTimePickerOpen = false;
 
-    constructor(private readonly cdr: ChangeDetectorRef) {}
+    // CVA callbacks
+    private onChangeFn: (value: Date | null) => void = () => {};
+    private onTouchedFn: () => void = () => {};
+    private onValidatorChangeFn: () => void = () => {};
+
+    constructor(private readonly cdr: ChangeDetectorRef) {
+        this.dateErrorStateMatcher = new DateErrorStateMatcher(this);
+        this.timeErrorStateMatcher = new TimeErrorStateMatcher(this);
+    }
+
+    ngAfterViewInit(): void {
+        this.patchTimepickerOpen();
+    }
+
+    // ControlValueAccessor implementation
+    writeValue(value: Date | null): void {
+        if (this.invalidDateFormat || this.invalidTimeFormat) {
+            return;
+        }
+        this.model = value;
+        this.interacted = false;
+        this.syncFromModel();
+    }
+
+    registerOnChange(fn: (value: Date | null) => void): void {
+        this.onChangeFn = fn;
+    }
+
+    registerOnTouched(fn: () => void): void {
+        this.onTouchedFn = fn;
+    }
+
+    setDisabledState(isDisabled: boolean): void {
+        this.isDisabled = isDisabled;
+    }
+
+    // Validator implementation
+    validate(): ValidationErrors | null {
+        if (this.invalidDateFormat) {
+            return { invalidDate: true };
+        }
+
+        if (this.invalidTimeFormat) {
+            return { invalidTime: true };
+        }
+
+        // Date entered but time empty → require explicit time
+        if (this.dateValue && !this.timeInput?.trim()) {
+            return { timeRequired: true };
+        }
+
+        if (this.isRequired && !this.model) {
+            return { required: true };
+        }
+
+        if (this.min && this.model && this.compareDates(this.model, this.min) < 0) {
+            return { min: { min: this.min, actual: this.model } };
+        }
+
+        if (this.max && this.model && this.compareDates(this.model, this.max) > 0) {
+            return { max: { max: this.max, actual: this.model } };
+        }
+
+        return null;
+    }
+
+    registerOnValidatorChange(fn: () => void): void {
+        this.onValidatorChangeFn = fn;
+    }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['model'] && !this.isSyncing) {
@@ -66,56 +170,118 @@ export class DateTimeControlComponent implements OnChanges {
     }
 
     onDateChange(value: Date | null): void {
+        if (this.invalidDateFormat) {
+            return;
+        }
+        this.interacted = true;
         this.dateValue = value ? new Date(value) : null;
-        this.invalidDateFormat = this.dateValue ? Number.isNaN(this.dateValue.getTime()) : false;
+        if (value) {
+            this.invalidDateFormat = Number.isNaN(this.dateValue!.getTime());
+            this.lastRawDateInput = '';
+        }
         this.refreshError();
         this.updateModel();
     }
 
     onDateInput(event: any): void {
+        if (this.isDateBlurring) {
+            return;
+        }
         const input = event.target?.value;
+        this.lastRawDateInput = input ?? '';
         if (!input || !input.trim()) {
             this.invalidDateFormat = false;
             this.refreshError();
             return;
         }
 
-        // Check if the typed value is a valid date
-        const parsed = new Date(input);
-        this.invalidDateFormat = Number.isNaN(parsed.getTime());
-        this.refreshError();
-    }
+        const trimmed = input.trim();
 
-    onDateBlur(): void {
-        // Revalidate on blur
-        if (this.dateValue) {
-            this.invalidDateFormat = Number.isNaN(this.dateValue.getTime());
+        // Trigger validation at 3rd character: if length >= 3 and doesn't look
+        // like a valid partial MM/DD/YYYY pattern, mark as invalid immediately
+        if (trimmed.length >= 3) {
+            const partialDatePattern = /^\d{1,2}\/(\d{0,2}(\/\d{0,4})?)?$/;
+            if (!partialDatePattern.test(trimmed)) {
+                this.invalidDateFormat = true;
+                this.refreshError();
+                return;
+            }
+        }
+
+        // For complete-looking dates, also check actual parsability
+        if (trimmed.length >= 8) {
+            const parsed = new Date(trimmed);
+            this.invalidDateFormat = Number.isNaN(parsed.getTime());
         } else {
             this.invalidDateFormat = false;
         }
         this.refreshError();
     }
 
+    onDateBlur(): void {
+        this.interacted = true;
+        this.isDateBlurring = true;
+
+        // Use setTimeout to restore state AFTER MatDatepickerInput finishes.
+        setTimeout(() => {
+            if (this.invalidDateFormat && this.lastRawDateInput) {
+                const el = this.dateInputRef?.nativeElement;
+                if (el) {
+                    el.value = this.lastRawDateInput;
+                }
+            }
+            this.isDateBlurring = false;
+            this.refreshError();
+            this.tryDetectChanges();
+        });
+        this.onTouchedFn();
+    }
+
     onTimeInputChange(value: any): void {
+        if (!this.isSyncing) {
+            this.interacted = true;
+        }
+
         if (value == null) {
-            this.timeInput = '';
+            // MatTimepickerInput emits null when it can't parse the raw input.
+            // Don't overwrite timeInput — the user is still typing.
+            // Read the actual DOM value to keep timeInput in sync with what's displayed.
+            const rawValue = this.timeInputRef?.nativeElement?.value ?? '';
+            this.timeInput = rawValue;
         } else if (typeof value === 'string') {
             this.timeInput = value;
         } else if (value instanceof Date) {
             this.timeInput = this.toTimeString(value);
+            this.invalidTimeFormat = false;
         } else {
             this.timeInput = String(value ?? '');
         }
 
-        // Check if time format is valid
-        if (this.timeInput && this.timeInput.trim()) {
-            this.invalidTimeFormat = !this.parseTime(this.timeInput.trim());
+        this.refreshError();
+        this.updateModel();
+    }
+
+    onTimeInput(event: any): void {
+        const input = event.target?.value;
+        if (!input || !input.trim()) {
+            this.invalidTimeFormat = false;
+            this.refreshError();
+            return;
+        }
+
+        const trimmed = input.trim();
+
+        // Progressive validation — don't flag errors on partial input
+        if (trimmed.length >= 5) {
+            this.invalidTimeFormat = !this.parseTime(trimmed);
+        } else if (trimmed.length >= 3) {
+            const partialTimePattern = /^\d{1,2}:\d{0,2}$/;
+            this.invalidTimeFormat = !partialTimePattern.test(trimmed);
         } else {
             this.invalidTimeFormat = false;
         }
 
         this.refreshError();
-        this.updateModel();
     }
 
     onTimeSelected(event: MatTimepickerSelected<Date> | Date | null): void {
@@ -125,13 +291,23 @@ export class DateTimeControlComponent implements OnChanges {
     }
 
     onTimeBlur(): void {
+        this.interacted = true;
         const normalized = this.normalizeTimeString(this.timeInput);
-        if (!normalized || normalized === this.timeInput) {
-            return;
+        if (normalized && normalized !== this.timeInput) {
+            this.timeInput = normalized;
+            this.invalidTimeFormat = false;
+            this.updateModel();
+        } else {
+            // On blur, validate the raw DOM value — if text is present but unparseable, show error
+            const rawValue = this.timeInputRef?.nativeElement?.value?.trim() ?? '';
+            if (rawValue) {
+                this.invalidTimeFormat = !this.parseTime(rawValue);
+            } else {
+                this.invalidTimeFormat = false;
+            }
         }
-
-        this.timeInput = normalized;
-        this.updateModel();
+        this.refreshError();
+        this.onTouchedFn();
     }
 
     get errorMessage(): string | null {
@@ -139,6 +315,7 @@ export class DateTimeControlComponent implements OnChanges {
     }
 
     syncFromModel(): void {
+        this.isSyncing = true;
         const source = this.model instanceof Date && !Number.isNaN(this.model.getTime()) ? new Date(this.model) : null;
 
         this.dateValue = source;
@@ -152,7 +329,10 @@ export class DateTimeControlComponent implements OnChanges {
         this.tryDetectChanges();
 
         this.syncNativeTimeInput();
-        Promise.resolve().then(() => this.syncNativeTimeInput());
+        Promise.resolve().then(() => {
+            this.syncNativeTimeInput();
+            this.isSyncing = false;
+        });
     }
 
     private tryDetectChanges(): void {
@@ -168,12 +348,27 @@ export class DateTimeControlComponent implements OnChanges {
         const el = this.timeInputRef?.nativeElement;
         if (el) {
             el.value = this.timeInput ?? '';
-            el.dispatchEvent(new Event('input', { bubbles: true }));
         }
+    }
+
+    private patchTimepickerOpen(): void {
+        const picker = this.timePickerRef as any;
+        if (!picker?.open) return;
+        const originalOpen = picker.open.bind(picker);
+        picker.open = () => {
+            if (this.allowTimePickerOpen) {
+                this.allowTimePickerOpen = false;
+                originalOpen();
+            }
+        };
     }
 
     private updateModel(): void {
         if (this.isSyncing) {
+            return;
+        }
+
+        if (this.invalidDateFormat || this.invalidTimeFormat) {
             return;
         }
 
@@ -194,20 +389,15 @@ export class DateTimeControlComponent implements OnChanges {
             return;
         }
 
+        // Date entered but no time → keep model null, require explicit time
         if (date && !time) {
-            const fallbackTime = this.initialTime || '00:00:00';
-            const combined = this.combine(date, fallbackTime);
-            if (combined) {
-                this.emitModel(combined);
-            }
+            this.refreshError();
             return;
         }
 
-        if (!date && time && this.initialDate) {
-            const combined = this.combine(this.initialDate, time);
-            if (combined) {
-                this.emitModel(combined);
-            }
+        // Time entered but no date → keep model null
+        if (!date && time) {
+            this.refreshError();
         }
     }
 
@@ -215,6 +405,7 @@ export class DateTimeControlComponent implements OnChanges {
         this.isSyncing = true;
         this.model = value;
         this.modelChange.emit(value);
+        this.onChangeFn(value);
         this.dateValue = value ? new Date(value) : null;
         this.timeInput = value ? this.toTimeString(value) : '';
         this.initialDate = this.dateValue ? new Date(this.dateValue) : null;
@@ -304,6 +495,7 @@ export class DateTimeControlComponent implements OnChanges {
     private refreshError(): void {
         this.currentError = this.computeErrorMessage();
         this.displayError = !!this.currentError;
+        this.onValidatorChangeFn();
     }
 
     private computeErrorMessage(): string | null {
@@ -311,13 +503,15 @@ export class DateTimeControlComponent implements OnChanges {
             return this.error;
         }
 
-        // Check for invalid format errors first
-        if (this.invalidDateFormat) {
-            return 'Invalid date format. Please use MM/DD/YYYY.';
+        // Format errors are shown via per-field mat-error inside mat-form-field
+        if (this.invalidDateFormat || this.invalidTimeFormat) {
+            return null;
         }
 
-        if (this.invalidTimeFormat) {
-            return 'Invalid time format. Please use HH:MM AM/PM.';
+        // Don't show shared error messages until user has interacted.
+        // validate() still returns errors → OK button stays disabled.
+        if (!this.interacted) {
+            return null;
         }
 
         const value = this.model;
@@ -328,14 +522,6 @@ export class DateTimeControlComponent implements OnChanges {
 
         if (this.max && value && this.compareDates(value, this.max) > 0) {
             return `Date must be less than ${this.datePipe.transform(this.max, 'M/d/yyyy hh:mm:ss')}`;
-        }
-
-        if (this.min && this.max && value) {
-            return `Date must be between ${this.datePipe.transform(this.min, 'M/d/yyyy hh:mm:ss')} and ${this.datePipe.transform(this.max, 'M/d/yyyy hh:mm:ss')}`;
-        }
-
-        if (!value && this.isRequired) {
-            return 'Date is required';
         }
 
         return null;

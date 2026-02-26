@@ -9,6 +9,7 @@ namespace Progressive.Telematics.Labs.Api.Controllers.Device
     [Route("Api/Device")]
     public class ParticipantController() : TelematicsController<IDeviceOrchestrator>
     {
+
         [HttpPost("MarkDefective")]
         public async Task<Resource> MarkDefective([FromBody] MarkDefectiveRequest request)
         {
@@ -61,6 +62,18 @@ namespace Progressive.Telematics.Labs.Api.Controllers.Device
         public async Task<Resource> UpdateAudio([FromBody] Progressive.Telematics.Labs.Business.Resources.Resources.Device.UpdateAudioRequest request)
         {
             return await Orchestrator.UpdateAudio(request);
+        }
+
+        [HttpPost("Activate")]
+        public async Task<Resource> Activate([FromBody] Progressive.Telematics.Labs.Business.Resources.Resources.Device.ActivateDeviceRequest request)
+        {
+            return await Orchestrator.ActivateDevice(request);
+        }
+
+        [HttpPost("Deactivate")]
+        public async Task<Resource> Deactivate([FromBody] Progressive.Telematics.Labs.Business.Resources.Resources.Device.DeactivateDeviceRequest request)
+        {
+            return await Orchestrator.DeactivateDevice(request);
         }
     }
 }

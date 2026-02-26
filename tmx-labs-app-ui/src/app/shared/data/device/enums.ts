@@ -146,17 +146,7 @@ export const DeviceLocationValue = new Map<DeviceLocation, number>([
 	[DeviceLocation.InVehicle, 6],
 	[DeviceLocation.Unknown, 7]
 ]);
-export const DeviceLotStatusValue = new Map<DeviceLotStatus, number>([
-	[DeviceLotStatus.ShippedToDistributor, 1],
-	[DeviceLotStatus.ShipmentReceivedByDistributor, 2],
-	[DeviceLotStatus.AssigningDevices, 3],
-	[DeviceLotStatus.UsedForTest, 4],
-	[DeviceLotStatus.ShippedToManufacturer, 5],
-	[DeviceLotStatus.ShipmentReceivedByManufacturer, 6],
-	[DeviceLotStatus.AssignedToRMA, 7],
-	[DeviceLotStatus.Storage, 8],
-	[DeviceLotStatus.Obsolete, 9]
-]);
+
 export const DeviceLotTypeValue = new Map<DeviceLotType, number>([
 	[DeviceLotType.Manufacturer, 1],
 	[DeviceLotType.Returned, 2],

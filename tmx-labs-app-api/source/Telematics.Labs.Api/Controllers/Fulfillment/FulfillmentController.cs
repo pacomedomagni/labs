@@ -1,68 +1,114 @@
-using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Progressive.Telematics.Labs.Business.Orchestrators.Fulfillment;
-using Progressive.Telematics.Labs.Business.Resources.Enums;
+using Progressive.Telematics.Labs.Business.Resources.Resources.Device;
 using Progressive.Telematics.Labs.Business.Resources.Resources.FulFillment;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
 
-namespace Progressive.Telematics.Labs.Api.Controllers.Fulfillment
+namespace Progressive.Telematics.Labs.Api.Controllers.Fulfillment;
+
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+public class FulfillmentController : ControllerBase
 {
-    /// <summary>
-    /// Controller for managing order fulfillment operations including order counts, 
-    /// state-level order counts, and new order retrieval for various order types
-    /// (Snapshot, Commercial Lines, Commercial Lines Heavy Truck).
-    /// </summary>
-    [Route("api/Fulfillment")]
-    public class FulfillmentController : TelematicsController<IOrderCountsOrchestrator>
+    private readonly IDeviceFulfillmentOrchestrator _orchestrator;
+
+    public FulfillmentController(IDeviceFulfillmentOrchestrator orchestrator)
     {
-        /// <summary>
-        /// Gets order counts for a specific order type.
-        /// Includes totals for open orders, devices needed, and processed/fulfilled orders.
-        /// </summary>
-        /// <param name="ordersModel">The orders model containing the order type and other filter criteria</param>
-        /// <returns>Orders object with count information populated</returns>
-        /// <response code="200">Returns the order counts successfully</response>
-        [HttpPost("OrderCounts")]
-        [ProducesResponseType(typeof(Orders), StatusCodes.Status200OK)]
-        public async Task<Orders> GetOrderCounts([FromBody][Required] Orders ordersModel)
-        {
-            return await Orchestrator.GetOrderCounts(ordersModel);
-        }
-
-        /// <summary>
-        /// Gets order counts grouped by state for a specific order type.
-        /// Provides detailed breakdown by state including number of orders, devices needed,
-        /// oldest order date, and count of old orders.
-        /// </summary>
-        /// <param name="ordersByState">The orders by state model containing the order type</param>
-        /// <returns>OrdersByState object with state-level count information</returns>
-        /// <response code="200">Returns the state order counts successfully</response>
-        [HttpPost("StateOrderCounts")]
-        [ProducesResponseType(typeof(OrdersByState), StatusCodes.Status200OK)]
-        public async Task<OrdersByState> GetStateOrderCounts([FromBody][Required] OrdersByState ordersByState)
-        {
-            return await Orchestrator.GetStateOrderCounts(ordersByState);
-        }
-
-        /// <summary>
-        /// Gets new orders for a specific order type with optional filtering by state and order ID.
-        /// Supports multiple order types: Snapshot (1, 2, 3), Preview, Commercial Lines, and Heavy Truck orders.
-        /// </summary>
-        /// <param name="orderType">The type of order to retrieve (e.g., Snapshot1Only, CommercialLines, CommercialLinesHeavyTruck)</param>
-        /// <param name="orderState">Optional: Filter orders by state (e.g., "OH", "PA")</param>
-        /// <param name="orderId">Optional: Filter by specific order ID or order number</param>
-        /// <returns>List of order details including vehicle information, device versions, and shipping details</returns>
-        /// <response code="200">Returns the list of new orders successfully</response>
-        [HttpGet("NewOrders")]
-        [ProducesResponseType(typeof(List<OrderDetails>), StatusCodes.Status200OK)]
-        public async Task<List<OrderDetails>> GetNewOrders(
-            [FromQuery][Required] OrderType orderType,
-            [FromQuery] string orderState = null,
-            [FromQuery] string orderId = null)
-        {
-            return await Orchestrator.GetNewOrders(orderType, orderState, orderId);
-        }
+        _orchestrator = orchestrator;
     }
+
+    /// <summary>
+    /// Assigns devices to an order
+    /// </summary>
+    /// <param name="request">Request containing vehicle and order details</param>
+    /// <returns>Updated order details</returns>
+    [HttpPost("AssignDevices")]
+    public async Task<ActionResult<OrderDetailsModel>> AssignDevicesToOrder([FromBody] AssignDevicesRequest request)
+    {
+        if (request == null)
+            return BadRequest("Request body is required");
+
+        if (request.MyScoreVehicle == null)
+            return BadRequest("MyScoreVehicle is required");
+
+        if (request.OrderDetails == null)
+            return BadRequest("OrderDetails is required");
+
+        var result = await _orchestrator.AssignDevicesToOrder(request.MyScoreVehicle, request.OrderDetails);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets order details by device order sequence ID
+    /// </summary>
+    /// <param name="deviceOrderSeqID">The device order sequence ID</param>
+    /// <returns>Order details</returns>
+    [HttpGet("OrderDetails/{deviceOrderSeqID}")]
+    public async Task<ActionResult<OrderDetailsModel>> GetOrderDetails([FromRoute] int deviceOrderSeqID)
+    {
+        if (deviceOrderSeqID <= 0)
+            return BadRequest("DeviceOrderSeqID must be greater than 0");
+
+        var orderDetails = new OrderDetailsModel { DeviceOrderSeqID = deviceOrderSeqID };
+        var result = await _orchestrator.GetOrderDetails(orderDetails);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets orders by status code
+    /// </summary>
+    /// <param name="deviceOrderStatusCode">The device order status code</param>
+    /// <param name="participantGroupTypeCode">Optional participant group type code</param>
+    /// <param name="canOnlyViewOrdersForOwnGroup">Whether user can only view orders for their own group</param>
+    /// <returns>List of orders matching the status</returns>
+    [HttpGet("OrdersByStatus")]
+    public async Task<ActionResult<OrdersList>> GetOrdersByStatusCommand(
+        [FromQuery] int deviceOrderStatusCode,
+        [FromQuery] int? participantGroupTypeCode = null,
+        [FromQuery] bool canOnlyViewOrdersForOwnGroup = false)
+    {
+        var orderList = new OrdersList
+        {
+            DeviceOrderStatusCode = deviceOrderStatusCode,
+            ParticipantGroupTypeCode = participantGroupTypeCode,
+            CanOnlyViewOrdersForOwnGroup = canOnlyViewOrdersForOwnGroup
+        };
+
+        var result = await _orchestrator.GetOrdersByStatusCommand(orderList);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets all pending orders with full details for the Pending Orders table
+    /// </summary>
+    /// <returns>List of pending orders with order number, date, state, device info, and status</returns>
+    [HttpGet("PendingOrderList")]
+    public async Task<ActionResult<OrdersList>> GetPendingOrderList()
+    {
+        var result = await _orchestrator.GetPendingOrderList();
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets the count of device orders processed today
+    /// </summary>
+    /// <returns>Count of processed orders</returns>
+    [HttpGet("ProcessedOrderCount")]
+    public async Task<ActionResult<int>> ProcessedOrderCount()
+    {
+        var result = await _orchestrator.GetProcessedOrderCount();
+        return Ok(result);
+    }
+}
+
+
+
+/// <summary>
+/// Request model for assigning devices to an order
+/// </summary>
+public class AssignDevicesRequest
+{
+    public MyScoreVehicle MyScoreVehicle { get; set; }
+    public OrderDetailsModel OrderDetails { get; set; }
 }

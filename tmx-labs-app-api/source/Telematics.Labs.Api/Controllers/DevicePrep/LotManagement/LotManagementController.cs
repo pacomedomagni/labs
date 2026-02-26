@@ -51,7 +51,7 @@ namespace Progressive.Telematics.Labs.Api.Controllers.DevicePrep.LotManagement
         public async Task<ActionResult<GetReceiveDeviceLotsInProcessResponse>> GetLotsForMarkBenchTestComplete()
         {
             var lots = await Orchestrator.GetLotsForMarkBenchTestComplete();
-            var requiredCount = 2; // TODO Pull from somehwere??
+            var requiredCount = await Orchestrator.GetBenchtestQuotaPercentage();
 
             var response = new GetReceiveDeviceLotsInProcessResponse
             {
@@ -168,6 +168,67 @@ namespace Progressive.Telematics.Labs.Api.Controllers.DevicePrep.LotManagement
 
             return Ok(result);
         }
+
+        /// <summary>
+        /// Activate or deactivate all devices in a lot
+        /// </summary>
+        /// <param name="request">Request containing lot sequence ID and activation action</param>
+        /// <returns>Result of the activation operation</returns>
+        [HttpPost("ActivateLot")]
+        [ProducesResponseType(typeof(Resource), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Resource>> ActivateLot([FromBody] ActivateLotRequest request)
+        {
+            if (request == null)
+            {
+                return BadRequest("Valid lot sequence ID is required");
+            }
+
+            var result = await Orchestrator.UpdateLotActivationStatus(request.LotSeqId, request.Action);
+
+            if (result.HasErrorCode("NotFound"))
+            {
+                return NotFound(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Update lot information
+        /// </summary>
+        /// <param name="request">Request containing lot details to update</param>
+        /// <returns>Result of the update operation</returns>
+        [HttpPost("UpdateLot")]
+        [ProducesResponseType(typeof(Resource), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Resource>> UpdateLot([FromBody] UpdateLotRequest request)
+        {
+            if (request == null || request.LotSeqId <= 0)
+            {
+                return BadRequest("Valid lot sequence ID is required");
+            }
+
+            var result = await Orchestrator.UpdateLotStatus(request.LotSeqId, request.TypeCode, request.StatusCode, request.Name);
+
+            return Ok(result);
+        }
+    }
+
+    /// <summary>
+    /// Request model for activating or deactivating a lot
+    /// </summary>
+    public class ActivateLotRequest
+    {
+        /// <summary>
+        /// Lot sequence ID
+        /// </summary>
+        public int LotSeqId { get; set; }
+
+        /// <summary>
+        /// Activation action (Activate or Deactivate)
+        /// </summary>
+        public ActivationAction Action { get; set; }
     }
 
     /// <summary>
@@ -179,5 +240,27 @@ namespace Progressive.Telematics.Labs.Api.Controllers.DevicePrep.LotManagement
         /// Lot name or device serial number
         /// </summary>
         public string Query { get; set; }
+    }
+
+    /// <summary>
+    /// Request model for updating a lot
+    /// </summary>
+    public class UpdateLotRequest
+    {
+        /// <summary>
+        /// Lot sequence ID
+        /// </summary>
+        public int LotSeqId { get; set; }
+
+        /// <summary>
+        /// Lot name
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Lot status code
+        /// </summary>
+        public LotStatus? StatusCode { get; set; }
+        public DeviceLotType TypeCode { get; set; }
     }
 }

@@ -17,6 +17,7 @@
             <!-- Menu item with submenu -->
             <button
                 mat-menu-item
+                [tabIndex]="-1"
                 [disabled]="action.disabled ?? false"
                 [matTooltip]="action.tooltip ?? ''"
                 matTooltipPosition="above"
@@ -28,6 +29,7 @@
                 @for (subAction of getValidChildren(action); track subAction.id) {
                     <button
                         mat-menu-item
+                        [tabIndex]="-1"
                         [disabled]="subAction.disabled ?? false"
                         [matTooltip]="subAction.tooltip ?? ''"
                         matTooltipPosition="above"
@@ -41,6 +43,7 @@
             <!-- Regular menu item -->
             <button
                 mat-menu-item
+                [tabIndex]="-1"
                 [disabled]="action.disabled ?? false"
                 [matTooltip]="action.tooltip ?? ''"
                 matTooltipPosition="above"

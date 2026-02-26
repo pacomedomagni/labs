@@ -4,11 +4,11 @@ import { RoleTestingComponent } from "./role-testing.component";
 
 function setup() {
 	const userInfoService: Partial<UserInfoService> = {
-		getUserInfo: jest.fn(),
-		userInfo: { next: jest.fn() } as any
+		getUserInfo: jasmine.createSpy('getUserInfo'),
+		userInfo: { next: jasmine.createSpy('userInfo.next') } as any
 	};
 	const notificationService: Partial<NotificationBannerService> = {
-		success: jest.fn()
+		success: jasmine.createSpy('success')
 	};
 	const builder = {
 		userInfoService,
@@ -32,15 +32,4 @@ describe("RoleTestingComponent", () => {
 
 		expect(component).toBeTruthy();
 	});
-});
-
-
-    expect(component.loadError()).toBeTrue();
-    const errorMessage: HTMLElement | null = fixture.nativeElement.querySelector('.error-message');
-    expect(errorMessage?.textContent).toContain('Unable to retrieve user roles');
-    expect(notificationService.error).toHaveBeenCalledWith('Unable to retrieve user roles');
-
-    const okButton: HTMLButtonElement = fixture.nativeElement.querySelector('button[type="submit"]');
-    expect(okButton.disabled).toBeTrue();
-  });
 });

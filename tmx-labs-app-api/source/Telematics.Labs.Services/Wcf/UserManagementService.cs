@@ -15,6 +15,7 @@ namespace Progressive.Telematics.Labs.Services.Wcf
         Task<string> GetUserFullName();
         Task<GetUserByUIDResponse> GetUserByUID(string searhString);
         Task<GetUserByUserNameResponse> GetUserByUserName(string userName);
+        Task<GetUsersByUIDsResponse> GetUsersByUIDs(string[] uids);
         Task<List<Business.Resources.Resources.Customer.LabsUser>> GetCustomersBySearchString(string searchString);
         Task<CreateUserResponse> CreateUser(CreateUserRequest request);
         Task UpdateUser(UpdateUserRequest request);
@@ -98,6 +99,16 @@ namespace Progressive.Telematics.Labs.Services.Wcf
                 UID = searhString,
             }), logger);
             return usersByFirstName;
+        }
+
+        public async Task<GetUsersByUIDsResponse> GetUsersByUIDs(string[] uids)
+        {
+            await using var client = CreateClient();
+            var response = await client.HandledCall(() => client.GetUsersByUIDsAsync(new GetUsersByUIDsRequest
+            {
+                UIDs = uids
+            }), logger, "Unable to get users by UIDs");
+            return response;
         }
 
         public async Task<CreateUserResponse> CreateUser(CreateUserRequest request)

@@ -1,12 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { Observable } from 'rxjs';
-import { 
+import {
     DeviceLot,
     GetDevicesByLotResponse,
     CheckinRequest,
     DeviceLotType,
-    GetDeviceLotsInProgressResponse
+    GetDeviceLotsInProgressResponse,
+    DeviceActivationAction,
+    DeviceLotStatus,
 } from 'src/app/shared/data/lot-management/resources';
 import { Resource } from 'src/app/shared/data/application/resources';
 
@@ -17,7 +19,7 @@ export class LotManagementService {
     private readonly controller = '/LotManagement';
     private api = inject(ApiService);
 
-    GetLotsForMarkBenchTestComplete(): Observable<GetDeviceLotsInProgressResponse> {
+    getLotsForMarkBenchTestComplete(): Observable<GetDeviceLotsInProgressResponse> {
         return this.api.get<GetDeviceLotsInProgressResponse>({
             uri: `${this.controller}/GetLotsForMarkBenchTestComplete`,
         });
@@ -47,6 +49,37 @@ export class LotManagementService {
         return this.api.post<Resource>({
             uri: `${this.controller}/Checkin`,
             payload: request,
+        });
+    }
+
+    activateAllDevicesInLot(lotSeqId: number): Observable<Resource> {
+        return this.api.post<Resource>({
+            uri: `${this.controller}/ActivateLot`,
+            payload: {
+                lotSeqId: lotSeqId,
+                action: DeviceActivationAction.Activate,
+            },
+        });
+    }
+
+    deactivateAllDevicesInLot(lotSeqId: number): Observable<Resource> {
+        return this.api.post<Resource>({
+            uri: `${this.controller}/ActivateLot`,
+            payload: {
+                lotSeqId: lotSeqId,
+                action: DeviceActivationAction.Deactivate,
+            },
+        });
+    }
+
+    updateLotStatus(lotSeqID: number, lotType: number, status: DeviceLotStatus) : Observable<Resource> {
+        return this.api.post<Resource>({
+            uri: `${this.controller}/UpdateLot`,
+            payload: {
+                lotSeqId: lotSeqID,
+                typeCode: lotType,
+                statusCode: status,
+            },
         });
     }
 }

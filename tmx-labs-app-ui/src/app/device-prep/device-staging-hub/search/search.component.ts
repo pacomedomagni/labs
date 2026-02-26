@@ -1,19 +1,15 @@
 import {
     Component,
     computed,
-    inject,
-    OnDestroy,
-    signal,
-    ViewChild,
-    WritableSignal
+    DestroyRef,
+    inject
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCard } from '@angular/material/card';
 import {
-    EmptyStateComponent,
-    SearchComponent
+    EmptyStateComponent
 } from '@pgr-cla/core-ui-components';
 import { LotManagementService } from '../../../shared/services/api/lot-management/lot-management.service';
-import { Subject, takeUntil } from 'rxjs';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DeviceLot } from 'src/app/shared/data/lot-management/resources';
 import { LotDetailsComponent } from './components/lot-details/lot-details.component';
@@ -22,12 +18,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatAnchor, MatButtonModule } from '@angular/material/button';
 import { SearchValidators } from './search.validators';
 import { NotificationBannerService } from 'src/app/shared/notifications/notification-banner/notification-banner.service';
+import { DeviceLotStateService } from './services';
 
 @Component({
     selector: 'tmx-device-staging-hub-search',
     standalone: true,
     templateUrl: './search.component.html',
-    styleUrl: './search.component.scss',
+    styleUrls: ['./search.component.scss'],
     imports: [
         MatCard,
         EmptyStateComponent,
@@ -39,34 +36,28 @@ import { NotificationBannerService } from 'src/app/shared/notifications/notifica
         ReactiveFormsModule,
     ],
 })
-export class DeviceStagingHubSearchComponent implements OnDestroy {
-    @ViewChild('searchBox') searchBox!: SearchComponent;
+export class DeviceStagingHubSearchComponent {
+    private readonly lotManagementService = inject(LotManagementService);
+    private readonly notificationBannerService = inject(NotificationBannerService);
+    private readonly deviceLotState = inject(DeviceLotStateService);
+    private readonly destroyRef = inject(DestroyRef);
 
-    private lotManagementService = inject(LotManagementService);
-    private notificationBannerService = inject(NotificationBannerService);
-
-    private _destroySubject$ = new Subject<void>();
-
-    deviceLot: WritableSignal<DeviceLot> = signal(null);
-
-    initialState = computed(() => this.deviceLot() === null);
+    initialState = computed(() => !this.deviceLotState.hasDeviceLot());
 
     searchQuery = new FormControl('', [
         Validators.required,
         SearchValidators.validLotIDOrSerialNumber(),
     ]);
 
-    constructor() {}
-
     private findByLotName(searchTerm: string): void {
         // Try to find by lot name first, then by device serial number
         this.lotManagementService
             .getDeviceLot(searchTerm)
-            .pipe(takeUntil(this._destroySubject$))
+            .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (response: DeviceLot) => {
                     if (response && response.name) {
-                        this.deviceLot.set(response);
+                        this.deviceLotState.setDeviceLot(response);
                     } else {
                         // Try finding by serial number
                         this.findBySerialNumber(searchTerm);
@@ -83,19 +74,19 @@ export class DeviceStagingHubSearchComponent implements OnDestroy {
     private findBySerialNumber(serialNumber: string): void {
         this.lotManagementService
             .findLot(serialNumber)
-            .pipe(takeUntil(this._destroySubject$))
+            .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (response: DeviceLot) => {
                     if (response) {
-                        this.deviceLot.set(response);
+                        this.deviceLotState.setDeviceLot(response);
                     } else {
-                        this.deviceLot.set(null);
+                        this.deviceLotState.setDeviceLot(null);
                         this.showNoResultsError();
                     }
                 },
                 error: () => {
                     this.showNoResultsError();
-                    this.deviceLot.set(null);
+                    this.deviceLotState.setDeviceLot(null);
                 },
             });
     }
@@ -109,10 +100,5 @@ export class DeviceStagingHubSearchComponent implements OnDestroy {
     onSubmitClicked() {
         const searchTerm = this.searchQuery.value?.trim() ?? '';
         this.findByLotName(searchTerm);
-    }
-
-    ngOnDestroy(): void {
-        this._destroySubject$.next();
-        this._destroySubject$.complete();
     }
 }

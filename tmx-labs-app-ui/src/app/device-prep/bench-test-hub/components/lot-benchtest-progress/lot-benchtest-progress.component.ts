@@ -87,7 +87,7 @@ export class LotBenchtestProgressComponent implements OnInit {
     loadDeviceLots(): void {
         this.isLoadingLots.set(true);
         this.lotManagementService
-            .GetLotsForMarkBenchTestComplete()
+            .getLotsForMarkBenchTestComplete()
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (response) => {

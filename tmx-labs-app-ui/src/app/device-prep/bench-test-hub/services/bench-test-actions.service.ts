@@ -68,7 +68,7 @@ export class BenchTestActionsService {
     startBenchTest(board: Board): Observable<Resource> {
         return this.benchTestService.updateBenchTestBoard({
             boardID: board.boardID,
-            statusCode: BenchTestBoardStatus.Running
+            statusCode: BenchTestBoardStatus.Loading
         });
     }
 }

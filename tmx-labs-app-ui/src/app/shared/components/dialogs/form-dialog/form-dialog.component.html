@@ -39,7 +39,7 @@
             class="mr-xxs"
             id="btn-confirm"
             (click)="onConfirm()"
-            [disabled]="dialogForm.invalid"
+            [disabled]="!loaded || dialogForm.invalid"
         >
             {{ data.confirmText }}
         </button>

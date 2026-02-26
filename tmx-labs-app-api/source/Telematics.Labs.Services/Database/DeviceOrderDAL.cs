@@ -24,6 +24,13 @@ namespace Progressive.Telematics.Labs.Services.Database
         Task<IEnumerable<DeviceOrderDetails>> GetDeviceOrdersByParticipantGroupSeqId(int participantGroupSeqId);
 
         Task<DeviceOrderCreationResult> CreateReplacementOrder(CreateReplacementDeviceOrderModel model);
+
+        /// <summary>
+        /// Get count of device orders processed today
+        /// </summary>
+        /// <returns>Count of processed orders</returns>
+        Task<int> ProcessedOrderCount();
+
     }
 
     public class DeviceOrderDAL : DbContext, IDeviceOrderDAL
@@ -70,6 +77,15 @@ namespace Progressive.Telematics.Labs.Services.Database
                 DeviceOrderSeqId = orderSeqId,
                 DeviceOrderDetailSeqIds = detailIds,
             };
+        }
+        
+        public async Task<int> ProcessedOrderCount()
+        {
+            const string storedProc = "dbo.usp_DeviceOrder_CountOfProcessedToday";
+
+            var parms = new DynamicParameters();
+
+            return await ExecuteScalarAsync<int>(storedProc, parms);
         }
 
         private static DataTable CreateDetailTable(CreateReplacementDeviceOrderModel model)

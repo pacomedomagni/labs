@@ -135,8 +135,9 @@ export class BenchTestCurrentBoardComponent {
             const boardId = this.selectedBoardId();
             const status = this.selectedBoardStatusCode();
 
+            this.deviceStatusService.reset();
             this.deviceStatusService.stopPolling();
-
+            
             if (status === BenchTestBoardStatus.Running) {
                 this.deviceStatusService.startPolling(boardId);
             } else if (status === BenchTestBoardStatus.Complete) {

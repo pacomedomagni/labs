@@ -51,6 +51,7 @@ namespace Progressive.Telematics.Labs.Api
                 .Configure<TranactionAlerts>(Configuration.GetSection("TranactionAlerts"))
                 .Configure<HttpRetryConfig>(Configuration.GetSection("RetryOptions"))
                 .Configure<VinPicklistConfig>(Configuration.GetSection("VinPicklistOptions"))
+                .Configure<LabConfigSettings>(Configuration.GetSection("LabConfigSettings"))
                 .AddTransient<IRetryPolicyProvider, RetryPolicyProvider>();
 
             services.AddHealthChecks();
@@ -103,6 +104,33 @@ namespace Progressive.Telematics.Labs.Api
                 .AddTelematicsLogging(CreateLoggingOptions())
                 .AddMemoryCache();
 
+            // Initialize DataCache singleton for CodeTableManager
+            services.AddSingleton<Progressive.Telematics.Labs.Shared.CodeTableManager.CoreCodeTableManager.IDataCache>(sp =>
+            {
+                var memoryCache = sp.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+                var dataCache = new Progressive.Telematics.Labs.Shared.CodeTableManager.CoreCodeTableManager.DataCache(memoryCache);
+                Progressive.Telematics.Labs.Shared.CodeTableManager.CoreCodeTableManager.DataCache.Instance = dataCache;
+                return dataCache;
+            });
+
+            // Register ConfigSettings
+            services.AddSingleton<Progressive.Telematics.Labs.Shared.Utils.IConfigSettings, Progressive.Telematics.Labs.Services.Configuration.ConfigSettings>();
+
+            // Register CodeTable Managers using clean factory pattern (all WCF code now in Services layer)
+            services.AddSingleton<Progressive.Telematics.Labs.Shared.CodeTableManager.IHomeBaseCodeTableManager>(sp =>
+            {
+                var wcfFactory = sp.GetRequiredService<Progressive.Telematics.Labs.Services.Wcf.IWcfServiceFactory>();
+                var configSettings = sp.GetRequiredService<Progressive.Telematics.Labs.Shared.Utils.IConfigSettings>();
+                return Progressive.Telematics.Labs.Services.CodeTableManager.CodeTableProviderFactory.CreateHomeBaseCodeTableManager(wcfFactory, configSettings);
+            });
+
+            services.AddSingleton<Progressive.Telematics.Labs.Shared.CodeTableManager.IMyScoreCodeTableManager>(sp =>
+            {
+                var wcfFactory = sp.GetRequiredService<Progressive.Telematics.Labs.Services.Wcf.IWcfServiceFactory>();
+                var configSettings = sp.GetRequiredService<Progressive.Telematics.Labs.Shared.Utils.IConfigSettings>();
+                return Progressive.Telematics.Labs.Services.CodeTableManager.CodeTableProviderFactory.CreateMyScoreCodeTableManager(wcfFactory, configSettings);
+            });
+
             services.AddCors(options =>
             {
                 options.AddPolicy(AllowAllOriginsPolicy,
@@ -152,6 +180,14 @@ namespace Progressive.Telematics.Labs.Api
                 .UseTelematicsLoggerWhenShuttingDown();
 
             AppServicesHelper.Services = app.ApplicationServices;
+
+            // CRITICAL: Force eager initialization of DataCache singleton
+            // This ensures DataCache.Instance is set before any CodeTableManager is used
+            var dataCache = app.ApplicationServices.GetRequiredService<Progressive.Telematics.Labs.Shared.CodeTableManager.CoreCodeTableManager.IDataCache>();
+            if (Progressive.Telematics.Labs.Shared.CodeTableManager.CoreCodeTableManager.DataCache.Instance == null)
+            {
+                throw new InvalidOperationException("DataCache.Instance was not initialized during DI registration. This is a critical error.");
+            }
         }
 
         private ConsoleLoggerOptions CreateLoggingOptions()

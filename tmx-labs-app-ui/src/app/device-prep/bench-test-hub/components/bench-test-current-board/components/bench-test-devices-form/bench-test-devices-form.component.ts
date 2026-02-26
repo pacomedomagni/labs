@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import {
     Component,
     computed,
@@ -145,7 +146,7 @@ export class BenchTestDevicesFormComponent implements ControlValueAccessor, Vali
 
         this.devicesForm.patchValue(patchValues, { emitEvent: false });
     }
-
+    
     registerOnChange(fn: any): void {
         this.onChange = fn;
     }

@@ -57,7 +57,8 @@ describe('BenchTestCurrentBoardComponent', () => {
             'startPolling',
             'stopPolling',
             'fetchDeviceStatuses',
-            'resetAutoStopTimer'
+            'resetAutoStopTimer',
+            'reset'
         ], {
             deviceStatuses$: deviceStatusSubject.asObservable()
         });

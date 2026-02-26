@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef, computed } from '@angular/core';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -28,9 +28,10 @@ export class BenchTestingBoardsComponent implements OnInit {
     private destroyRef = inject(DestroyRef);
 
     dropdownSelectedBoard: Board | null = null;
-    selectedActiveBoard: Board | null = null;
     openBoards = signal<Board[]>([]);
     activeBoards = signal<Board[]>([]);
+    activeBoard = this.boardService.selectedBoard;
+    activeBoardId = computed(() => this.activeBoard()?.boardID ?? null);
     displayedColumns = ['boardName', 'status', 'count', 'actions'];
 
     get canStartBenchTest() {
@@ -56,10 +57,6 @@ export class BenchTestingBoardsComponent implements OnInit {
     getStatusText(statusCode?: number): string {
         if (!statusCode) return 'Unknown';
         return BenchTestBoardStatusDescription.get(statusCode) || 'Unknown';
-    }
-
-    selectBoard(board: Board): void {
-        this.selectedActiveBoard = board;
     }
 
     openBenchTestInProgress(board: Board) {

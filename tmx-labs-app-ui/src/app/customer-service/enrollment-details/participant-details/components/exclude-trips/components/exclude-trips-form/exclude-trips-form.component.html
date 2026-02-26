@@ -7,8 +7,9 @@
                 readonly
                 role="button"
                 placeholder="Range Start Date"
-                [value]="formatDisplayDate(formModel.rangeStart)"
-                [attr.aria-describedby]="shouldShowRangeStartError() ? 'rangeStartError' : null"
+                [ngModel]="formatDisplayDate(formModel.rangeStart)"
+                [ngModelOptions]="{ standalone: true }"
+                [errorStateMatcher]="rangeStartErrorMatcher"
                 (click)="openDateTimeEditor('start')"
                 (keydown.enter)="openEditorFromKeyboard($event, 'start')"
                 (keydown.space)="openEditorFromKeyboard($event, 'start')"
@@ -22,15 +23,13 @@
             >
                 <mat-icon>open_in_new</mat-icon>
             </button>
+            <mat-error>{{ rangeStartError }}</mat-error>
         </mat-form-field>
-        <div class="error-message" *ngIf="shouldShowRangeStartError()" id="rangeStartError">
-            {{ rangeStartError }}
-        </div>
         <input
             type="hidden"
             name="rangeStart"
-            required
             [(ngModel)]="formModel.rangeStart"
+            [ngModelOptions]="{ updateOn: 'blur' }"
             #rangeStartCtrl="ngModel"
         />
     </div>
@@ -43,8 +42,9 @@
                 readonly
                 role="button"
                 placeholder="Range End Date"
-                [value]="formatDisplayDate(formModel.rangeEnd)"
-                [attr.aria-describedby]="shouldShowRangeEndError() ? 'rangeEndError' : null"
+                [ngModel]="formatDisplayDate(formModel.rangeEnd)"
+                [ngModelOptions]="{ standalone: true }"
+                [errorStateMatcher]="rangeEndErrorMatcher"
                 (click)="openDateTimeEditor('end')"
                 (keydown.enter)="openEditorFromKeyboard($event, 'end')"
                 (keydown.space)="openEditorFromKeyboard($event, 'end')"
@@ -58,15 +58,13 @@
             >
                 <mat-icon>open_in_new</mat-icon>
             </button>
+            <mat-error>{{ rangeEndError }}</mat-error>
         </mat-form-field>
-        <div class="error-message" *ngIf="shouldShowRangeEndError()" id="rangeEndError">
-            {{ rangeEndError }}
-        </div>
         <input
             type="hidden"
             name="rangeEnd"
-            required
             [(ngModel)]="formModel.rangeEnd"
+            [ngModelOptions]="{ updateOn: 'blur' }"
             #rangeEndCtrl="ngModel"
         />
     </div>

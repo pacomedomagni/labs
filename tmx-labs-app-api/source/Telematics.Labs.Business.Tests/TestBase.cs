@@ -34,6 +34,7 @@ namespace Progressive.Telematics.Labs.Business.Tests
     {
         public Mock<Progressive.Telematics.Labs.Services.Database.ILotManagementDAL> LotManagement { get; set; }
         public Mock<Progressive.Telematics.Labs.Services.Database.IBenchTestBoardDAL> BenchTestBoardDAL { get; set; }
+        public Mock<Progressive.Telematics.Labs.Services.Database.IConfigValuesDAL> ConfigValues { get; set; }
     }
 
     public abstract class TestBase<T, T2>
@@ -77,7 +78,8 @@ namespace Progressive.Telematics.Labs.Business.Tests
             Databases = new Databases
             {
                 LotManagement = new Mock<Progressive.Telematics.Labs.Services.Database.ILotManagementDAL>(),
-                BenchTestBoardDAL = new Mock<Progressive.Telematics.Labs.Services.Database.IBenchTestBoardDAL>()
+                BenchTestBoardDAL = new Mock<Progressive.Telematics.Labs.Services.Database.IBenchTestBoardDAL>(),
+                ConfigValues = new Mock<Progressive.Telematics.Labs.Services.Database.IConfigValuesDAL>()
             };
         }
 

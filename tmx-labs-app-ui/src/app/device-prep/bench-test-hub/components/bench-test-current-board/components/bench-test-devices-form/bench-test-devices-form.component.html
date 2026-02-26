@@ -2,7 +2,7 @@
     @for (control of devicesForm.controls; track $index) {
         <tmx-bench-test-device
             [formControl]="control"
-            (onTextCleared)="deviceRemoved.emit({ position: $index + 1 })"
+            (textCleared)="deviceRemoved.emit({ position: $index + 1 })"
             [displayLoadingPlaceholder]="displayLoadingPlaceholder()"
             [displayStatus]="displayStatus()"
             [progress]="getDeviceStatus($index + 1).percentage"

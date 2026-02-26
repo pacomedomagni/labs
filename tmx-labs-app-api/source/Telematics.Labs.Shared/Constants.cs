@@ -6,8 +6,6 @@ namespace Progressive.Telematics.Labs.Shared
 {
     public static class Constants
     {
-        public const int GPSDeviceVersion = 15;
-        public const int W7DeviceVersion = 16;
         public const int SecondsInDay = 86400;
         public static class General
         {
@@ -67,35 +65,6 @@ namespace Progressive.Telematics.Labs.Shared
         public static class ConversionConstants
         {
             public const decimal KilometersToMiles = 0.621371M;
-        }
-
-        public static class FulfillmentConstants
-        {
-            public const int NumberOfDaysForOldOrder = 5;
-        }
-
-        public static class UBIConfigSections
-        {
-            public const string AppSettings = "AppSettings";
-
-
-            public static class UBIConfigKeys
-            {
-                public const string cCodeTableManagerExpirationSeconds = "CodeTableManagerExpirationSeconds";
-            }
-        }
-
-        public static class CodeTableDataSetTables
-        {
-            public const string cDevicePrepCodeTablesDataSetName = "DevicePrepCodeTablesDataSet";
-            public const string cXirgoLotType = "XirgoLotType";
-            public const string cDeviceLotStatus = "XirgoLotStatus";
-            public const string cFirmwareType = "XirgoFirmwareType";
-            public const string cFirmwareTypeVersion = "XirgoFirmwareTypeVersion";
-            public const string cBenchTestDeviceStatus = "XirgoBenchTestDeviceStatus";
-            public const string cCalculatorVersion = "CalculatorVersion";
-            public const string cProduct = "XirgoVersion";
-            public const string cDeviceRule = "XirgoRule";
         }
     }
 

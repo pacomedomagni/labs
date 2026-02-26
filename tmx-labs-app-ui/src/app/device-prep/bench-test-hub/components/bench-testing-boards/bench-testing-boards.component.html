@@ -25,12 +25,9 @@
         <ng-container matColumnDef="boardName">
           <th mat-header-cell class="cui-cell-12 text-xl font-bold" *matHeaderCellDef>Board Name</th>
           <td mat-cell class="cui-cell-12 text-2xl cursor-pointer" 
-              [class.bg-blue-50]="selectedActiveBoard?.boardID === element.boardID"
+              [class.bg-blue-50]="activeBoardId() === element.boardID"
               *matCellDef="let element"
-              [attr.aria-label]="'Board Name: ' + element.name"
-              (click)="selectBoard(element)"
-              (keydown.enter)="selectBoard(element)"
-              (keydown.space)="selectBoard(element)">
+              [attr.aria-label]="'Board Name: ' + element.name">
             {{ element.name }}
           </td>
         </ng-container>
@@ -39,12 +36,9 @@
         <ng-container matColumnDef="status">
           <th mat-header-cell class="cui-cell-12 text-xl font-bold" *matHeaderCellDef>Status</th>
           <td mat-cell class="cui-cell-12 text-2xl cursor-pointer pr-8" 
-              [class.bg-blue-50]="selectedActiveBoard?.boardID === element.boardID"
+              [class.bg-blue-50]="activeBoardId() === element.boardID"
               *matCellDef="let element"
-              [attr.aria-label]="'Status: ' + getStatusText(element.statusCode)"
-              (click)="selectBoard(element)"
-              (keydown.enter)="selectBoard(element)"
-              (keydown.space)="selectBoard(element)">
+              [attr.aria-label]="'Status: ' + getStatusText(element.statusCode)">
             {{ getStatusText(element.statusCode) }}
           </td>
         </ng-container>
@@ -53,12 +47,9 @@
         <ng-container matColumnDef="count">
           <th mat-header-cell class="cui-cell-6 text-xl font-bold" *matHeaderCellDef>Count</th>
           <td mat-cell class="cui-cell-6 text-2xl cursor-pointer text-center" 
-              [class.bg-blue-50]="selectedActiveBoard?.boardID === element.boardID"
+              [class.bg-blue-50]="activeBoardId() === element.boardID"
               *matCellDef="let element"
-              [attr.aria-label]="'Count: ' + (element.deviceCount || '0')"
-              (click)="selectBoard(element)"
-              (keydown.enter)="selectBoard(element)"
-              (keydown.space)="selectBoard(element)">
+              [attr.aria-label]="'Count: ' + (element.deviceCount || '0')">
             {{ element.deviceCount || '0' }}
           </td>
         </ng-container>
@@ -80,7 +71,7 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row 
             *matRowDef="let row; columns: displayedColumns"
-            [class.bg-blue-50]="selectedActiveBoard?.boardID === row.boardID">
+            [class.bg-blue-50]="activeBoardId() === row.boardID">
         </tr>
         
         <!-- No data row -->

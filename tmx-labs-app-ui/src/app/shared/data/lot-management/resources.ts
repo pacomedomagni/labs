@@ -20,6 +20,11 @@ export enum DeviceLotStatus {
     Obsolete = 9
 }
 
+export enum DeviceActivationAction {
+    Activate = 1,
+    Deactivate = 2
+}
+
 // Interfaces
 export interface DeviceLot extends Resource {
     createDateTime?: Date;
@@ -37,6 +42,8 @@ export interface DeviceDetails extends Resource {
     deviceSerialNumber: string;
     createDateTime: Date;
     sim?: string;
+    isSimActive?: boolean;
+    statusCode?: number;
     shipDateTime?: Date;
     firstContactDateTime?: Date;
     lastContactDateTime?: Date;
