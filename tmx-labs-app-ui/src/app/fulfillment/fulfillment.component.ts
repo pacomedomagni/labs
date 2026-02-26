@@ -6,7 +6,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { PendingOrdersComponent } from './components/pending-orders/pending-orders.component';
 import { CompletedOrdersComponent } from './components/completed-orders/completed-orders.component';
 import { FulfillmentService } from '../shared/services/api/fulfillment/fulfillment.services';
-import { DeviceOrder } from '../shared/data/fulfillment/resources';
+import { DeviceOrder, CompletedOrdersList } from '../shared/data/fulfillment/resources';
 
 @Component({
   selector: 'tmx-customer-service-fulfillment',
@@ -25,12 +25,17 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
   private fulfillmentService = inject(FulfillmentService);
   private refreshInterval?: number;
   private subscription?: Subscription;
+  private completedOrdersSubscription?: Subscription;
 
   // Summary statistics
   pendingOrders = signal(0);
   devicesNeeded = signal(0);
   completedToday = signal(0);
   pendingOrderData = signal<DeviceOrder[]>([]);
+
+  // Completed orders
+  completedOrderData = signal<CompletedOrdersList | null>(null);
+  completedOrdersLoading = signal(false);
 
   selectedTab = signal(0);
 
@@ -48,6 +53,9 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
     }
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.completedOrdersSubscription) {
+      this.completedOrdersSubscription.unsubscribe();
     }
   }
 
@@ -77,8 +85,35 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
     this.selectedTab.set(index);
   }
 
-  onOrderSelected(order: DeviceOrder) {
+  onOrderSelected(order: DeviceOrder | { orderNumber: string }) {
     // TODO: Open Order Details modal (PBI 6478014)
     console.log('Order selected:', order.orderNumber);
+  }
+
+  loadCompletedOrders(startDate: Date, endDate: Date) {
+    if (this.completedOrdersSubscription) {
+      this.completedOrdersSubscription.unsubscribe();
+    }
+
+    this.completedOrdersLoading.set(true);
+    this.completedOrdersSubscription = this.fulfillmentService
+      .getCompletedOrderList(this.formatDate(startDate), this.formatDate(endDate))
+      .subscribe({
+        next: (result) => {
+          this.completedOrderData.set(result);
+          this.completedOrdersLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Error loading completed orders:', error);
+          this.completedOrdersLoading.set(false);
+        }
+      });
+  }
+
+  private formatDate(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 }
