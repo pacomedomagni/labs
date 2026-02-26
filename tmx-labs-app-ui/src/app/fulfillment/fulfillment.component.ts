@@ -25,7 +25,6 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
   private fulfillmentService = inject(FulfillmentService);
   private refreshInterval?: number;
   private subscription?: Subscription;
-  private completedOrdersSubscription?: Subscription;
 
   // Summary statistics
   pendingOrders = signal(0);
@@ -40,10 +39,10 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
   selectedTab = signal(0);
 
   ngOnInit() {
-    this.loadOrderCounts();
-    // Refresh order counts every 10 minutes
+    this.loadData();
+    // Refresh every 10 minutes
     this.refreshInterval = window.setInterval(() => {
-      this.loadOrderCounts();
+      this.loadData();
     }, 10 * 60 * 1000);
   }
 
@@ -54,29 +53,31 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    if (this.completedOrdersSubscription) {
-      this.completedOrdersSubscription.unsubscribe();
-    }
   }
 
-  private loadOrderCounts() {
-    // Unsubscribe from previous request if still pending
+  private loadData() {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
 
+    this.completedOrdersLoading.set(true);
+
     this.subscription = forkJoin({
       pendingOrders: this.fulfillmentService.getPendingOrderList(),
-      processedCount: this.fulfillmentService.getProcessedOrdersCount()
+      processedCount: this.fulfillmentService.getProcessedOrdersCount(),
+      completedOrders: this.fulfillmentService.getCompletedOrderList()
     }).subscribe({
       next: (result) => {
         this.pendingOrders.set(result.pendingOrders.numberOfOrders);
         this.devicesNeeded.set(result.pendingOrders.numberOfDevices);
         this.pendingOrderData.set(result.pendingOrders.deviceOrders);
         this.completedToday.set(result.processedCount);
+        this.completedOrderData.set(result.completedOrders);
+        this.completedOrdersLoading.set(false);
       },
       error: (error) => {
-        console.error('Error loading order counts:', error);
+        console.error('Error loading fulfillment data:', error);
+        this.completedOrdersLoading.set(false);
       }
     });
   }
@@ -88,32 +89,5 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
   onOrderSelected(order: DeviceOrder | { orderNumber: string }) {
     // TODO: Open Order Details modal (PBI 6478014)
     console.log('Order selected:', order.orderNumber);
-  }
-
-  loadCompletedOrders(startDate: Date, endDate: Date) {
-    if (this.completedOrdersSubscription) {
-      this.completedOrdersSubscription.unsubscribe();
-    }
-
-    this.completedOrdersLoading.set(true);
-    this.completedOrdersSubscription = this.fulfillmentService
-      .getCompletedOrderList(this.formatDate(startDate), this.formatDate(endDate))
-      .subscribe({
-        next: (result) => {
-          this.completedOrderData.set(result);
-          this.completedOrdersLoading.set(false);
-        },
-        error: (error) => {
-          console.error('Error loading completed orders:', error);
-          this.completedOrdersLoading.set(false);
-        }
-      });
-  }
-
-  private formatDate(date: Date): string {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
   }
 }

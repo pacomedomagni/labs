@@ -43,9 +43,9 @@ export class FulfillmentService {
         });
     }
 
-    getCompletedOrderList(startDate: string, endDate: string): Observable<CompletedOrdersList> {
+    getCompletedOrderList(): Observable<CompletedOrdersList> {
         return this.apiService.get<CompletedOrdersList>({
-            uri: `${this.controller}/CompletedOrderList?startDate=${startDate}&endDate=${endDate}`,
+            uri: `${this.controller}/CompletedOrderList`,
         });
     }
 }

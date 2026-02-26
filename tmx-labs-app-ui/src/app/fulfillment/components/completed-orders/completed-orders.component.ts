@@ -37,7 +37,6 @@ export class CompletedOrdersComponent implements AfterViewInit {
 
   orderData = input<CompletedOrdersList | null>(null);
   loading = input<boolean>(false);
-  dateRangeChanged = output<{ startDate: Date; endDate: Date }>();
   orderSelected = output<CompletedDeviceOrder>();
 
   displayedColumns: string[] = ['orderNumber', 'processedDateTime', 'shipDateTime', 'processedBy', 'state', 'deviceCount', 'devices'];
@@ -64,13 +63,26 @@ export class CompletedOrdersComponent implements AfterViewInit {
       && end.toDateString() === today.toDateString();
   });
 
-  // Computed: client-side filtered orders (ProcessedBy filter only — dates are server-side)
+  // Computed: client-side filtered orders (date range + ProcessedBy)
   filteredOrders = computed(() => {
     const data = this.orderData();
     if (!data) return [];
 
     let result = data.orders;
 
+    // Date range filter
+    const start = this.startDate();
+    const end = this.endDate();
+    result = result.filter(o => {
+      if (!o.processedDateTime) return false;
+      const processed = new Date(o.processedDateTime);
+      const processedDate = new Date(processed.getFullYear(), processed.getMonth(), processed.getDate());
+      const startDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+      return processedDate >= startDate && processedDate <= endDate;
+    });
+
+    // ProcessedBy filter
     const processedBy = this.selectedProcessedBy();
     if (processedBy.length > 0) {
       result = result.filter(o => processedBy.includes(o.processedByUserID));
@@ -91,8 +103,6 @@ export class CompletedOrdersComponent implements AfterViewInit {
       .map(id => users.find(u => u.userID === id)?.displayName ?? id)
       .join(', ');
   });
-
-  private initialized = false;
 
   constructor() {
     effect(() => {
@@ -123,27 +133,19 @@ export class CompletedOrdersComponent implements AfterViewInit {
       }
     };
 
-    // Emit initial date range to load today's data
-    if (!this.initialized) {
-      this.initialized = true;
-      this.dateRangeChanged.emit({ startDate: this.startDate(), endDate: this.endDate() });
-    }
   }
 
   onStartDateChange(date: Date | null): void {
     if (!date) return;
     this.startDate.set(date);
-    // If end date is now before start date, adjust it
     if (this.endDate() < date) {
       this.endDate.set(date);
     }
-    this.dateRangeChanged.emit({ startDate: this.startDate(), endDate: this.endDate() });
   }
 
   onEndDateChange(date: Date | null): void {
     if (!date) return;
     this.endDate.set(date);
-    this.dateRangeChanged.emit({ startDate: this.startDate(), endDate: this.endDate() });
   }
 
   clearFilters(): void {
@@ -151,7 +153,6 @@ export class CompletedOrdersComponent implements AfterViewInit {
     this.selectedProcessedBy.set([]);
     this.startDate.set(today);
     this.endDate.set(today);
-    this.dateRangeChanged.emit({ startDate: today, endDate: today });
   }
 
   onOrderClick(event: Event, order: CompletedDeviceOrder): void {

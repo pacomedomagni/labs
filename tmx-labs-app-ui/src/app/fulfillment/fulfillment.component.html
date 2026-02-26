@@ -37,7 +37,6 @@
         <tmx-completed-orders
           [orderData]="completedOrderData()"
           [loading]="completedOrdersLoading()"
-          (dateRangeChanged)="loadCompletedOrders($event.startDate, $event.endDate)"
           (orderSelected)="onOrderSelected($event)">
         </tmx-completed-orders>
       </mat-tab>
