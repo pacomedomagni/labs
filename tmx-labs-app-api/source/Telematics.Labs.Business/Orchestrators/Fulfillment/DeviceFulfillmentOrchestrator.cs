@@ -312,32 +312,10 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
 
     public async Task<CompletedOrdersList> GetCompletedOrderList(DateTime startDate, DateTime endDate)
     {
-        // Get shipped order summaries (status 3 = Shipped)
-        var summaryResponse = await _wCFDeviceOrderSummaryService.GetByStatus(
-            new GetDeviceOrderSummaryByStatusRequest { DeviceOrderStatusCode = 3 });
+        // Query database directly — WCF detail service caps results
+        var rows = (await _deviceOrderDAL.GetCompletedOrders(startDate, endDate)).ToList();
 
-        if (summaryResponse.ResponseStatus != WCFDeviceOrderSummaryService.ResponseStatus.Success)
-            throw new ApplicationException("Failure on DeviceOrderSummaryService GetByStatus for completed orders.");
-
-        // Get detailed business device order data
-        var detailResponse = await _wCFBusinessDeviceOrderService.GetBusinessDeviceOrderByOrderStatus(
-            new GetBusinessDeviceOrderByOrderStatusRequest { OrderStatus = 3 });
-
-        if (detailResponse.ResponseStatus != WCFBusinessDeviceOrderService.ResponseStatus.Success)
-            throw new ApplicationException("Failure on BusinessDeviceOrderService GetBusinessDeviceOrderByOrderStatus for completed orders.");
-
-        // Build detail lookup
-        var detailLookup = detailResponse.BusinessDeviceOrderList
-            .ToDictionary(b => b.DeviceOrder.DeviceOrderSeqID);
-
-        // Filter by ProcessedDateTime date range
-        var filteredDetails = detailResponse.BusinessDeviceOrderList
-            .Where(b => b.DeviceOrder.ProcessedDateTime.HasValue
-                && b.DeviceOrder.ProcessedDateTime.Value.Date >= startDate.Date
-                && b.DeviceOrder.ProcessedDateTime.Value.Date <= endDate.Date)
-            .ToList();
-
-        if (filteredDetails.Count == 0)
+        if (rows.Count == 0)
         {
             return new CompletedOrdersList
             {
@@ -347,13 +325,8 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
             };
         }
 
-        // Resolve customer info from summaries
-        var filteredSeqIds = new HashSet<int>(filteredDetails.Select(d => d.DeviceOrder.DeviceOrderSeqID));
-        var filteredSummaries = summaryResponse.DeviceOrderSummaryList
-            .Where(s => filteredSeqIds.Contains(s.DeviceOrderSeqID))
-            .ToList();
-
-        var uids = filteredSummaries.Select(s => s.ParticipantGroupExternalKey).Distinct().ToArray();
+        // Resolve customer State via UserManagement WCF
+        var uids = rows.Select(r => r.ParticipantGroupExternalKey).Where(k => !string.IsNullOrEmpty(k)).Distinct().ToArray();
         var userLookup = new Dictionary<string, WcfUserManagementService.User>();
         if (uids.Length > 0)
         {
@@ -363,8 +336,8 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
         }
 
         // Resolve FulfilledByUserID → display names
-        var fulfilledByUserIds = filteredDetails
-            .Select(d => d.DeviceOrder.FulfilledByUserID)
+        var fulfilledByUserIds = rows
+            .Select(r => r.FulfilledByUserID)
             .Where(id => !string.IsNullOrEmpty(id))
             .Distinct()
             .ToList();
@@ -391,44 +364,35 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
             }
         }
 
-        // Build summary lookup for state info
-        var summaryLookup = filteredSummaries.ToDictionary(s => s.DeviceOrderSeqID);
-
         // Build completed order DTOs
-        var orders = filteredDetails.Select(detail =>
+        var orders = rows.Select(row =>
         {
-            var deviceOrder = detail.DeviceOrder;
-            var fulfilledBy = deviceOrder.FulfilledByUserID ?? "";
+            var fulfilledBy = row.FulfilledByUserID ?? "";
             var processedByName = processedByLookup.ContainsKey(fulfilledBy)
                 ? processedByLookup[fulfilledBy]
                 : fulfilledBy;
 
             var state = "";
-            if (summaryLookup.ContainsKey(deviceOrder.DeviceOrderSeqID))
-            {
-                var externalKey = summaryLookup[deviceOrder.DeviceOrderSeqID].ParticipantGroupExternalKey;
-                if (userLookup.ContainsKey(externalKey))
-                    state = (userLookup[externalKey].State ?? "").Trim();
-            }
+            if (!string.IsNullOrEmpty(row.ParticipantGroupExternalKey) && userLookup.ContainsKey(row.ParticipantGroupExternalKey))
+                state = (userLookup[row.ParticipantGroupExternalKey].State ?? "").Trim();
 
-            var serialNumbers = detail.DeviceOrderDetails
-                .Where(d => !string.IsNullOrEmpty(d.DeviceSerialNbr))
-                .Select(d => d.DeviceSerialNbr)
-                .ToList();
+            var serialNumbers = string.IsNullOrEmpty(row.DeviceSerialNumbers)
+                ? new List<string>()
+                : row.DeviceSerialNumbers.Split(',').Where(s => !string.IsNullOrEmpty(s)).ToList();
 
             return new CompletedDeviceOrder
             {
-                DeviceOrderSeqID = deviceOrder.DeviceOrderSeqID,
-                OrderNumber = deviceOrder.DeviceOrderSeqID.ToString(),
-                ProcessedDateTime = deviceOrder.ProcessedDateTime,
-                ShipDateTime = deviceOrder.ShipDateTime,
+                DeviceOrderSeqID = row.DeviceOrderSeqID,
+                OrderNumber = row.DeviceOrderSeqID.ToString(),
+                ProcessedDateTime = row.ProcessedDateTime,
+                ShipDateTime = row.ShipDateTime,
                 ProcessedBy = processedByName,
                 ProcessedByUserID = fulfilledBy,
                 State = state,
-                DeviceCount = detail.DeviceOrderDetails.Length,
+                DeviceCount = row.DeviceCount,
                 DeviceSerialNumbers = serialNumbers
             };
-        }).OrderByDescending(o => o.ProcessedDateTime).ToList();
+        }).ToList();
 
         // Build ProcessedByUsers list for filter dropdown
         var processedByUsers = processedByLookup

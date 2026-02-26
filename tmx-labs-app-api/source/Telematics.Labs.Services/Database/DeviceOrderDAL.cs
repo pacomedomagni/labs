@@ -31,6 +31,11 @@ namespace Progressive.Telematics.Labs.Services.Database
         /// <returns>Count of processed orders</returns>
         Task<int> ProcessedOrderCount();
 
+        /// <summary>
+        /// Get completed (shipped) orders within a date range
+        /// </summary>
+        Task<IEnumerable<CompletedOrderRow>> GetCompletedOrders(DateTime startDate, DateTime endDate);
+
     }
 
     public class DeviceOrderDAL : DbContext, IDeviceOrderDAL
@@ -86,6 +91,33 @@ namespace Progressive.Telematics.Labs.Services.Database
             var parms = new DynamicParameters();
 
             return await ExecuteScalarAsync<int>(storedProc, parms);
+        }
+
+        public async Task<IEnumerable<CompletedOrderRow>> GetCompletedOrders(DateTime startDate, DateTime endDate)
+        {
+            const string query = @"
+                SELECT
+                    do.DeviceOrderSeqID,
+                    pg.ExternalKey AS ParticipantGroupExternalKey,
+                    do.ProcessedDateTime,
+                    do.ShipDateTime,
+                    do.FulfilledByUserID,
+                    COUNT(dod.DeviceOrderDetailSeqID) AS DeviceCount,
+                    STRING_AGG(dod.DeviceSerialNbr, ',') AS DeviceSerialNumbers
+                FROM dbo.DeviceOrder do
+                INNER JOIN dbo.DeviceOrderDetail dod ON dod.DeviceOrderSeqID = do.DeviceOrderSeqID
+                INNER JOIN dbo.ParticipantGroup pg ON pg.ParticipantGroupSeqID = do.ParticipantGroupSeqID
+                WHERE do.DeviceOrderStatusCode = 3
+                  AND CAST(do.ProcessedDateTime AS DATE) >= @StartDate
+                  AND CAST(do.ProcessedDateTime AS DATE) <= @EndDate
+                GROUP BY do.DeviceOrderSeqID, pg.ExternalKey, do.ProcessedDateTime, do.ShipDateTime, do.FulfilledByUserID
+                ORDER BY do.ProcessedDateTime DESC";
+
+            var parms = new DynamicParameters()
+                .Parameter("@StartDate", startDate.Date, DbType.Date)
+                .Parameter("@EndDate", endDate.Date, DbType.Date);
+
+            return await ExecuteQueryAsync<CompletedOrderRow>(query, parms);
         }
 
         private static DataTable CreateDetailTable(CreateReplacementDeviceOrderModel model)
