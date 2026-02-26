@@ -34,7 +34,12 @@
       </mat-tab>
       
       <mat-tab label="COMPLETED ORDERS">
-        <tmx-completed-orders></tmx-completed-orders>
+        <tmx-completed-orders
+          [orderData]="completedOrderData()"
+          [loading]="completedOrdersLoading()"
+          (dateRangeChanged)="loadCompletedOrders($event.startDate, $event.endDate)"
+          (orderSelected)="onOrderSelected($event)">
+        </tmx-completed-orders>
       </mat-tab>
     </mat-tab-group>
   </div>

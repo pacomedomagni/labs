@@ -6,7 +6,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { PendingOrdersComponent } from './components/pending-orders/pending-orders.component';
 import { CompletedOrdersComponent } from './components/completed-orders/completed-orders.component';
 import { FulfillmentService } from '../shared/services/api/fulfillment/fulfillment.services';
-import { DeviceOrder } from '../shared/data/fulfillment/resources';
+import { DeviceOrder, CompletedOrdersList } from '../shared/data/fulfillment/resources';
 
 @Component({
   selector: 'tmx-customer-service-fulfillment',
@@ -32,6 +32,11 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
   completedToday = signal(0);
   pendingOrderData = signal<DeviceOrder[]>([]);
 
+  // Completed orders data
+  completedOrderData = signal<CompletedOrdersList | null>(null);
+  completedOrdersLoading = signal(false);
+  private completedOrdersSubscription?: Subscription;
+
   selectedTab = signal(0);
 
   ngOnInit() {
@@ -48,6 +53,9 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
     }
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.completedOrdersSubscription) {
+      this.completedOrdersSubscription.unsubscribe();
     }
   }
 
@@ -77,8 +85,36 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
     this.selectedTab.set(index);
   }
 
-  onOrderSelected(order: DeviceOrder) {
+  onOrderSelected(order: DeviceOrder | { orderNumber: string }) {
     // TODO: Open Order Details modal (PBI 6478014)
     console.log('Order selected:', order.orderNumber);
+  }
+
+  loadCompletedOrders(startDate: Date, endDate: Date) {
+    if (this.completedOrdersSubscription) {
+      this.completedOrdersSubscription.unsubscribe();
+    }
+
+    this.completedOrdersLoading.set(true);
+    const start = this.formatDate(startDate);
+    const end = this.formatDate(endDate);
+
+    this.completedOrdersSubscription = this.fulfillmentService.getCompletedOrderList(start, end).subscribe({
+      next: (result) => {
+        this.completedOrderData.set(result);
+        this.completedOrdersLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading completed orders:', error);
+        this.completedOrdersLoading.set(false);
+      }
+    });
+  }
+
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

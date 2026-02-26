@@ -28,6 +28,7 @@ public interface IDeviceFulfillmentOrchestrator
     Task<OrdersList> GetOrdersByStatusCommand(OrdersList orderList);
     Task<OrdersList> GetPendingOrderList();
     Task<int> GetProcessedOrderCount();
+    Task<CompletedOrdersList> GetCompletedOrderList(DateTime startDate, DateTime endDate);
 }
 public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
 {
@@ -307,6 +308,122 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
     public async Task<int> GetProcessedOrderCount()
     {
         return await _deviceOrderDAL.ProcessedOrderCount();
+    }
+
+    public async Task<CompletedOrdersList> GetCompletedOrderList(DateTime startDate, DateTime endDate)
+    {
+        // 1. Get summaries for shipped orders (status code 3)
+        var summaryRequest = new GetDeviceOrderSummaryByStatusRequest { DeviceOrderStatusCode = 3 };
+        var summaryResponse = await _wCFDeviceOrderSummaryService.GetByStatus(summaryRequest);
+
+        if (summaryResponse.ResponseStatus != WCFDeviceOrderSummaryService.ResponseStatus.Success)
+        {
+            throw new ApplicationException("Failure on DeviceOrderSummaryService GetByStatus for shipped orders.");
+        }
+
+        // 2. Get business device order details for shipped orders
+        var detailResponse = await _wCFBusinessDeviceOrderService.GetBusinessDeviceOrderByOrderStatus(
+            new GetBusinessDeviceOrderByOrderStatusRequest { OrderStatus = 3 });
+
+        if (detailResponse.ResponseStatus != WCFBusinessDeviceOrderService.ResponseStatus.Success)
+        {
+            throw new ApplicationException("Failure on BusinessDeviceOrderService for shipped orders.");
+        }
+
+        // 3. Filter by ProcessedDateTime within date range
+        var filteredDetails = detailResponse.BusinessDeviceOrderList
+            .Where(b => b.DeviceOrder.ProcessedDateTime.HasValue
+                && b.DeviceOrder.ProcessedDateTime.Value.Date >= startDate.Date
+                && b.DeviceOrder.ProcessedDateTime.Value.Date <= endDate.Date)
+            .ToDictionary(b => b.DeviceOrder.DeviceOrderSeqID);
+
+        var filteredSeqIds = new HashSet<int>(filteredDetails.Keys);
+
+        // 4. Filter summaries to only those in the date range
+        var filteredSummaries = summaryResponse.DeviceOrderSummaryList
+            .Where(s => filteredSeqIds.Contains(s.DeviceOrderSeqID))
+            .ToList();
+
+        if (!filteredSummaries.Any())
+        {
+            return new CompletedOrdersList();
+        }
+
+        // 5. Resolve customer info (for State)
+        var customerUids = filteredSummaries.Select(s => s.ParticipantGroupExternalKey).Distinct().ToArray();
+        var customerResp = await _userManagementService.GetUsersByUIDs(customerUids);
+        if (customerResp.ResponseStatus != WcfUserManagementService.ResponseStatus.Success)
+        {
+            throw new ApplicationException("Failure on UserManagementService GetUsersByUIDs for completed orders.");
+        }
+
+        // 6. Resolve FulfilledByUserID to display names
+        var fulfilledByIds = filteredDetails.Values
+            .Select(d => d.DeviceOrder.FulfilledByUserID)
+            .Where(id => !string.IsNullOrEmpty(id))
+            .Distinct()
+            .ToArray();
+
+        var fulfilledByUsers = new Dictionary<string, WcfUserManagementService.User>();
+        foreach (var userId in fulfilledByIds)
+        {
+            var userResp = await _userManagementService.GetUserByUserName(userId);
+            if (userResp.ResponseStatus == WcfUserManagementService.ResponseStatus.Success && userResp.User != null)
+            {
+                fulfilledByUsers[userId] = userResp.User;
+            }
+        }
+
+        // 7. Build completed order DTOs
+        var orders = new List<CompletedDeviceOrder>();
+        foreach (var summary in filteredSummaries)
+        {
+            if (!filteredDetails.TryGetValue(summary.DeviceOrderSeqID, out var detail))
+                continue;
+            if (!customerResp.Users.ContainsKey(summary.ParticipantGroupExternalKey))
+                continue;
+
+            var customer = customerResp.Users[summary.ParticipantGroupExternalKey];
+            var fulfilledById = detail.DeviceOrder.FulfilledByUserID ?? "";
+            var processedByName = fulfilledByUsers.TryGetValue(fulfilledById, out var fulfiller)
+                ? $"{(fulfiller.LastName ?? "").Trim()}, {(fulfiller.FirstName ?? "").Trim()}"
+                : fulfilledById;
+
+            var serialNumbers = detail.DeviceOrderDetails
+                .Where(d => !string.IsNullOrEmpty(d.DeviceSerialNbr))
+                .Select(d => d.DeviceSerialNbr)
+                .ToList();
+
+            orders.Add(new CompletedDeviceOrder
+            {
+                DeviceOrderSeqID = summary.DeviceOrderSeqID,
+                OrderNumber = summary.DeviceOrderSeqID.ToString(),
+                ProcessedDateTime = detail.DeviceOrder.ProcessedDateTime,
+                ShipDateTime = detail.DeviceOrder.ShipDateTime,
+                ProcessedBy = processedByName,
+                ProcessedByUserID = fulfilledById,
+                State = (customer.State ?? "").Trim(),
+                DeviceCount = detail.DeviceOrderDetails.Length,
+                DeviceSerialNumbers = serialNumbers
+            });
+        }
+
+        // 8. Build ProcessedByUsers list for filter dropdown
+        var processedByUsers = fulfilledByUsers
+            .Select(kvp => new ProcessedByUser
+            {
+                UserID = kvp.Key,
+                DisplayName = $"{(kvp.Value.LastName ?? "").Trim()}, {(kvp.Value.FirstName ?? "").Trim()}"
+            })
+            .OrderBy(u => u.DisplayName)
+            .ToList();
+
+        return new CompletedOrdersList
+        {
+            Orders = orders,
+            TotalCount = orders.Count,
+            ProcessedByUsers = processedByUsers
+        };
     }
 
 }

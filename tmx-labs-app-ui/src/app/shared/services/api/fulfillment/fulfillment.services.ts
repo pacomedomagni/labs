@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../api.service';
 
-import { OrderListDetails, OrderDetails, AssingDeviceRequest } from '../../../data/fulfillment/resources';
+import { OrderListDetails, OrderDetails, AssingDeviceRequest, CompletedOrdersList } from '../../../data/fulfillment/resources';
 
 @Injectable({
     providedIn: 'root'
@@ -40,6 +40,12 @@ export class FulfillmentService {
     getProcessedOrdersCount(): Observable<number> {
         return this.apiService.get<number>({
             uri: `${this.controller}/ProcessedOrderCount`,
+        });
+    }
+
+    getCompletedOrderList(startDate: string, endDate: string): Observable<CompletedOrdersList> {
+        return this.apiService.get<CompletedOrdersList>({
+            uri: `${this.controller}/CompletedOrderList?startDate=${startDate}&endDate=${endDate}`,
         });
     }
 }

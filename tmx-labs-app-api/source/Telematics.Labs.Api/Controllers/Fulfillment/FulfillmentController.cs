@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Progressive.Telematics.Labs.Business.Orchestrators.Fulfillment;
@@ -98,6 +99,24 @@ public class FulfillmentController : ControllerBase
     public async Task<ActionResult<int>> ProcessedOrderCount()
     {
         var result = await _orchestrator.GetProcessedOrderCount();
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets completed (shipped) orders filtered by processed date range
+    /// </summary>
+    /// <param name="startDate">Start date for processed date filter</param>
+    /// <param name="endDate">End date for processed date filter</param>
+    /// <returns>List of completed orders with filter metadata</returns>
+    [HttpGet("CompletedOrderList")]
+    public async Task<ActionResult<CompletedOrdersList>> GetCompletedOrderList(
+        [FromQuery] DateTime startDate,
+        [FromQuery] DateTime endDate)
+    {
+        if (endDate < startDate)
+            return BadRequest("End date must be greater than or equal to start date");
+
+        var result = await _orchestrator.GetCompletedOrderList(startDate, endDate);
         return Ok(result);
     }
 }
