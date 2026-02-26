@@ -166,8 +166,8 @@ export class CompletedOrdersComponent implements AfterViewInit {
     const headers = ['Order #', 'Processed Date', 'Shipped Date', 'Processed By', 'State', 'Device Count', 'Devices'];
     const rows = orders.map(o => [
       o.orderNumber,
-      o.processedDateTime ? new Date(o.processedDateTime).toLocaleString() : '',
-      o.shipDateTime ? new Date(o.shipDateTime).toLocaleString() : '',
+      o.processedDateTime ? new Date(o.processedDateTime).toLocaleDateString() : '',
+      o.shipDateTime ? new Date(o.shipDateTime).toLocaleDateString() : '',
       o.processedBy,
       o.state,
       o.deviceCount.toString(),
