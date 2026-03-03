@@ -1,0 +1,80 @@
+<div class="test-container">
+    <div class="test-left">
+        <mat-card appearance="outlined" class="mb-xs">
+            <mat-card-header>
+                <mat-card-title>Control</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <mat-form-field appearance="outline">
+                    <mat-label>Control Selection</mat-label>
+                    <mat-select [value]="selectedControlType()" (selectionChange)="selectedControlType.set($event.value)">
+                        @for (ct of controlTypes; track ct.id) {
+                            <mat-option [value]="ct.id">{{ ct.label }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                @if (selectedControlType() === 'dateTime') {
+                    <tmx-date-time-control
+                        [model]="dateTimeModel()"
+                        (modelChange)="dateTimeModel.set($event)"
+                        [isRequired]="isRequired()"
+                        [isDisabled]="isDisabled()"
+                        [min]="minDate()"
+                        [max]="maxDate()"
+                        [label]="label()"
+                    ></tmx-date-time-control>
+                }
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined">
+            <mat-card-header>
+                <mat-card-title>Options</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                @if (selectedControlType() === 'dateTime') {
+                    <tmx-date-time-options
+                        [isRequired]="isRequired()"
+                        (isRequiredChange)="isRequired.set($event)"
+                        [isDisabled]="isDisabled()"
+                        (isDisabledChange)="isDisabled.set($event)"
+                        [minDate]="minDate()"
+                        (minDateChange)="minDate.set($event)"
+                        [maxDate]="maxDate()"
+                        (maxDateChange)="maxDate.set($event)"
+                        [label]="label()"
+                        (labelChange)="label.set($event)"
+                    ></tmx-date-time-options>
+                }
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <div class="test-right">
+        <mat-card appearance="outlined" class="mb-xs">
+            <mat-card-header>
+                <mat-card-title>Parent Model</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <pre>{{ dateTimeModel() | json }}</pre>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined">
+            <mat-card-header>
+                <mat-card-title>Control Data</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <tmx-data-list>
+                    <tmx-data-list-row label="model">{{ dateTimeModel() | json }}</tmx-data-list-row>
+                    <tmx-data-list-row label="isRequired">{{ isRequired() }}</tmx-data-list-row>
+                    <tmx-data-list-row label="isDisabled">{{ isDisabled() }}</tmx-data-list-row>
+                    <tmx-data-list-row label="min">{{ minDate() | json }}</tmx-data-list-row>
+                    <tmx-data-list-row label="max">{{ maxDate() | json }}</tmx-data-list-row>
+                    <tmx-data-list-row label="label">{{ label() }}</tmx-data-list-row>
+                </tmx-data-list>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>

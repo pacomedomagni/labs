@@ -11,27 +11,8 @@ export interface KeyValuePair<TKey, TValue> {
 }
 
 export interface UserInfo {
-	isInOpsAdminRole: boolean;
-	isInSupportAdminRole: boolean;
-	isInOpsUserRole: boolean;
-	isCommercialLineRole: boolean;
-	hasEligibilityAccess: boolean;
-	hasInsertInitialParticipationScoreInProcessAccess: boolean;
-	hasOptOutSuspensionAccess: boolean;
-	hasPolicyMergeAccess: boolean;
-	hasResetEnrollmentAccess: boolean;
-	hasStopShipmentAccess: boolean;
-	hasUpdatePProGuidAccess: boolean;
-	hasVehicleSupportAccess: boolean;
-	isInAppChangeRole: boolean;
-	isInMobileRegistrationAdminRole: boolean;
-	isInTheftOnlyRole: boolean;
-	isInTheftRole: boolean;
-	isInFeeReversalRole: boolean;
-	isInFeeReversalOnlyRole: boolean;
 	lanId: string;
 	name: string;
-	// TMX Labs specific roles
 	isLabsAdmin: boolean;
 	isLabsUser: boolean;
 }

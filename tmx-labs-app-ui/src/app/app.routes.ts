@@ -13,6 +13,7 @@ import { GrayCardTemplateComponent } from './shared/components/layout/page-templ
 import { RolesAuthGuard } from './shared/guards/roles-auth.guard';
 import { UserRoles } from './shared/data/application/constants';
 import { applicationGroups as devicePrepApps } from './device-prep/device-prep-applications-metadata';
+import { applicationGroups as toolsApps } from './tools/tools-applications-metadata';
 
 export const routes: Routes = [
     {
@@ -140,18 +141,68 @@ export const routes: Routes = [
                     ),
             },
             {
-                path: ApplicationGroupIds.RoleTestingTool,
+                path: ApplicationGroupIds.Tools,
+                canActivate: [AuthGuard],
                 data: {
                     breadcrumb: {
-                        label: 'Role Testing Tool',
-                        disable: true,
+                        label: 'Tools',
+                        disable: false,
+                    },
+                    sidebar: {
+                        title: 'Tools',
+                        icon: 'build',
+                        baseRoute: `${ApplicationGroupIds.Tools}/Apps`,
+                        apps: toolsApps,
                     },
                 },
-                canActivate: [AuthGuard],
-                loadComponent: () =>
-                    import('./role-testing/role-testing.component').then(
-                        (m) => m.RoleTestingComponent,
-                    ),
+                children: [
+                    {
+                        path: '',
+                        redirectTo: 'Apps',
+                        pathMatch: 'full',
+                    },
+                    {
+                        path: 'Apps',
+                        data: {
+                            breadcrumb: {
+                                label: 'Apps',
+                                disable: false,
+                            },
+                        },
+                        loadComponent: () =>
+                            import('./tools/tools.component').then(
+                                (m) => m.ToolsComponent,
+                            ),
+                        children: [
+                            {
+                                path: ApplicationGroupIds.UserInfoEditor,
+                                data: {
+                                    breadcrumb: {
+                                        label: 'User Info Editor',
+                                        disable: true,
+                                    },
+                                },
+                                loadComponent: () =>
+                                    import(
+                                        './tools/user-info-editor/user-info-editor.component'
+                                    ).then((m) => m.UserInfoEditorComponent),
+                            },
+                            {
+                                path: ApplicationGroupIds.InputControlTest,
+                                data: {
+                                    breadcrumb: {
+                                        label: 'Input Control Test',
+                                        disable: true,
+                                    },
+                                },
+                                loadComponent: () =>
+                                    import(
+                                        './tools/input-control-test/input-control-test.component'
+                                    ).then((m) => m.InputControlTestComponent),
+                            },
+                        ],
+                    },
+                ],
             },
             {
                 path: ApplicationGroupIds.OrderFulfillment,

@@ -3,9 +3,9 @@ import { ApplicationGroupMetadata } from '../data/application/application.interf
 import { faTools } from '@fortawesome/free-solid-svg-icons';
 
 export const metadata: ApplicationGroupMetadata = {
-    id: ApplicationGroupIds.RoleTestingTool,
-    name: 'Role Testing Tool',
-    description: 'Add and remove roles',
+    id: ApplicationGroupIds.Tools,
+    name: 'Tools',
+    description: 'Development and testing tools',
     faIcon: faTools,
     isReady: true,
     isNonProdOnly: true,

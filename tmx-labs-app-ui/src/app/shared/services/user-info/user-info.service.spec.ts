@@ -15,25 +15,7 @@ describe('UserInfoService', () => {
     name: 'Test User',
     lanId: 'testuser',
     isLabsAdmin: false,
-    isLabsUser: true,
-    isInAppChangeRole: true,
-    isInFeeReversalOnlyRole: false,
-    isInFeeReversalRole: false,
-    hasEligibilityAccess: true,
-    isInOpsAdminRole: false,
-    isInOpsUserRole: false,
-    isInSupportAdminRole: false,
-    isCommercialLineRole: false,
-    hasInsertInitialParticipationScoreInProcessAccess: false,
-    hasOptOutSuspensionAccess: false,
-    hasPolicyMergeAccess: false,
-    hasResetEnrollmentAccess: false,
-    hasStopShipmentAccess: false,
-    hasUpdatePProGuidAccess: false,
-    hasVehicleSupportAccess: false,
-    isInMobileRegistrationAdminRole: false,
-    isInTheftOnlyRole: false,
-    isInTheftRole: false
+    isLabsUser: true
   };
 
   beforeEach(() => {
@@ -93,21 +75,21 @@ describe('UserInfoService', () => {
   it('should return true when user has required access', () => {
     service.userInfo.next(mockUserInfo);
 
-    expect(service.getUserAccess(['isInAppChangeRole'])).toBeTrue();
+    expect(service.getUserAccess(['isLabsUser'])).toBeTrue();
   });
 
   it('should return false when user lacks required access', () => {
     service.userInfo.next({
       ...mockUserInfo,
-      isInAppChangeRole: false
+      isLabsUser: false
     });
 
-    expect(service.getUserAccess(['isInAppChangeRole'])).toBeFalse();
+    expect(service.getUserAccess(['isLabsUser'])).toBeFalse();
   });
 
   it('should return false when lanId is undefined', () => {
     service.userInfo.next({} as UserInfo);
 
-    expect(service.getUserAccess(['isInAppChangeRole'])).toBeFalse();
+    expect(service.getUserAccess(['isLabsUser'])).toBeFalse();
   });
 });

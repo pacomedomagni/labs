@@ -5,15 +5,15 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatButtonModule } from "@angular/material/button";
-import { NotificationBannerService } from "../shared/notifications/notification-banner/notification-banner.service";
-import { UserInfo } from "../shared/data/application/resources";
-import { UserInfoService } from "../shared/services/user-info/user-info.service";
+import { NotificationBannerService } from "../../shared/notifications/notification-banner/notification-banner.service";
+import { UserInfo } from "../../shared/data/application/resources";
+import { UserInfoService } from "../../shared/services/user-info/user-info.service";
 import { pipe } from "rxjs";
 
 @Component({
-	selector: "tmx-role-testing",
-	templateUrl: "./role-testing.component.html",
-	styleUrls: ["./role-testing.component.scss"],
+	selector: "tmx-user-info-editor",
+	templateUrl: "./user-info-editor.component.html",
+	styleUrls: ["./user-info-editor.component.scss"],
 	standalone: true,
 	imports: [
 		FormsModule,
@@ -24,7 +24,7 @@ import { pipe } from "rxjs";
 		MatButtonModule
 	]
 })
-export class RoleTestingComponent implements OnInit {
+export class UserInfoEditorComponent implements OnInit {
 
 	userInfo: UserInfo;
 	properties: string[];
@@ -33,7 +33,7 @@ export class RoleTestingComponent implements OnInit {
 
 	ngOnInit(): void {
 		this.reset();
-		this.properties = Object.keys(this.userInfo).filter(x => x !== "name" && x !== "lanId");
+		this.properties = ["isLabsAdmin", "isLabsUser"];
 	}
 
 	submit(): void {
@@ -50,24 +50,6 @@ export class RoleTestingComponent implements OnInit {
 
 	private defaultUserModel(): UserInfo {
 		return {
-			isInOpsAdminRole: false,
-			isInOpsUserRole: false,
-			isInSupportAdminRole: false,
-			isCommercialLineRole: false,
-			hasEligibilityAccess: false,
-			hasInsertInitialParticipationScoreInProcessAccess: false,
-			hasOptOutSuspensionAccess: false,
-			hasPolicyMergeAccess: false,
-			hasResetEnrollmentAccess: false,
-			hasStopShipmentAccess: false,
-			hasUpdatePProGuidAccess: false,
-			hasVehicleSupportAccess: false,
-			isInMobileRegistrationAdminRole: false,
-			isInTheftOnlyRole: false,
-			isInTheftRole: false,
-			isInFeeReversalOnlyRole: false,
-			isInFeeReversalRole: false,
-			isInAppChangeRole: false,
 			lanId: "",
 			name: "",
 			isLabsAdmin: false,
