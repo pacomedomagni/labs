@@ -5,8 +5,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { PendingOrdersComponent } from './components/pending-orders/pending-orders.component';
 import { CompletedOrdersComponent } from './components/completed-orders/completed-orders.component';
+import { PrinterInfoComponent } from './components/printer-info/printer-info.component';
 import { FulfillmentService } from '../shared/services/api/fulfillment/fulfillment.services';
-import { DeviceOrder } from '../shared/data/fulfillment/resources';
+import { DeviceOrder, CompletedOrdersList } from '../shared/data/fulfillment/resources';
 
 @Component({
   selector: 'tmx-customer-service-fulfillment',
@@ -16,7 +17,8 @@ import { DeviceOrder } from '../shared/data/fulfillment/resources';
     MatCardModule,
     MatTabsModule,
     PendingOrdersComponent,
-    CompletedOrdersComponent
+    CompletedOrdersComponent,
+    PrinterInfoComponent
   ],
   templateUrl: './fulfillment.component.html',
   styleUrl: './fulfillment.component.scss'
@@ -32,13 +34,16 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
   completedToday = signal(0);
   pendingOrderData = signal<DeviceOrder[]>([]);
 
+  // Completed orders
+  completedOrderData = signal<CompletedOrdersList | null>(null);
+
   selectedTab = signal(0);
 
   ngOnInit() {
-    this.loadOrderCounts();
-    // Refresh order counts every 10 minutes
+    this.loadData();
+    // Refresh every 10 minutes
     this.refreshInterval = window.setInterval(() => {
-      this.loadOrderCounts();
+      this.loadData();
     }, 10 * 60 * 1000);
   }
 
@@ -51,24 +56,25 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
     }
   }
 
-  private loadOrderCounts() {
-    // Unsubscribe from previous request if still pending
+  private loadData() {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
 
     this.subscription = forkJoin({
       pendingOrders: this.fulfillmentService.getPendingOrderList(),
-      processedCount: this.fulfillmentService.getProcessedOrdersCount()
+      processedCount: this.fulfillmentService.getProcessedOrdersCount(),
+      completedOrders: this.fulfillmentService.getCompletedOrderList()
     }).subscribe({
       next: (result) => {
         this.pendingOrders.set(result.pendingOrders.numberOfOrders);
         this.devicesNeeded.set(result.pendingOrders.numberOfDevices);
         this.pendingOrderData.set(result.pendingOrders.deviceOrders);
         this.completedToday.set(result.processedCount);
+        this.completedOrderData.set(result.completedOrders);
       },
       error: (error) => {
-        console.error('Error loading order counts:', error);
+        console.error('Error loading fulfillment data:', error);
       }
     });
   }
@@ -77,7 +83,7 @@ export class CustomerServiceFulfillmentComponent implements OnInit, OnDestroy {
     this.selectedTab.set(index);
   }
 
-  onOrderSelected(order: DeviceOrder) {
+  onOrderSelected(order: DeviceOrder | { orderNumber: string }) {
     // TODO: Open Order Details modal (PBI 6478014)
     console.log('Order selected:', order.orderNumber);
   }

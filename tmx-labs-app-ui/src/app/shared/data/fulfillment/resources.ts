@@ -69,3 +69,31 @@ export interface AssingDeviceRequest {
     orderDetails: OrderDetails;
 }
 
+export interface CompletedDeviceOrder {
+    deviceOrderSeqID: number;
+    orderNumber: string;
+    processedDateTime: string;
+    shipDateTime: string;
+    processedBy: string;
+    processedByUserID: string;
+    state: string;
+    deviceCount: number;
+    deviceSerialNumbers: string[];
+}
+
+export interface CompletedOrdersList {
+    orders: CompletedDeviceOrder[];
+    totalCount: number;
+    processedByUsers: ProcessedByUser[];
+}
+
+export interface ProcessedByUser {
+    userID: string;
+    displayName: string;
+}
+
+export interface LabelPrinter {
+    PrinterName: string;
+    PrinterIP: string;
+}
+

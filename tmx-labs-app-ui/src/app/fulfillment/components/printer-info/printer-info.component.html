@@ -1,0 +1,13 @@
+<div class="printer-info">
+  <div class="printer-label">Selected Printer</div>
+  <div class="printer-details">
+    <span class="printer-name">{{ printerName() }}</span>
+  </div>
+  <button 
+    type="button" 
+    class="printer-link" 
+    (click)="setDefaultPrinter()"
+    [attr.aria-label]="printerName() === 'NONE' ? 'Set default printer' : 'Change printer'">
+    {{ printerName() === 'NONE' ? '[Set Default Printer]' : '[Change Printer]' }}
+  </button>
+</div>

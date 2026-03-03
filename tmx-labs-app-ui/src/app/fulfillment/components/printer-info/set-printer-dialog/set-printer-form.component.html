@@ -1,0 +1,21 @@
+<div class="flex flex-col p-xs pb-0">
+    <div class="form-description">
+        <span>Select the default printer you want to use for printing shipping labels.</span>
+    </div>
+    <mat-form-field appearance="outline" [hideRequiredMarker]="true" class="mt-m">
+        <mat-label>Select a Printer</mat-label>
+        <mat-select 
+            [(ngModel)]="printerDetails.selectedPrinter" 
+            name="printer" 
+            #printerModel="ngModel"
+            id="tmx-printer-select"
+            required>
+            @for (printer of availablePrinters(); track printer) {
+                <mat-option [value]="printer">{{ printer }}</mat-option>
+            }
+        </mat-select>
+        @if (printerModel.invalid && (printerModel.dirty || printerModel.touched)) {
+            <mat-error>Printer is required</mat-error>
+        }
+    </mat-form-field>
+</div>

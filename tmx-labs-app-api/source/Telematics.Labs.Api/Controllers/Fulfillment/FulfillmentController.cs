@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Progressive.Telematics.Labs.Business.Orchestrators.Fulfillment;
@@ -98,6 +99,24 @@ public class FulfillmentController : ControllerBase
     public async Task<ActionResult<int>> ProcessedOrderCount()
     {
         var result = await _orchestrator.GetProcessedOrderCount();
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets all completed (shipped) orders
+    /// </summary>
+    /// <returns>List of completed orders with processed-by user info</returns>
+    [HttpGet("CompletedOrderList")]
+    public async Task<ActionResult<CompletedOrdersList>> GetCompletedOrderList()
+    {
+        var result = await _orchestrator.GetCompletedOrderList();
+        return Ok(result);
+    }
+
+    [HttpGet("GetLabelPrinters")]
+    public async Task<ActionResult<List<LabelPrinter>>> GetLabelPrinters()
+    {
+        var result = await _orchestrator.GetLabelPrinters();
         return Ok(result);
     }
 }

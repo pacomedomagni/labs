@@ -46,6 +46,32 @@ main {
 	min-width: 600px;
 }
 
+@media print {
+	body,
+	main,
+	tmx-root,
+	.app-main,
+	.app-main__content {
+		height: auto !important;
+		overflow: visible !important;
+	}
+
+	tmx-root {
+		position: static !important;
+		left: auto !important;
+		right: auto !important;
+		top: auto !important;
+		bottom: auto !important;
+	}
+
+	tmx-nav-rail,
+	tmx-secondary-sidebar,
+	.app-main__header,
+	tmx-spinner {
+		display: none !important;
+	}
+}
+
 .float-left {
 	float: left;
 }
