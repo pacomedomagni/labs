@@ -20,7 +20,7 @@
             />
             <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
             <mat-datepicker #datePicker></mat-datepicker>
-            <mat-error aria-live="assertive">{{ invalidDateFormat ? 'Invalid date format. Please use MM/DD/YYYY.' : '' }}</mat-error>
+            <mat-error>{{ invalidDateFormat ? 'Invalid date format. Please use MM/DD/YYYY.' : '' }}</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" [hideRequiredMarker]="true">
@@ -41,7 +41,7 @@
             />
             <mat-timepicker-toggle matSuffix [for]="timePicker" (mousedown)="allowTimePickerOpen = true" (keydown.enter)="allowTimePickerOpen = true" (keydown.space)="allowTimePickerOpen = true"></mat-timepicker-toggle>
             <mat-timepicker #timePicker interval="1min" (selected)="onTimeSelected($event)"></mat-timepicker>
-            <mat-error aria-live="assertive">{{ invalidTimeFormat ? 'Invalid time format. Please use HH:MM AM/PM.' : '' }}</mat-error>
+            <mat-error>{{ invalidTimeFormat ? 'Invalid time format. Please use HH:MM AM/PM.' : '' }}</mat-error>
         </mat-form-field>
     </div>
 

@@ -1,12 +1,9 @@
 <div class="exclude-trips-container">
-    <div class="status-message"
-         [class.success]="statusMessage()?.type === 'success'"
-         [class.error]="statusMessage()?.type === 'error'"
-         role="status"
-         aria-live="polite"
-         aria-atomic="true">
-        {{ statusMessage()?.text }}
-    </div>
+    @if (statusMessage()) {
+        <div class="status-message" [class.success]="statusMessage()!.type === 'success'" [class.error]="statusMessage()!.type === 'error'">
+            {{ statusMessage()!.text }}
+        </div>
+    }
     @if (isLoading()) {
         <div class="loading-state">
             <tmx-spinner></tmx-spinner>
