@@ -1,0 +1,36 @@
+:host {
+	table, th {
+		text-align: center;
+	}
+	
+	.mat-mdc-footer-cell {
+		border: none;
+		padding-bottom: 0 !important;
+	}
+
+	::ng-deep {
+		.mat-mdc-tab-group {
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			.mat-tab-body-wrapper {
+				overflow: visible !important;
+			}
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			.mat-tab-body-active {
+					overflow: visible !important;
+			}
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+			.mat-tab-body-content {
+					overflow: visible !important;
+			}
+		}
+	}
+}

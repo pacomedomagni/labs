@@ -1,0 +1,79 @@
+<table mat-table class="cui-table w-1/2 pb-l" [dataSource]="topDataSource">
+	<ng-container matColumnDef="reportedVin">
+		<th mat-header-cell	*matHeaderCellDef>Reported VIN</th>
+		<td mat-cell *matCellDef="let device">{{ device.reportedVIN }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="isDataCollectionAllowed">
+		<th mat-header-cell	*matHeaderCellDef>Is Data Collection Allowed</th>
+		<td mat-cell *matCellDef="let device">{{ helper.getExtender(device, 'IsDataCollectionAllowed') }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="lastRemoteResetDate">
+		<th mat-header-cell	*matHeaderCellDef>Last Remote Reset Date</th>
+		<td mat-cell *matCellDef="let device">{{ device.lastRemoteResetDate | date: 'M/d/yyyy h:mm:ss a' }}</td>
+	</ng-container>
+
+	<tr mat-header-row *matHeaderRowDef="topColumns; sticky: true"></tr>
+	<tr mat-row	*matRowDef="let row; columns: topColumns"></tr>
+</table>
+
+<table mat-table class="cui-table pt-l" [dataSource]="bottomDataSource">
+	<ng-container matColumnDef="status">
+		<th mat-header-cell *matHeaderCellDef></th>
+		<td mat-cell class="serial-fit"	*matCellDef="let details">{{ details.status }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="configurationFirmwareValue">
+		<th mat-header-cell *matHeaderCellDef>Configuration Type Version</th>
+		<td mat-cell class="serial-fit" *matCellDef="let details">{{ details.configurationFirmwareValue }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="configurationFirmwareFileName">
+		<th mat-header-cell *matHeaderCellDef>Configuration Type Version</th>
+		<td mat-cell class="serial-fit" *matCellDef="let details">{{ details.configurationFirmwareFileName }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="obd2FirmwareValue">
+		<th mat-header-cell *matHeaderCellDef>OBD2 Firmware Type Version</th>
+		<td mat-cell class="serial-fit" *matCellDef="let details">{{ details.obd2FirmwareValue }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="obd2FirmwareFileName">
+		<th mat-header-cell *matHeaderCellDef>OBD2 Firmware Type Version</th>
+		<td mat-cell class="serial-fit" *matCellDef="let details">{{ details.obd2FirmwareFileName }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="cellFirmwareValue">
+		<th mat-header-cell *matHeaderCellDef>Cell Firmware Type Version</th>
+		<td mat-cell class="serial-fit" *matCellDef="let details">{{ details.cellFirmwareValue }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="cellFirmwareFileName">
+		<th mat-header-cell *matHeaderCellDef>Cell Firmware Type Filename</th>
+		<td mat-cell class="serial-fit" *matCellDef="let details">{{ details.cellFirmwareFileName }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="gpsFirmwareValue">
+		<th mat-header-cell *matHeaderCellDef>GPS Firmware Type Version</th>
+		<td mat-cell class="serial-fit" *matCellDef="let details">{{ details.gpsFirmwareValue }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="gpsFirmwareFileName">
+		<th mat-header-cell *matHeaderCellDef>GPS Firmware Type Filename</th>
+		<td mat-cell class="serial-fit" *matCellDef="let details">{{ details.gpsFirmwareFileName }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="mainFirmwareValue">
+		<th mat-header-cell *matHeaderCellDef>Main Firmware Type Version</th>
+		<td mat-cell class="serial-fit" *matCellDef="let details">{{ details.mainFirmwareValue }}</td>
+	</ng-container>
+
+	<ng-container matColumnDef="mainFirmwareFileName">
+		<th mat-header-cell *matHeaderCellDef>Main Firmware Type Filename</th>
+		<td mat-cell class="serial-fit" *matCellDef="let details">{{ details.mainFirmwareFileName }}</td>
+	</ng-container>
+
+	<tr mat-header-row *matHeaderRowDef="bottomColumns; sticky: true"></tr>
+	<tr mat-row	*matRowDef="let row; columns: bottomColumns"></tr>
+</table>

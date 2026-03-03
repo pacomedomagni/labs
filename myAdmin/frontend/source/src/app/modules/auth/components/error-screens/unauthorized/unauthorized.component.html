@@ -1,0 +1,30 @@
+<div>
+  <h1 class="mb-s error-screen-title">Authentication Failed</h1>
+  <div class="error-screen-description mb-s">Looks like authentication has failed or has not been provided.</div>
+  <div class="mb-xs">To fix the problem, try these steps:</div>
+  <ol class="mb-m">
+    <li>
+      <div class="flex items-center">
+        <button mat-flat-button (click)="clearStorage()" color="primary">Clear Storage</button>
+        @if (loading) {
+          <span class="flex items-center ml-xxs">
+            <mat-spinner diameter="22" class="mr-bl-2"></mat-spinner>
+            <div class="cui-label">Clearing...</div>
+          </span>
+        }
+        @if (!loading && storageCleared) {
+          <span class="flex items-center ml-xxs delete-cookies-success">
+            <mat-icon class="mr-bl-2">check_circle_outline</mat-icon>
+            <div class="delete-cookies-success-text">Storage cleared</div>
+          </span>
+        }
+      </div>
+    </li>
+    <li>
+      <div class="flex items-center">
+        <button mat-flat-button (click)="reloadApp()" color="primary">Reload App</button>
+      </div>
+    </li>
+  </ol>
+  <strong class="error-screen-help">If the problem persists, call the help desk at <span class="underline">{{helpDeskNumber}}</span></strong>
+</div>

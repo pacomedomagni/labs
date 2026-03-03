@@ -1,0 +1,38 @@
+:host {
+	p {
+		margin: 0;
+	}
+
+	::ng-deep {
+		ul {
+			margin-bottom: 8px;
+			padding-bottom: 18px;
+		}
+	}
+
+	h3 {
+		width: 80%;
+		margin: .7em auto;
+		overflow: hidden;
+		text-align: center;
+	}
+
+	h3:before, h3:after {
+		content: "";
+		display: inline-block;
+		width: 50%;
+		margin: 0 .5em 0 -55%;
+		vertical-align: middle;
+		border-bottom: 1px solid;
+		opacity: 25%;
+	}
+
+	h3:after {
+		margin: 0 -55% 0 .5em;
+	}
+
+	span {
+		display: inline-block;
+		vertical-align: middle;
+	}
+}

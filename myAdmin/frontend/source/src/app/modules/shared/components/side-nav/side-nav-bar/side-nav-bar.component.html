@@ -1,0 +1,27 @@
+<mat-toolbar>
+  <mat-icon fontSet="material-icons-outlined" class="text-accent">
+    {{appGroup?.icon}}
+  </mat-icon>
+  <h2 class="cui-h2">{{appGroup?.name}}</h2>
+</mat-toolbar>
+@for (group of groupedApps; track group; let last = $last) {
+  <mat-nav-list dense [disableRipple]="true">
+    <h3 mat-subheader>{{ group.appType }}</h3>
+    @for (app of group.apps; track app) {
+      <mat-list-item class="tmx-sidenav-item">
+        @if (shouldDisplay(app)) {
+          <a matRipple mat-list-item [routerLink]="appGroup.id + '/' + group.appType + '/' + app.id" #rla="routerLinkActive"
+            [routerLinkActive]="['active']" class="tmx-sidenav-link">
+            {{ app.name }}
+            @if (!app.isReady && app.externalInfo) {
+              <mat-icon class="external-link-icon">launch</mat-icon>
+            }
+          </a>
+        }
+      </mat-list-item>
+    }
+    @if (!last) {
+      <mat-divider></mat-divider>
+    }
+  </mat-nav-list>
+}

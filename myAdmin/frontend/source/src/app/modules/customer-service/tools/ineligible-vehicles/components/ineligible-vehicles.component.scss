@@ -1,0 +1,21 @@
+:host {
+	th, tr, td {
+		text-align: center;
+	}
+	
+	::ng-deep {
+		.filter {
+			/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
+			/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
+			.mat-form-field-wrapper {
+				padding-bottom: 0px !important;
+			}
+		}
+
+		.exact-match-cell {
+			width: 30%;
+		}
+	}
+}

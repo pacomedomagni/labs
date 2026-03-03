@@ -1,0 +1,21 @@
+@if (swappableParticipants?.length > 0) {
+  <div class="flex flex-col p-xs pb-0">
+    <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+      <mat-label>Please select vehicle to swap with</mat-label>
+      <mat-select id="tmx-swap-part"
+        cuiMatSelectAccessibility [(ngModel)]="model.destParticipant" required>
+        <mat-select-trigger>{{ labelService.getParticipantDisplayName(model.destParticipant) }}</mat-select-trigger>
+        @for (participant of swappableParticipants; track participant) {
+          <mat-option [value]="participant">
+            {{ labelService.getParticipantDisplayName(participant) }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error>Participant is required</mat-error>
+    </mat-form-field>
+  </div>
+} @else {
+  <tmx-empty-state icon="group" primaryText="Unable to Swap Devices" secondaryText="At least two vehicles must be enrolled with a plug-in device and devices must be assigned">
+  </tmx-empty-state>
+}
+

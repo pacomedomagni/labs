@@ -1,0 +1,17 @@
+<mat-form-field appearance="outline" [hideRequiredMarker]="true" class="w-full">
+	<mat-label>{{ label }}</mat-label>
+	<input
+		matInput 
+		type="number"
+		[disabled]="isDisabled"	
+		[id]="id" 
+		[max]="max"
+		[min]="min"
+		[name]="name ? name : id" 
+		[required]="isRequired" 
+		[step]="step"
+		(change)="onChangeEvent()"
+		(keydown.enter)="onKeyEnterEvent($event)"
+		[(ngModel)]="model">
+	<mat-error>{{ getErrorMessage() }}</mat-error>
+</mat-form-field>

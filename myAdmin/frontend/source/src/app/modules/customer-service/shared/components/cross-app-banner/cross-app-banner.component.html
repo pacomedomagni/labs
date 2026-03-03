@@ -1,0 +1,27 @@
+@if (availableFeatures.length > 0) {
+  <mat-card appearance="outlined" class="flex justify-evenly">
+    @for (item of availableFeatures; track item) {
+      <div>
+        <mat-icon mat-icon-button attr.aria-label="cross-app-info"
+        color="primary">{{ 'notification_important' }}</mat-icon>
+        <a class="cui-link" routerLink="/CustomerService/Apps/{{item.feature}}"
+          [state]="{ policyNumber: policyNumber }"
+          matTooltip="View Policy in {{ item.label }}"
+        matTooltipPosition="above">Policy in {{ item.label }}</a>
+      </div>
+    }
+  </mat-card>
+}
+@if ((policyQuery.policyTransactionError$ | async) !== null) {
+  <mat-card appearance="outlined"
+    class="flex justify-evenly">
+    <div>
+      <mat-icon mat-icon-button attr.aria-label="cross-app-info"
+      color="warning">{{ 'notification_important' }}</mat-icon>
+      <button mat-flat-button (click)="displayTransactionDialog()"
+        color="secondary" matTooltip="Transaction Error On Policy"
+        matTooltipPosition="above">Policy has
+      Transaction Error</button>
+    </div>
+  </mat-card>
+}

@@ -1,0 +1,8 @@
+<div class="flex flex-col p-xs pb-0">
+	<mat-form-field appearance="outline" [hideRequiredMarker]="true">
+		<mat-label>Transfer data to Policy #:</mat-label>
+		<input id="tmx-transfer-new-pol-nbr" type="text" [(ngModel)]="model.newPolicyNumber" matInput maxlength="9" required>
+		<mat-error>Policy number is required</mat-error>
+	</mat-form-field>
+</div>
+

@@ -1,0 +1,79 @@
+<div class="flex flex-col pt-xxs container"> 
+	<cui-vertical-stepper linear="true">
+		<cui-step [stepControl]="oldParticipantFormGroup" [summary]="getSummary(model.srcParticipant)">
+			<form [formGroup]="oldParticipantFormGroup">
+				<ng-template matStepLabel>Participant to replace</ng-template>
+				<p class="step-description">Select the vehicle or driver you would like to replace and select 'Next' to continue.</p>
+				<mat-form-field appearance="outline" [hideRequiredMarker]="true">
+					<mat-label>Participant to replace</mat-label>
+					<mat-select id="tmx-pm-old-part" #oldParticipantCtrl formControlName="oldParticipantCtrl"
+					 	cuiMatSelectAccessibility [(ngModel)]="model.srcParticipant" required (selectionChange)="onOldParticipantChange($event.value)">
+						<mat-select-trigger>{{ labelService.getParticipantDisplayName(model.srcParticipant) }}</mat-select-trigger>
+						<mat-option *ngFor="let participant of participants" [value]="participant">
+							<div>
+								<p>{{ labelService.getParticipantDisplayName(participant) }}</p>
+								<div *ngIf="!helper.isParticipantMobile(participant), else mobile">
+									<p >VIN: {{ participant.snapshotDetails.vehicleDetails?.vin }}</p>
+									<p >Device Id: {{ participant.pluginDeviceDetails?.deviceSerialNumber }}</p>
+								</div>
+								<ng-template #mobile>
+									<p >Mobile Phone #: {{ participant.registrationDetails?.mobileRegistrationCode | phoneNumber }}</p>
+								</ng-template>
+								<p >Participant Id: {{ participant.snapshotDetails.participantId }}</p>
+							</div>
+						</mat-option>
+					</mat-select>
+					<mat-error>Participant is required</mat-error>
+				</mat-form-field>
+				<cui-dialog-footer>
+					<button mat-flat-button matStepperNext color="primary" [disabled]="!model.srcParticipant">Next<mat-icon matSuffix>east</mat-icon></button>
+				</cui-dialog-footer>
+			</form>
+		</cui-step>
+		<cui-step [stepControl]="newParticipantFormGroup" [summary]="getSummary(model.destParticipant)">
+			<div [formGroup]="newParticipantFormGroup">
+				<ng-template matStepLabel>Participant to remain on policy</ng-template>
+				<p class="step-description">Select the new vehicle or driver that you wish to be on the policy following the merge and select 'Next' to continue.</p>
+				<mat-form-field appearance="outline" [hideRequiredMarker]="true">
+					<mat-label>Participant to remain on policy</mat-label>
+					<mat-select id="tmx-pm-new-part" #newParticipantCtrl formControlName="newParticipantCtrl" cuiMatSelectAccessibility [(ngModel)]="model.destParticipant" (selectionChange)="onNewParticipantChange()" required>
+						<mat-select-trigger>{{ labelService.getParticipantDisplayName(model.destParticipant) }}</mat-select-trigger>
+						<mat-option *ngFor="let participant of participants" 
+
+							[value]="participant" 
+							[disabled]="shouldDisableParticipant(model.srcParticipant, participant)"
+							[matTooltip]="shouldDisableParticipant(model.srcParticipant, participant)" matTooltipPosition="right"
+							>
+							<div>
+								<p>{{ labelService.getParticipantDisplayName(participant) }}</p>
+								<div *ngIf="!helper.isParticipantMobile(participant), else mobile">
+									<p >VIN: {{ participant.snapshotDetails.vehicleDetails?.vin }}</p>
+									<p >Device Id: {{ participant.pluginDeviceDetails?.deviceSerialNumber }}</p>
+								</div>
+								<ng-template #mobile>
+									<p >Mobile Phone #: {{ participant.registrationDetails?.mobileRegistrationCode | phoneNumber }}</p>
+								</ng-template>
+								<p >Participant Id: {{ participant.snapshotDetails.participantId }}</p>
+							</div>
+						</mat-option>
+					</mat-select>
+					<mat-error>Participant is required</mat-error>
+				</mat-form-field>
+				<cui-dialog-footer>
+					<button mat-stroked-button matStepperPrevious color="primary" class="mr-xs"><mat-icon matPrefix>west</mat-icon>Back</button>
+					<button mat-flat-button matStepperNext color="primary" [disabled]="!model.destParticipant">Next<mat-icon matSuffix>east</mat-icon></button>
+				</cui-dialog-footer>
+			</div>
+		</cui-step>
+		<cui-step>
+			<div>
+				<ng-template matStepLabel>Review</ng-template>
+				<p class="step-description">Please review your selections and if you wish to proceed click 'OK'.</p>
+				<cui-dialog-footer>
+					<button mat-stroked-button matStepperPrevious color="primary" class="mr-xs"><mat-icon matPrefix>west</mat-icon>Back</button>
+					<button mat-flat-button matStepperNext color="primary" (click)="injectedData.submit()">OK</button>
+				</cui-dialog-footer>
+			</div>
+		</cui-step>
+	</cui-vertical-stepper>
+</div>

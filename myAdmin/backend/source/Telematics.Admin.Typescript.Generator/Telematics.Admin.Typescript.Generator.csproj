@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifiers>linux-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="TypeLitePlus" Version="2.1.0" />
+    <PackageReference Include="TypeLitePlus.DotNetScript" Version="2.1.0" />
+    <PackageReference Include="Tmx.EditorConfig" Version="1.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Telematics.Admin.Business.Resources\Telematics.Admin.Business.Resources.csproj" />
+    <ProjectReference Include="..\Telematics.Admin.Services\Telematics.Admin.Services.csproj" />
+  </ItemGroup>
+</Project>

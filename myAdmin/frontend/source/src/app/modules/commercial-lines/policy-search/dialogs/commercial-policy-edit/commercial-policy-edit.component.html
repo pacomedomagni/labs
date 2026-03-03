@@ -1,0 +1,105 @@
+<cui-dialog closeButtonLabel="Close Dialog" [showClose]="true"
+  [showFooter]="true" (close)="onCancel()">
+
+  <div mat-dialog-title dialog-header
+    class="mat-toolbar dialog-header mat-toolbar-single-row">
+    <span>Policy Edit</span>
+  </div>
+  <cui-notification-banner dialog-sub-header type="info">
+    This is to Update Policy {{policy.policyNumber}}.
+  </cui-notification-banner>
+  <div mat-dialog-content dialog-content class="mt-xxs">
+    <form [formGroup]="myForm">
+
+      <div class="flex flex-wrap justify-center">
+        @if (policy) {
+          <div class="flex ml-s mr-s columns">
+            <mat-form-field appearance="outline" [hideRequiredMarker]="true"
+              class="w-full">
+              <mat-label>Name</mat-label>
+              <input matInput id="name" formControlName="name"
+                class="form-control">
+                @if (!myForm.get('name').valid) {
+                  <mat-error>Name is
+                  Required.</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline" [hideRequiredMarker]="true"
+                class="w-full">
+                <mat-label>Address 1</mat-label>
+                <input matInput id="address1" formControlName="address1"
+                  class="form-control">
+                  @if (!myForm.get('address1').valid) {
+                    <mat-error>Address 1 is
+                    Required.</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline" [hideRequiredMarker]="true"
+                  class="w-full">
+                  <mat-label>Address 2</mat-label>
+                  <input matInput id="address2" formControlName="address2"
+                    class="form-control">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" [hideRequiredMarker]="true"
+                    class="w-full">
+                    <mat-label>city</mat-label>
+                    <input matInput id="city" formControlName="city"
+                      class="form-control">
+                      @if (!myForm.get('city').valid) {
+                        <mat-error>City is
+                        Required.</mat-error>
+                      }
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" [hideRequiredMarker]="true"
+                      class="w-full">
+                      <mat-label>State</mat-label>
+                      <input matInput id="state" formControlName="state"
+                        class="form-control">
+                        @if (!myForm.get('state').valid) {
+                          <mat-error>State is
+                          Required.</mat-error>
+                        }
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" [hideRequiredMarker]="true"
+                        class="w-full">
+                        <mat-label>Zip</mat-label>
+                        <input matInput id="zip" formControlName="zip" class="form-control">
+                        @if (!myForm.get('zip').valid) {
+                          <mat-error>Zip is
+                          Required.</mat-error>
+                        }
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" [hideRequiredMarker]="true"
+                        class="w-full">
+                        <mat-label>Email</mat-label>
+                        <input matInput id="email" formControlName="email"
+                          class="form-control">
+                          @if (!myForm.get('email').valid) {
+                            <mat-error>Enter a valid Email
+                            address.</mat-error>
+                          }
+                        </mat-form-field>
+                        <mat-checkbox matInput id="sendDashboard" class="checkbox"
+                          formControlName="sendDashboard" class="form-control">
+                          Send Dashboard
+                        </mat-checkbox>
+                      </div>
+                    }
+                  </div>
+                  <ng-container dialog-footer>
+
+                    <div class="footer">
+                      <button type="submit" mat-flat-button color="primary"
+                        [disabled]="!canSubmit" class="mr-xxs" id="btn-confirm"
+                        (click)="onConfirm()">
+                        Ok
+                      </button>
+                      <button mat-stroked-button color="primary" id="btn-cancel"
+                        (click)="onCancel()">
+                        Cancel
+                      </button>
+                    </div>
+                  </ng-container>
+                </form>
+              </div>
+            </cui-dialog>

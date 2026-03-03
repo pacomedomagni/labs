@@ -1,0 +1,245 @@
+{
+	"root": true,
+	"plugins": ["unused-imports","jest"],
+	"env": {
+		"jest/globals": true
+	},
+	"overrides": [
+		{
+			"files": [
+				"*.ts"
+			],
+			"parserOptions": {
+				"project": "**/tsconfig.json"
+			},
+			"extends": [
+				"plugin:@angular-eslint/recommended",
+				"plugin:@angular-eslint/template/process-inline-templates"
+			],
+			"rules": {
+					"unused-imports/no-unused-imports": "warn",
+					"unused-imports/no-unused-vars": [
+						"warn",
+						{ "vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }
+					],
+					"no-undef": "warn",
+				"@angular-eslint/component-selector": [
+					"error",
+					{
+						"prefix": "tmx",
+						"style": "kebab-case",
+						"type": "element"
+					}
+				],
+				"arrow-body-style": [
+					"off"
+				],
+				"arrow-parens": [
+					"off",
+					"as-needed"
+				],
+				"brace-style": [
+					"off",
+					"stroustrup",
+					{
+						"allowSingleLine": true
+					}
+				],
+				"curly": [
+					"error",
+					"multi-line"
+				],
+				"dot-location": [
+					"error",
+					"property"
+				],
+				"eol-last": [
+					"off"
+				],
+				"eqeqeq": [
+					"error",
+					"smart"
+				],
+				"guard-for-in": [
+					"off"
+				],
+				"id-blacklist": [
+					"error"
+				],
+				"indent": [
+					"off",
+					"tab",
+					{
+						"SwitchCase": 1,
+						"MemberExpression": 1,
+						"ignoredNodes": [
+							"FunctionExpression > .params[decorators.length > 0]",
+							"FunctionExpression > .params > :matches(Decorator, :not(:first-child))",
+							"ClassBody.body > PropertyDefinition[decorators.length > 0] > .key"
+						]
+					}
+				],
+				"jsdoc/check-alignment": [
+					"off"
+				],
+				"jsdoc/newline-after-description": [
+					"off"
+				],
+				"max-len": [
+					"off"
+				],
+				"new-parens": [
+					"error"
+				],
+				"no-dupe-args": [
+					"error"
+				],
+				"no-eval": [
+					"error"
+				],
+				"no-extra-semi": [
+					"error"
+				],
+				"no-multiple-empty-lines": [
+					"error",
+					{
+						"max": 1,
+						"maxBOF": 1,
+						"maxEOF": 1
+					}
+				],
+				"no-trailing-spaces": [
+					"error"
+				],
+				"no-underscore-dangle": [
+					"error"
+				],
+				"no-unsafe-finally": [
+					"error"
+				],
+				"no-unused-expressions": [
+					"error",
+					{
+						"allowShortCircuit": true,
+						"allowTernary": true,
+						"allowTaggedTemplates": true
+					}
+				],
+				"object-shorthand": [
+					"off"
+				],
+				"prefer-const": [
+					"off"
+				],
+				"prefer-arrow/prefer-arrow-functions": [
+					"off"
+				],
+				"quotes": [
+					"error",
+					"double",
+					{
+						"avoidEscape": true,
+						"allowTemplateLiterals": true
+					}
+				],
+				"radix": [
+					"error",
+					"as-needed"
+				],
+				"semi": [
+					"error"
+				],
+				"semi-spacing": [
+					"error",
+					{
+						"before": false,
+						"after": true
+					}
+				],
+				"sort-imports": [
+					"off"
+				],
+				"space-before-blocks": [
+					"error",
+					"always"
+				],
+				"space-infix-ops": [
+					"error"
+				],
+				"space-unary-ops": [
+					"error",
+					{
+						"words": true,
+						"nonwords": false
+					}
+				],
+				"@angular-eslint/component-class-suffix": [
+					"off"
+				],
+				"@angular-eslint/directive-class-suffix": [
+					"off"
+				],
+				"@angular-eslint/directive-selector": [
+					"off"
+				],
+				"@angular-eslint/no-host-metadata-property": [
+					"off"
+				],
+				"@angular-eslint/no-output-on-prefix": [
+					"off"
+				],
+				"@angular-eslint/use-lifecycle-interface": [
+					"error"
+				],
+				"@typescript-eslint/ban-types": [
+					"off"
+				],
+				"@typescript-eslint/consistent-type-assertions": [
+					"off"
+				],
+				"@typescript-eslint/dot-notation": [
+					"off"
+				],
+				"@typescript-eslint/explicit-member-accessibility": [
+					"off"
+				],
+				"@typescript-eslint/explicit-function-return-type": [
+					"off"
+				],
+				"@typescript-eslint/member-ordering": [
+					"off"
+				],
+				"@typescript-eslint/no-inferrable-types": [
+					"off"
+				],
+				"@typescript-eslint/no-unused-vars": [
+					"off"
+				],
+				"@typescript-eslint/naming-convention": [
+					"off"
+				],
+				"@typescript-eslint/quotes": [
+					"off"
+				],
+				"@typescript-eslint/semi": [
+					"off"
+				],
+				"@angular-eslint/prefer-inject": [
+					"warn"
+				],
+				"@angular-eslint/prefer-standalone": [
+					"warn"
+				]
+			}
+		},
+		{
+			"files": [
+				"*.html"
+			],
+			"extends": [
+				"plugin:@angular-eslint/template/recommended"
+			],
+			"rules": {			}
+		}
+	]
+}

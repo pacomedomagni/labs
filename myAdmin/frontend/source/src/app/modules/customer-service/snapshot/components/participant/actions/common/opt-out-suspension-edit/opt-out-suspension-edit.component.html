@@ -1,0 +1,19 @@
+<div class="flex flex-col p-xs pb-0"> 
+
+	<mat-form-field appearance="outline" [hideRequiredMarker]="true">
+		<mat-label>Begin Date</mat-label>
+		<input name="start-date" matInput [matDatepicker]="startPicker" [(ngModel)]="model.startDate" (ngModelChange)="updateEndDate()" [min]="today" required>
+		<mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+		<mat-datepicker #startPicker></mat-datepicker>
+		<mat-error>Please enter a valid start date</mat-error>
+	</mat-form-field>
+
+	<mat-form-field appearance="outline" [hideRequiredMarker]="true">
+		<mat-label>End Date</mat-label>
+		<input name="end-date" matInput [matDatepicker]="endPicker" [(ngModel)]="model.endDate" [min]="minEndDate" required>
+		<mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+		<mat-datepicker #endPicker></mat-datepicker>
+		<mat-error>The End Date must be greater than the Start Date</mat-error>
+	</mat-form-field>
+
+</div>

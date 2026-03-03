@@ -1,0 +1,49 @@
+<div class="flex flex-col p-xs pb-0">
+  <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+    <mat-label>Name</mat-label>
+    <input [(ngModel)]="policyDetails.mailingAddress.contactName" name="name" id="tmx-name-edit" type="text" matInput required>
+    <mat-error>Name is required</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+    <mat-label>Address 1</mat-label>
+    <input [(ngModel)]="policyDetails.mailingAddress.address1" name="address1" id="tmx-address1-edit" type="text" matInput required>
+    <mat-error>Address is required</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Address 2 (Optional)</mat-label>
+    <input [(ngModel)]="policyDetails.mailingAddress.address2" name="address2" id="tmx-address2-edit" type="text" matInput>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+    <mat-label>City</mat-label>
+    <input [(ngModel)]="policyDetails.mailingAddress.city" name="city" id="tmx-city-edit" type="text" matInput required>
+    <mat-error>City is required</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+    <mat-label>State</mat-label>
+    <input [(ngModel)]="policyDetails.mailingAddress.state" name="state" id="tmx-state-edit" type="text" matInput required>
+    <mat-error>State is required</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+    <mat-label>Zip Code</mat-label>
+    <input [(ngModel)]="policyDetails.mailingAddress.zipCode" name="zip" id="tmx-zip-edit" type="text" matInput cuiNumbersOnly required maxlength="5" minlength="5">
+    <mat-error>Zip code must be 5 digits</mat-error>
+  </mat-form-field>
+
+  @if (isMobilePolicy) {
+    <div class="flex justify-between">
+      <mat-form-field appearance="outline" [hideRequiredMarker]="true" class="w-11/12">
+        <mat-label>App Experience</mat-label>
+        <mat-select id="tmx-app-exp" name="appExperience" cuiMatSelectAccessibility [(ngModel)]="policyDetails.appName" [disabled]="true">
+          <mat-option value="MNA">Progressive Mobile App</mat-option>
+          <mat-option value="SMA">Snapshot Mobile App</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  }
+
+</div>
