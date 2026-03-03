@@ -8,5 +8,5 @@ export const metadata: ApplicationGroupMetadata = {
     svgIcon: 'ubi_snapshot_device',
     isReady: true,
     applications: [],
-    access: ['isLabsUser'],
+    access: ['isLabsAdmin'],
 };

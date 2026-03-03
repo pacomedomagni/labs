@@ -36,24 +36,6 @@ namespace Progressive.Telematics.Labs.Shared
         {
             public const string MyScoreRole = "ubilabsusr-01";
             public const string LabsAdminRole = "ubilabsadm-01";
-            public const string OpsAdmin = "OpsAdmin";
-            public const string OpsUser = "OpsUser";
-            public const string SupportAdmin = "SupportAdmin";
-            public const string Theft = "Theft";
-            public const string TheftOnly = "TheftOnly";
-            public const string MobileRegistrationAdmin = "MobileRegistrationAdmin";
-            public const string ChangeAppAssignment = "ChangeAppAssignment";
-            public const string FeeReversal = "FeeReversal";
-            public const string FeeReversalOnly = "FeeReversalOnly";
-            public const string CommercialLineRole = "CommercialLineRole";
-            public const string Eligibility = "Eligibility";
-            public const string InsertInitialParticipationScoreInProcess = "InsertInitialParticipationScoreInProcess";
-            public const string OptOutSuspension = "OptOutSuspension";
-            public const string PolicyMerge = "PolicyMerge";
-            public const string ResetEnrollment = "ResetEnrollment";
-            public const string StopShipment = "StopShipment";
-            public const string UpdatePProGuid = "UpdatePProGuid";
-            public const string VehicleSupport = "VehicleSupport";
         }
 
         public static class ParticipantGroupTypes

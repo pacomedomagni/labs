@@ -8,5 +8,5 @@ export const metadata: ApplicationGroupMetadata = {
     description: 'Base landing page for Activate/Deactivate Devices',
     faIcon: faToggleOn,
     isReady: true,
-    access: ['isLabsUser'],
+    access: ['isLabsAdmin'],
 };

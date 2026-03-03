@@ -17,7 +17,7 @@
       <ul>
         @for (access of properties; track access) {
           <li>
-            <mat-checkbox [value]="access" [checked]="userInfo[access]"	(change)="userInfo[access] = $event.checked">{{ access }}</mat-checkbox>
+            <mat-checkbox [value]="access" [checked]="userInfo[access]" (change)="onRoleChange(access, $event.checked)" [disabled]="isRoleDisabled(access)">{{ access }}</mat-checkbox>
           </li>
         }
       </ul>

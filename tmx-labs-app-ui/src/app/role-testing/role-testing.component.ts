@@ -36,6 +36,17 @@ export class RoleTestingComponent implements OnInit {
 		this.properties = Object.keys(this.userInfo).filter(x => x !== "name" && x !== "lanId");
 	}
 
+	onRoleChange(access: string, checked: boolean): void {
+		this.userInfo[access] = checked;
+		if (access === 'isLabsAdmin' && checked) {
+			this.userInfo.isLabsUser = true;
+		}
+	}
+
+	isRoleDisabled(access: string): boolean {
+		return access === 'isLabsUser' && this.userInfo.isLabsAdmin;
+	}
+
 	submit(): void {
 		this.userInfoService.userInfo.next(this.userInfo);
 		this.notification.success("User info updated");
@@ -50,24 +61,6 @@ export class RoleTestingComponent implements OnInit {
 
 	private defaultUserModel(): UserInfo {
 		return {
-			isInOpsAdminRole: false,
-			isInOpsUserRole: false,
-			isInSupportAdminRole: false,
-			isCommercialLineRole: false,
-			hasEligibilityAccess: false,
-			hasInsertInitialParticipationScoreInProcessAccess: false,
-			hasOptOutSuspensionAccess: false,
-			hasPolicyMergeAccess: false,
-			hasResetEnrollmentAccess: false,
-			hasStopShipmentAccess: false,
-			hasUpdatePProGuidAccess: false,
-			hasVehicleSupportAccess: false,
-			isInMobileRegistrationAdminRole: false,
-			isInTheftOnlyRole: false,
-			isInTheftRole: false,
-			isInFeeReversalOnlyRole: false,
-			isInFeeReversalRole: false,
-			isInAppChangeRole: false,
 			lanId: "",
 			name: "",
 			isLabsAdmin: false,

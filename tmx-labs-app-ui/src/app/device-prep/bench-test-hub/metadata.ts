@@ -8,5 +8,5 @@ export const metadata: ApplicationGroupMetadata = {
     description: 'Start, track, and complete benchtesting all in one place',
     faIcon: faMicrochip,
     isReady: true,
-    access: ['isLabsUser'],
+    access: ['isLabsAdmin'],
 };
