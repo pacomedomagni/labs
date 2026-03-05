@@ -31,6 +31,12 @@ namespace Progressive.Telematics.Labs.Services.Database
         /// <returns>Count of processed orders</returns>
         Task<int> ProcessedOrderCount();
 
+        /// <summary>
+        /// Get fulfillment orders by status codes (cross-database query to LabsMyScore + LabsHomebase)
+        /// </summary>
+        /// <param name="statusCodes">Status codes to filter by (e.g. 1,2 for pending; 3 for completed)</param>
+        Task<IEnumerable<FulfillmentOrderDataModel>> GetFulfillmentOrdersByStatus(int[] statusCodes);
+
     }
 
     public class DeviceOrderDAL : DbContext, IDeviceOrderDAL
@@ -86,6 +92,16 @@ namespace Progressive.Telematics.Labs.Services.Database
             var parms = new DynamicParameters();
 
             return await ExecuteScalarAsync<int>(storedProc, parms);
+        }
+
+        public async Task<IEnumerable<FulfillmentOrderDataModel>> GetFulfillmentOrdersByStatus(int[] statusCodes)
+        {
+            const string storedProc = "dbo.usp_FulfillmentOrder_SelectByStatus";
+
+            var parms = new DynamicParameters()
+                .Parameter("@Parm_StatusCodes", string.Join(",", statusCodes));
+
+            return await ExecuteStoredProcedureAsync<FulfillmentOrderDataModel>(storedProc, parms);
         }
 
         private static DataTable CreateDetailTable(CreateReplacementDeviceOrderModel model)

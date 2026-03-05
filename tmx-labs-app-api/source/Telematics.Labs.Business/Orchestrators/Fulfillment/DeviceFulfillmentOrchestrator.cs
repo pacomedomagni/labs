@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kerberos.NET.Entities;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ using Progressive.Telematics.Labs.Business.Resources.Resources.Device;
 using Progressive.Telematics.Labs.Business.Resources.Resources.FulFillment;
 using Progressive.Telematics.Labs.Services;
 using Progressive.Telematics.Labs.Services.Database;
+using Progressive.Telematics.Labs.Services.Database.Models.DeviceOrder;
 using Progressive.Telematics.Labs.Services.Wcf;
 using Progressive.Telematics.Labs.Shared;
 using Progressive.Telematics.Labs.Shared.Attributes;
@@ -240,17 +242,40 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
     {
         try
         {
-            // Fetch pending orders for both statuses by reusing GetOrdersByStatusCommand
-            var newOrderList = new OrdersList { DeviceOrderStatusCode = 1 };
-            var assignedOrderList = new OrdersList { DeviceOrderStatusCode = 2 };
+            var dbOrders = (await _deviceOrderDAL.GetFulfillmentOrdersByStatus(new[] { 1, 2 })).ToList();
+            if (dbOrders.Count == 0)
+            {
+                return new OrdersList
+                {
+                    NumberOfOrders = 0,
+                    NumberOfDevices = 0,
+                    DeviceOrders = new List<Resources.Resources.FulFillment.DeviceOrder>()
+                };
+            }
 
-            newOrderList = await GetOrdersByStatusCommand(newOrderList);
-            assignedOrderList = await GetOrdersByStatusCommand(assignedOrderList);
+            var userLookup = await GetUsersByExternalKeysAsync(
+                dbOrders.Select(o => o.ParticipantGroupExternalKey));
 
-            var allOrders = newOrderList.DeviceOrders
-                .Concat(assignedOrderList.DeviceOrders)
-                .OrderBy(o => o.OrderDate)
-                .ToList();
+            var allOrders = dbOrders.Select(o =>
+            {
+                var state = userLookup.TryGetValue(o.ParticipantGroupExternalKey, out var user)
+                    ? (user.State ?? "").Trim()
+                    : "";
+
+                return new Resources.Resources.FulFillment.DeviceOrder
+                {
+                    DeviceOrderSeqID = o.DeviceOrderSeqID,
+                    OrderNumber = o.DeviceOrderSeqID.ToString(),
+                    OrderDate = o.CreateDateTime,
+                    State = state,
+                    NbrDevicesNeeded = o.DeviceDetailCount,
+                    DeviceType = ExtractDeviceType(o.XirgoVersionDescriptions),
+                    SnapshotVersion = ResolveSnapshotVersion(o.SnapshotVersionCode),
+                    DeviceOrderStatusDescription = o.StatusDescription
+                };
+            })
+            .OrderBy(o => o.OrderDate)
+            .ToList();
 
             return new OrdersList
             {
@@ -352,22 +377,56 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
     {
         try
         {
-            const int completedStatus = 3;
-
-            var summaries = await GetSummariesByStatusAsync(completedStatus);
-            if (summaries.Length == 0)
+            var dbOrders = (await _deviceOrderDAL.GetFulfillmentOrdersByStatus(new[] { 3 })).ToList();
+            if (dbOrders.Count == 0)
             {
-                return CreateEmptyCompletedOrdersList();
+                return new CompletedOrdersList
+                {
+                    Orders = new List<CompletedDeviceOrder>(),
+                    TotalCount = 0,
+                    ProcessedByUsers = new List<ProcessedByUser>()
+                };
             }
 
             var userLookup = await GetUsersByExternalKeysAsync(
-                summaries.Select(s => s.ParticipantGroupExternalKey));
+                dbOrders.Select(o => o.ParticipantGroupExternalKey));
 
-            var detailLookup = await GetDetailLookupByStatusAsync(completedStatus);
-            var processedByLookup = await BuildProcessedByLookupAsync(detailLookup.Values);
+            var processedByLookup = await BuildProcessedByLookupAsync(
+                dbOrders.Select(o => o.FulfilledByUserID));
 
-            var orders = BuildCompletedOrders(summaries, userLookup, detailLookup, processedByLookup);
-            var processedByUsers = BuildProcessedByUsers(processedByLookup);
+            var orders = dbOrders.Select(o =>
+            {
+                var state = userLookup.TryGetValue(o.ParticipantGroupExternalKey, out var user)
+                    ? (user.State ?? "").Trim()
+                    : "";
+
+                var processedByUserID = o.FulfilledByUserID ?? "";
+                var processedBy = processedByLookup.TryGetValue(processedByUserID, out var displayName)
+                    ? displayName
+                    : processedByUserID;
+
+                var deviceSerialNumbers = string.IsNullOrEmpty(o.DeviceSerialNumbers)
+                    ? new List<string>()
+                    : o.DeviceSerialNumbers.Split(',').Where(s => !string.IsNullOrEmpty(s)).ToList();
+
+                return new CompletedDeviceOrder
+                {
+                    DeviceOrderSeqID = o.DeviceOrderSeqID,
+                    OrderNumber = o.DeviceOrderSeqID.ToString(),
+                    ProcessedDateTime = o.ProcessedDateTime,
+                    ShipDateTime = o.ShipDateTime,
+                    ProcessedBy = processedBy,
+                    ProcessedByUserID = processedByUserID,
+                    State = state,
+                    DeviceCount = o.DeviceDetailCount,
+                    DeviceSerialNumbers = deviceSerialNumbers
+                };
+            }).ToList();
+
+            var processedByUsers = processedByLookup
+                .Select(kvp => new ProcessedByUser { UserID = kvp.Key, DisplayName = kvp.Value })
+                .OrderBy(u => u.DisplayName)
+                .ToList();
 
             return new CompletedOrdersList
             {
@@ -382,29 +441,6 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
                 "Failed to get completed orders.");
             throw;
         }
-    }
-
-    private async Task<DeviceOrderSummary[]> GetSummariesByStatusAsync(int status)
-    {
-        var summaryRequest = new GetDeviceOrderSummaryByStatusRequest { DeviceOrderStatusCode = status };
-        var summaryResponse = await _wCFDeviceOrderSummaryService.GetByStatus(summaryRequest);
-
-        if (summaryResponse.ResponseStatus != WCFDeviceOrderSummaryService.ResponseStatus.Success)
-        {
-            throw new ApplicationException("Failure on DeviceOrderSummaryService GetByStatus for completed orders.");
-        }
-
-        return summaryResponse.DeviceOrderSummaryList ?? Array.Empty<DeviceOrderSummary>();
-    }
-
-    private static CompletedOrdersList CreateEmptyCompletedOrdersList()
-    {
-        return new CompletedOrdersList
-        {
-            Orders = new List<CompletedDeviceOrder>(),
-            TotalCount = 0,
-            ProcessedByUsers = new List<ProcessedByUser>()
-        };
     }
 
     private async Task<Dictionary<string, WcfUserManagementService.User>> GetUsersByExternalKeysAsync(IEnumerable<string> keys)
@@ -424,25 +460,9 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
         return new Dictionary<string, WcfUserManagementService.User>();
     }
 
-    private async Task<Dictionary<int, WCFBusinessDeviceOrderService.BusinessDeviceOrder>> GetDetailLookupByStatusAsync(int status)
+    private async Task<Dictionary<string, string>> BuildProcessedByLookupAsync(IEnumerable<string> fulfilledByUserIds)
     {
-        var detailResponse = await _wCFBusinessDeviceOrderService.GetBusinessDeviceOrderByOrderStatus(
-            new GetBusinessDeviceOrderByOrderStatusRequest { OrderStatus = status });
-
-        if (detailResponse.ResponseStatus != WCFBusinessDeviceOrderService.ResponseStatus.Success)
-        {
-            return new Dictionary<int, WCFBusinessDeviceOrderService.BusinessDeviceOrder>();
-        }
-
-        return detailResponse.BusinessDeviceOrderList
-            .ToDictionary(b => b.DeviceOrder.DeviceOrderSeqID);
-    }
-
-    private async Task<Dictionary<string, string>> BuildProcessedByLookupAsync(
-        IEnumerable<WCFBusinessDeviceOrderService.BusinessDeviceOrder> details)
-    {
-        var userIds = details
-            .Select(d => d.DeviceOrder.FulfilledByUserID)
+        var userIds = fulfilledByUserIds
             .Where(id => !string.IsNullOrEmpty(id))
             .Distinct()
             .ToList();
@@ -475,55 +495,53 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
         return userId;
     }
 
-    private static List<CompletedDeviceOrder> BuildCompletedOrders(
-        IEnumerable<DeviceOrderSummary> summaries,
-        IReadOnlyDictionary<string, WcfUserManagementService.User> userLookup,
-        IReadOnlyDictionary<int, WCFBusinessDeviceOrderService.BusinessDeviceOrder> detailLookup,
-        IReadOnlyDictionary<string, string> processedByLookup)
+    /// <summary>
+    /// Extracts device type letters from XirgoVersion descriptions.
+    /// Each description is like "Wireless W", "Wireless X (Ocarina WX...)", etc.
+    /// Extracts the first capital letter after "Wireless " and groups with counts.
+    /// Returns e.g. "J(2), X(1)"
+    /// </summary>
+    private static string ExtractDeviceType(string xirgoVersionDescriptions)
     {
-        return summaries.Select(summary =>
+        if (string.IsNullOrEmpty(xirgoVersionDescriptions))
+            return "";
+
+        var descriptions = xirgoVersionDescriptions.Split(',');
+        var letters = new List<string>();
+
+        foreach (var desc in descriptions)
         {
-            detailLookup.TryGetValue(summary.DeviceOrderSeqID, out var detail);
-
-            var state = userLookup.TryGetValue(summary.ParticipantGroupExternalKey, out var user)
-                ? (user.State ?? "").Trim()
-                : "";
-
-            var processedByUserID = detail?.DeviceOrder.FulfilledByUserID ?? "";
-            var processedBy = processedByLookup.TryGetValue(processedByUserID, out var displayName)
-                ? displayName
-                : processedByUserID;
-
-            var deviceSerialNumbers = detail?.DeviceOrderDetails
-                .Where(d => !string.IsNullOrEmpty(d.DeviceSerialNbr))
-                .Select(d => d.DeviceSerialNbr)
-                .ToList() ?? new List<string>();
-
-            return new CompletedDeviceOrder
+            var trimmed = desc.Trim();
+            var match = Regex.Match(trimmed, @"Wireless\s+([A-Z])");
+            if (match.Success)
             {
-                DeviceOrderSeqID = summary.DeviceOrderSeqID,
-                OrderNumber = summary.DeviceOrderSeqID.ToString(),
-                ProcessedDateTime = detail?.DeviceOrder.ProcessedDateTime,
-                ShipDateTime = detail?.DeviceOrder.ShipDateTime,
-                ProcessedBy = processedBy,
-                ProcessedByUserID = processedByUserID,
-                State = state,
-                DeviceCount = summary.DeviceOrderDetailCount,
-                DeviceSerialNumbers = deviceSerialNumbers
-            };
-        }).ToList();
+                letters.Add(match.Groups[1].Value);
+            }
+        }
+
+        if (letters.Count == 0)
+            return "";
+
+        return string.Join(", ", letters
+            .GroupBy(l => l)
+            .OrderBy(g => g.Key)
+            .Select(g => $"{g.Key}({g.Count()})"));
     }
 
-    private static List<ProcessedByUser> BuildProcessedByUsers(IReadOnlyDictionary<string, string> processedByLookup)
+    /// <summary>
+    /// Converts SnapshotVersionCode from the stored proc to a display string using SnapshotVersionMap.
+    /// </summary>
+    private static string ResolveSnapshotVersion(string snapshotVersionCode)
     {
-        return processedByLookup
-            .Select(kvp => new ProcessedByUser
-            {
-                UserID = kvp.Key,
-                DisplayName = kvp.Value
-            })
-            .OrderBy(u => u.DisplayName)
-            .ToList();
+        if (string.IsNullOrEmpty(snapshotVersionCode))
+            return "";
+
+        if (int.TryParse(snapshotVersionCode, out var code))
+        {
+            return SnapshotVersionMap.GetDescription(code) ?? "";
+        }
+
+        return "";
     }
 
 }
