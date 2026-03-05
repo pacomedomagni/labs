@@ -37,9 +37,9 @@ BEGIN
         ON do.ParticipantGroupSeqID = pg.ParticipantGroupSeqID
     LEFT JOIN dbo.DeviceOrderDetail dod
         ON do.DeviceOrderSeqID = dod.DeviceOrderSeqID
-    LEFT JOIN [LabsHomebase].dbo.XirgoDevice xd
+    LEFT JOIN [ubilabshomebase].dbo.XirgoDevice xd
         ON dod.DeviceSeqID = xd.DeviceSeqID
-    LEFT JOIN [LabsHomebase].dbo.XirgoVersion xv
+    LEFT JOIN [ubilabshomebase].dbo.XirgoVersion xv
         ON xd.VersionCode = xv.Code
     LEFT JOIN dbo.Participant p
         ON dod.ParticipantSeqID = p.ParticipantSeqID
