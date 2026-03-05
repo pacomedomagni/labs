@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, effect, inject, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, computed, effect, inject, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCard } from '@angular/material/card';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -19,7 +19,7 @@ import { NotificationBannerService } from 'src/app/shared/notifications/notifica
     templateUrl: './device-details.component.html',
     styleUrl: './device-details.component.scss',
 })
-export class DeviceDetailsComponent implements AfterViewInit {
+export class DeviceDetailsComponent implements AfterViewInit, OnDestroy {
     private readonly deviceDetailsState = inject(DeviceDetailsStateService);
     private readonly deviceLotState = inject(DeviceLotStateService);
     private readonly deviceService = inject(DeviceService);
@@ -85,5 +85,9 @@ export class DeviceDetailsComponent implements AfterViewInit {
                 this.notificationService.success('Deactivate Device Successful');
             }
         });
+    }
+
+    ngOnDestroy(): void {
+        this.deviceLotState.clearDeviceLot();
     }
 }

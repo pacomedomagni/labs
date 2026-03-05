@@ -47,8 +47,9 @@ export class LotBenchtestProgressComponent implements OnInit {
         this.calculationService.calculateRequiredCount(this.requiredPercentage(), this.lotSize()),
     );
 
-    readonly percentTested = computed(() =>
-        this.calculationService.calculatePercentTested(this.testedDevicesCount(), this.lotSize()),
+    /** Percentage of devices tested with a successful result against the required number of devices*/
+    readonly successPercent = computed(() =>
+        this.calculationService.calculateSuccessPercent(this.successCount(), this.requiredCount()),
     );
 
     readonly canVerify = computed(
@@ -57,7 +58,7 @@ export class LotBenchtestProgressComponent implements OnInit {
             !this.isVerifying() &&
             !this.isLoadingLots() &&
             !this.isLoadingLotSize() &&
-            this.percentTested() >= this.requiredPercentage(),
+            this.successPercent() >= 100,
     );
 
     readonly devicesInLot = signal<string[]>([]);
@@ -168,19 +169,15 @@ export class LotBenchtestProgressComponent implements OnInit {
             .verifyBenchTest(request)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
-                next: (response) => {
-                    const message = `Bench test verified successfully! Total: ${response.totalDevices}, Successful: ${response.successfulUpdates}, Failed: ${response.failedUpdates}`;
+                next: () => {
+                    const message = `Benchtest complete. Total: ${this.testedDevicesCount()}, Successful: ${this.successCount()}, Failed: ${this.testedDevicesCount() - this.successCount()}`;
                     this.notificationService.success(message);
 
                     // Reload the device lots list
                     this.loadDeviceLots();
 
-                    // Reload the current lot data to refresh the counts
-                    const currentLot = this.selectedLot();
-                    if (currentLot?.lotSeqID && currentLot?.type !== undefined) {
-                        this.loadLotSize(currentLot.lotSeqID, currentLot.type);
-                    }
-
+                    this.selectedLotId.set(null);
+                    this.resetLotData();
                     this.isVerifying.set(false);
                 },
                 error: (error) => {

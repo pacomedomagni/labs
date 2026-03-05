@@ -36,7 +36,7 @@
   <!-- Progress Bar -->
   <div class="grid grid-cols-[1fr_auto] gap-4 items-center mb-8">
     <div class="w-full bg-gray-300 rounded-full h-8">
-      <div class="bg-blue-600 h-8 rounded-full" [style.width.%]="percentTested() > 100 ? 100 : percentTested()"></div>
+      <div class="bg-blue-600 h-8 rounded-full" [style.width.%]="successPercent() > 100 ? 100 : successPercent()"></div>
     </div>
     <div class="text-xl text-gray-600 whitespace-nowrap">{{ successCount() }} / {{ requiredCount() }} devices tested</div>
   </div>

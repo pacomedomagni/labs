@@ -11,7 +11,7 @@ export const metadata: ApplicationGroupMetadata = {
     description: 'Activate, deactivate, or update location for a single device or an entire lot',
     faIcon: faClipboardList,
     isReady: true,
-    access: ['isLabsAdmin'],
+    access: ['isLabsUser'],
 };
 
 export const applicationGroups: ApplicationGroupMetadata[] = [

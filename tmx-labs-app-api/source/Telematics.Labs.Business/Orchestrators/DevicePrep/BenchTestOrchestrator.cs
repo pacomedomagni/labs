@@ -44,6 +44,8 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
         private readonly IBenchTestService _benchTestService;
         private readonly IXirgoDeviceService _xirgoDeviceService;
         private readonly IDeviceActivityService _deviceActivityService;
+        private readonly IDeviceActivityDAL _deviceActivityDAL;
+        private readonly IXirgoDeviceDAL _xirgoDeviceDAL;
         private readonly ILogger<BenchTestOrchestrator> _logger;
 
         public BenchTestOrchestrator(
@@ -52,6 +54,8 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
             IBenchTestService benchTestService,
             IXirgoDeviceService xirgoDeviceService,
             IDeviceActivityService deviceActivityService,
+            IDeviceActivityDAL deviceActivityDAL,
+            IXirgoDeviceDAL xirgoDeviceDAL,
             ILogger<BenchTestOrchestrator> logger)
         {
             _benchTestBoardService = benchTestBoardService;
@@ -59,6 +63,8 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
             _benchTestService = benchTestService;
             _xirgoDeviceService = xirgoDeviceService;
             _deviceActivityService = deviceActivityService;
+            _deviceActivityDAL = deviceActivityDAL;
+            _xirgoDeviceDAL = xirgoDeviceDAL;
             _logger = logger;
         }
 
@@ -348,57 +354,68 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
             response.TotalDevices = wcfResponse.Devices.Length;
             var results = new List<DeviceUpdateResult>();
 
-            // Loop through each device and update
-            foreach (var device in wcfResponse.Devices)
+            // Filter devices eligible for update (ProgramCode is null)
+            var eligibleDevices = wcfResponse.Devices
+                .Where(d => d.ProgramCode == null && d.DeviceSeqID.HasValue)
+                .ToList();
+
+            var ineligibleDevices = wcfResponse.Devices
+                .Where(d => d.ProgramCode != null || !d.DeviceSeqID.HasValue)
+                .ToList();
+
+            // Add results for ineligible devices
+            foreach (var device in ineligibleDevices)
             {
-                var result = new DeviceUpdateResult
+                results.Add(new DeviceUpdateResult
                 {
                     DeviceSerialNumber = device.DeviceSerialNumber,
-                    Success = false
-                };
+                    Success = false,
+                    ErrorMessage = "Device has ProgramCode assigned or missing DeviceSeqID"
+                });
+                response.FailedUpdates++;
+            }
 
-                if (device.ProgramCode == null)
+            if (eligibleDevices.Count > 0)
+            {
+                // Prepare bulk update data
+                var deviceUpdates = eligibleDevices.Select(d => new XirgoDeviceBulkUpdateModel
                 {
-                    var updateRequest = new UpdateDeviceRequest();
+                    DeviceSeqID = d.DeviceSeqID!.Value,
+                    IsCommunicationAllowed = true,
+                    StatusCode = TMXDeviceStatus.Available,
+                    ReportedVIN = " ",
+                    WTFStateInfo = " ",
+                    ReportedProtocolCode = 0,
+                    LastRemoteResetDateTime = new DateTime(1970, 1, 1)
+                }).ToList();
 
-                    updateRequest.Device = new XirgoDevice
-                    {
-                        DeviceSeqID = device.DeviceSeqID,
-                        IsCommunicationAllowed = true,
-                        StatusCode = TMXDeviceStatus.Available,
-                        ReportedVIN = " ",
-                        WTFStateInfo = " ",
-                        ReportedProtocolCode = 0,
-                        LastRemoteResetDateTime = new DateTime(1970, 1, 1)
-                    };
-
-                    var updateResponse = await _xirgoDeviceService.UpdateAsync(updateRequest);
-
-                    if (updateResponse.ResponseStatus == WcfXirgoService.ResponseStatus.Success)
-                    {
-                        result.Success = true;
-                        response.SuccessfulUpdates++;
-
-                        // Log device activity
-                        await _deviceActivityService.AddDeviceActivity(
-                            device.DeviceSeqID.Value,
-                            $"Bench test verification: Status={device.StatusCode.Value}, Location={device.LocationCode.Value}"
-                        );
-                    }
-                    else
-                    {
-                        result.ErrorMessage = string.Join("; ",
-                            updateResponse.ResponseErrors?.Select(e => e.Message) ?? new[] { "Update failed" });
-                        response.FailedUpdates++;
-                    }
-                }
-                else
+                // Prepare bulk activity log data
+                var activityLogs = eligibleDevices.Select(d => new DeviceActivityBulkInsertModel
                 {
-                    result.ErrorMessage = "Missing required device information (DeviceSeqID, StatusCode, or LocationCode)";
-                    response.FailedUpdates++;
+                    DeviceSeqID = d.DeviceSeqID!.Value,
+                    Description = $"Bench test verification: Status={d.StatusCode}, Location={d.LocationCode}"
+                }).ToList();
+
+                // Execute bulk update (single DB call instead of N calls)
+                var updatedCount = await _xirgoDeviceDAL.BulkUpdateXirgoDevices(deviceUpdates);
+
+                // Execute bulk activity insert (single DB call instead of N calls)
+                await _deviceActivityDAL.BulkInsertDeviceActivities(activityLogs);
+
+                // Mark all eligible devices as successful
+                foreach (var device in eligibleDevices)
+                {
+                    results.Add(new DeviceUpdateResult
+                    {
+                        DeviceSerialNumber = device.DeviceSerialNumber,
+                        Success = true
+                    });
+                    response.SuccessfulUpdates++;
                 }
 
-                results.Add(result);
+                _logger.LogInformation("Bulk updated {UpdatedCount} devices and logged {ActivityCount} activities",
+                    updatedCount, activityLogs.Count);
+                
             }
 
             response.Results = results.ToArray();

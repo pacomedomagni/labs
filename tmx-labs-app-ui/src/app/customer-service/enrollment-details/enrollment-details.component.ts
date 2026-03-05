@@ -16,6 +16,7 @@ import { ParticipantDetailsComponent } from './participant-details/participant-d
 })
 export class EnrollmentDetailsComponent {
   private liveAnnouncer = inject(LiveAnnouncer);
+  private hasAnnounced = false;
 
   details: InputSignal<EnrollmentDetails | null> = input<EnrollmentDetails | null>(null);
 
@@ -25,7 +26,8 @@ export class EnrollmentDetailsComponent {
     // Watch for details changes and announce
     effect(() => {
       const detail = this.details();
-      if (detail) {
+      if (detail && !this.hasAnnounced) {
+        this.hasAnnounced = true;
         this.liveAnnouncer.announce(
           `Viewing enrollment details for ${detail.customer.user.firstName} ${detail.customer.user.lastName}`,
           'assertive'

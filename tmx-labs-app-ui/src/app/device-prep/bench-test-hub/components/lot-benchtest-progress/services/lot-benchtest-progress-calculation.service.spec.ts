@@ -102,47 +102,47 @@ describe('LotBenchtestProgressCalculationService', () => {
 
     describe('calculatePercentTested', () => {
         it('should calculate correct percentage', () => {
-            const result = service.calculatePercentTested(50, 100);
+            const result = service.calculateSuccessPercent(50, 100);
             expect(result).toBe(50);
         });
 
         it('should round percentage to nearest integer', () => {
-            const result = service.calculatePercentTested(33, 100);
+            const result = service.calculateSuccessPercent(33, 100);
             expect(result).toBe(33);
         });
 
         it('should round 0.5 up', () => {
-            const result = service.calculatePercentTested(5, 10);
+            const result = service.calculateSuccessPercent(5, 10);
             expect(result).toBe(50);
         });
 
         it('should handle 0 lot size and return 0', () => {
-            const result = service.calculatePercentTested(10, 0);
+            const result = service.calculateSuccessPercent(10, 0);
             expect(result).toBe(0);
         });
 
         it('should handle 0 tested count', () => {
-            const result = service.calculatePercentTested(0, 100);
+            const result = service.calculateSuccessPercent(0, 100);
             expect(result).toBe(0);
         });
 
         it('should handle 100% tested', () => {
-            const result = service.calculatePercentTested(100, 100);
+            const result = service.calculateSuccessPercent(100, 100);
             expect(result).toBe(100);
         });
 
         it('should handle fractional percentages correctly', () => {
-            const result = service.calculatePercentTested(1, 3);
+            const result = service.calculateSuccessPercent(1, 3);
             expect(result).toBe(33); // 33.33... rounds to 33
         });
 
         it('should round fractional percentages correctly', () => {
-            const result = service.calculatePercentTested(2, 3);
+            const result = service.calculateSuccessPercent(2, 3);
             expect(result).toBe(67); // 66.66... rounds to 67
         });
 
         it('should handle very small percentages', () => {
-            const result = service.calculatePercentTested(1, 1000);
+            const result = service.calculateSuccessPercent(1, 1000);
             expect(result).toBe(0); // 0.1% rounds to 0
         });
     });

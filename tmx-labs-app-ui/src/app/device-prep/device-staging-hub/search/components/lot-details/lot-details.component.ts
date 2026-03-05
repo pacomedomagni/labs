@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCard } from '@angular/material/card';
 import { FallbackValuePipe } from 'src/app/shared/pipes/fallback-value.pipe';
@@ -23,7 +23,7 @@ enum ActionItems {
     templateUrl: './lot-details.component.html',
     styleUrls: ['./lot-details.component.scss'],
 })
-export class LotDetailsComponent {
+export class LotDetailsComponent implements OnDestroy {
     private readonly deviceLotState = inject(DeviceLotStateService);
     private readonly deviceDetailsState = inject(DeviceDetailsStateService);
     private readonly destroyRef = inject(DestroyRef);
@@ -55,10 +55,12 @@ export class LotDetailsComponent {
             }));
         }
         
-        actions.push(MenuButtonGroupFactory.createButton({
-            id: ActionItems.UpdateLotStatus,
-            label: 'Update Lot Status',
-        }));
+        if(this.deviceLotState.isShippedToDistributorStatus()){
+            actions.push(MenuButtonGroupFactory.createButton({
+                id: ActionItems.UpdateLotStatus,
+                label: 'Update Lot Status',
+            }));
+        }
         
         return actions;
     });
@@ -89,6 +91,10 @@ export class LotDetailsComponent {
             default:
                 console.warn('Unknown action:', $event.id);
         }
+    }
+
+    ngOnDestroy(): void {
+        this.deviceLotState.clearDeviceLot();
     }
 
 }

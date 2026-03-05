@@ -20,8 +20,7 @@ export class LotBenchtestProgressCalculationService {
     calculateDeviceCounts(devices: BenchTestBoardDeviceStatus[] | DeviceDetails[]): DeviceCountResult {
         let successCount = 0;
         let testedCount = 0;
-
-        devices.forEach((device) => {
+        devices.forEach((device: BenchTestBoardDeviceStatus | DeviceDetails) => {
             if (device.benchTestStatusCode === BenchTestDeviceStatus.Completed) {
                 successCount++;
                 testedCount++;
@@ -32,18 +31,17 @@ export class LotBenchtestProgressCalculationService {
                 testedCount++;
             }
         });
-
         return { successCount, testedCount };
     }
 
     /**
-     * Calculates the percentage of devices tested
-     * @param testedCount - Number of devices tested
-     * @param lotSize - Total number of devices in the lot
-     * @returns Percentage tested, rounded to nearest integer
+     * Calculates the percentage of devices tested against the required count
+     * @param testedCount - Number of devices successfully tested
+     * @param requiredCount - Total number of devices in the lot
+     * @returns Percentage tested, rounded to nearest integer (ceiling)
      */
-    calculatePercentTested(testedCount: number, lotSize: number): number {
-        return lotSize > 0 ? Math.round((testedCount / lotSize) * 100) : 0;
+    calculateSuccessPercent(testedCount: number, requiredCount: number): number {
+        return requiredCount > 0 ? Math.round((testedCount / requiredCount) * 100) : 0;
     }
 
     /**

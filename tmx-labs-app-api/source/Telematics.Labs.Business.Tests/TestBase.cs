@@ -35,6 +35,8 @@ namespace Progressive.Telematics.Labs.Business.Tests
         public Mock<Progressive.Telematics.Labs.Services.Database.ILotManagementDAL> LotManagement { get; set; }
         public Mock<Progressive.Telematics.Labs.Services.Database.IBenchTestBoardDAL> BenchTestBoardDAL { get; set; }
         public Mock<Progressive.Telematics.Labs.Services.Database.IConfigValuesDAL> ConfigValues { get; set; }
+        public Mock<Progressive.Telematics.Labs.Services.Database.IDeviceActivityDAL> DeviceActivityDAL { get; set; }
+        public Mock<Progressive.Telematics.Labs.Services.Database.IXirgoDeviceDAL> XirgoDeviceDAL { get; set; }
     }
 
     public abstract class TestBase<T, T2>
@@ -79,7 +81,9 @@ namespace Progressive.Telematics.Labs.Business.Tests
             {
                 LotManagement = new Mock<Progressive.Telematics.Labs.Services.Database.ILotManagementDAL>(),
                 BenchTestBoardDAL = new Mock<Progressive.Telematics.Labs.Services.Database.IBenchTestBoardDAL>(),
-                ConfigValues = new Mock<Progressive.Telematics.Labs.Services.Database.IConfigValuesDAL>()
+                ConfigValues = new Mock<Progressive.Telematics.Labs.Services.Database.IConfigValuesDAL>(),
+                DeviceActivityDAL = new Mock<Progressive.Telematics.Labs.Services.Database.IDeviceActivityDAL>(),
+                XirgoDeviceDAL = new Mock<Progressive.Telematics.Labs.Services.Database.IXirgoDeviceDAL>()
             };
         }
 

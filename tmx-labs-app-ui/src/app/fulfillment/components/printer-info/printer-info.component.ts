@@ -1,5 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogService } from '../../../shared/services/dialogs/primary/dialog.service';
 import { LabelPrinterService } from '../../../shared/services/api/labelprinter/labelprinter.service';
 import { SetPrinterFormComponent, PrinterFormModel } from './set-printer-dialog/set-printer-form.component';
@@ -14,9 +15,11 @@ import { SetPrinterFormComponent, PrinterFormModel } from './set-printer-dialog/
 export class PrinterInfoComponent implements OnInit {
   private dialogService = inject(DialogService);
   private labelPrinterService = inject(LabelPrinterService);
-  private readonly PRINTER_COOKIE_NAME = 'defaultPrinterName';
+  private destroyRef = inject(DestroyRef);
+  private readonly PRINTER_STORAGE_KEY = 'defaultPrinterName';
+  private readonly NO_PRINTER_SELECTED = 'NONE';
   
-  printerName = signal<string>('NONE');
+  printerName = signal<string>(this.NO_PRINTER_SELECTED);
   workstationId = signal<string>('');
   availablePrinters = signal<string[]>([]);
 
@@ -26,77 +29,55 @@ export class PrinterInfoComponent implements OnInit {
   }
 
   private loadSavedPrinter(): void {
-    const savedPrinter = this.getCookie(this.PRINTER_COOKIE_NAME);
+    const savedPrinter = localStorage.getItem(this.PRINTER_STORAGE_KEY);
     if (savedPrinter) {
       this.printerName.set(savedPrinter);
     }
   }
 
-  private getCookie(name: string): string | null {
-    const nameEQ = name + '=';
-    const cookies = document.cookie.split(';');
-    for (const cookie of cookies) {
-      let trimmedCookie = cookie;
-      while (trimmedCookie.charAt(0) === ' ') {
-        trimmedCookie = trimmedCookie.substring(1, trimmedCookie.length);
-      }
-      if (trimmedCookie.indexOf(nameEQ) === 0) {
-        return trimmedCookie.substring(nameEQ.length, trimmedCookie.length);
-      }
-    }
-    return null;
-  }
-
-  private setCookie(name: string, value: string, days: number): void {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    const expires = 'expires=' + date.toUTCString();
-    document.cookie = name + '=' + value + ';' + expires + ';path=/';
-  }
-
-  private deleteCookie(name: string): void {
-    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
-  }
-
   private loadPrinterInfo(): void {
-    this.labelPrinterService.getLabelPrinters().subscribe({
-      next: (printers) => {
-        const printerNames = printers.map(p => p.PrinterName);
-        this.availablePrinters.set(printerNames);
+    this.labelPrinterService.getLabelPrinters()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (printers) => {
+          const printerNames = printers.map(p => p.PrinterName);
+          this.availablePrinters.set(printerNames);
 
-        // Validate saved printer against available printers
-        const savedPrinter = this.printerName();
-        if (savedPrinter !== 'NONE' && !printerNames.includes(savedPrinter)) {
-          // Printer from cookie is no longer available, clear it
-          this.deleteCookie(this.PRINTER_COOKIE_NAME);
-          this.printerName.set('NONE');
+          // Validate saved printer against available printers
+          const savedPrinter = this.printerName();
+          if (savedPrinter !== this.NO_PRINTER_SELECTED && !printerNames.includes(savedPrinter)) {
+            // Printer from storage is no longer available, clear it
+            localStorage.removeItem(this.PRINTER_STORAGE_KEY);
+            this.printerName.set(this.NO_PRINTER_SELECTED);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading printer info:', error);
         }
-
-
-      },
-      error: (error) => {
-        console.error('Error loading printer info:', error);
-      }
-    });
+      });
   }
 
   setDefaultPrinter() {
+    const currentPrinter = this.printerName() === this.NO_PRINTER_SELECTED ? '' : this.printerName();
+    
     const dialogRef = this.dialogService.openFormDialog<typeof SetPrinterFormComponent, PrinterFormModel>({
       title: 'Set Default Printer',
       component: SetPrinterFormComponent,
       confirmText: 'SAVE',
-      formModel: { selectedPrinter: this.printerName() } as PrinterFormModel,
+      formModel: { selectedPrinter: currentPrinter } as PrinterFormModel,
       componentData: {
-        selectedPrinter: this.printerName(),
+        selectedPrinter: currentPrinter,
         availablePrinters: this.availablePrinters()
       },
     });
 
-    dialogRef.afterClosed().subscribe((result: PrinterFormModel | undefined) => {
-      if (result && result.selectedPrinter) {
-        this.printerName.set(result.selectedPrinter);
-        this.setCookie(this.PRINTER_COOKIE_NAME, result.selectedPrinter, 1095); // 3 years = 1095 days
-      }
-    });
+    dialogRef.afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result: PrinterFormModel | undefined) => {
+        if (result && result.selectedPrinter) {
+          this.printerName.set(result.selectedPrinter);
+          localStorage.setItem(this.PRINTER_STORAGE_KEY, result.selectedPrinter);
+        }
+      });
   }
 }

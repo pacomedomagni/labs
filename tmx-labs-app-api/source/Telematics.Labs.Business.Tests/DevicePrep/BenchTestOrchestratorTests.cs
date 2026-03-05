@@ -22,6 +22,8 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
                 Services.BenchTest.Object,
                 Services.XirgoDevice.Object,
                 Services.DeviceActivity.Object,
+                Databases.DeviceActivityDAL.Object,
+                Databases.XirgoDeviceDAL.Object,
                 Logger.Object);
         }
 

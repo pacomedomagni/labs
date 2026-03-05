@@ -1,5 +1,5 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { DeviceLot } from 'src/app/shared/data/lot-management/resources';
+import { DeviceLot, DeviceLotStatus } from 'src/app/shared/data/lot-management/resources';
 
 @Injectable({
     providedIn: 'root',
@@ -13,6 +13,13 @@ export class DeviceLotStateService {
 
     // Computed signals
     readonly hasDeviceLot = computed(() => this._deviceLot() !== null);
+
+    readonly deviceLotStatus = computed(() => this._deviceLot()?.statusCode);
+
+    readonly isShippedToDistributorStatus = computed(() => {
+        const lotStatus = this.deviceLotStatus();
+        return lotStatus ? lotStatus === DeviceLotStatus.ShippedToDistributor : false;
+    });
 
     /**
      * Set the current device lot
