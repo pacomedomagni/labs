@@ -1,0 +1,58 @@
+@use '@angular/material';
+@use '../../../../../../styles/variables' as styles-variables;
+@use "base/variables";
+
+
+.tmx-sidenav {
+	box-shadow: none;
+	max-height: 100vh;
+	width: styles-variables.$sidenav-width;
+
+	&::ng-deep {
+		.mat-drawer-inner-container {
+			overflow: hidden;
+
+			&:hover {
+				overflow-y: auto;
+			}
+		}
+	}
+}
+
+.mat-mdc-list-base[dense] .tmx-sidenav-item {
+	&:hover {
+		background: 0;
+	}
+
+	&:last-of-type {
+		margin-bottom: .8rem;
+	}
+}
+
+.mat-mdc-list-base[dense] .mat-mdc-list-item {
+	font-size: 1.4rem;
+}
+
+.tmx-sidenav-link {
+	border-radius: variables.$border-radius;
+	padding: .4rem;
+
+
+	.external-link-icon {
+		font-size: 1.8rem;
+		height: 1.8rem;
+		line-height: 1.8rem;
+		position: absolute;
+		right: 1rem;
+		top: 1rem;
+		width: 1.8rem;
+	}
+
+	&.active {
+		font-weight: 500;
+	}
+}
+
+.mat-icon {
+	margin-right: .8rem;
+}

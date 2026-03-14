@@ -1,0 +1,67 @@
+<div class="flex p-xs pb-xxs">
+
+  <tmx-data-list class="mr-xxs" style="width: 35em;">
+    <tmx-data-list-row labelSpan="40" label="Program">{{ enums.programCode.description(model.programCode) }}</tmx-data-list-row>
+    <tmx-data-list-row labelSpan="40" label="Device Experience Type">{{ enums.deviceExperience.description(deviceExperience) }}</tmx-data-list-row>
+    <tmx-data-list-row labelSpan="40" label="Policy #">{{ model.policyNumber }}</tmx-data-list-row>
+    @if (isMobile) {
+      <tmx-data-list-row labelSpan="40" label="Mobile OS Name">{{ model.mobileOSName }}</tmx-data-list-row>
+    }
+    @if (isMobile) {
+      <tmx-data-list-row labelSpan="40" label="Mobile Device Model Name">{{ model.mobileDeviceModelName }}</tmx-data-list-row>
+    }
+    @if (isMobile) {
+      <tmx-data-list-row labelSpan="40" label="Mobile Device Id">{{ model.mobileDeviceId }}</tmx-data-list-row>
+    }
+    @if (!isMobile) {
+      <tmx-data-list-row labelSpan="40" label="Device Serial Number">{{ model.deviceSerialNumber }}</tmx-data-list-row>
+    }
+    @if (model.vehicleMake !== undefined) {
+      <tmx-data-list-row labelSpan="40" label="YMM">{{ model.vehicleModelYear + ' ' + model.vehicleMake + ' ' + model.vehicleModel }}</tmx-data-list-row>
+    }
+  </tmx-data-list>
+
+  <div class="ml-xxs" style="width: 100%;">
+    <mat-form-field appearance="outline" [hideRequiredMarker]="true" style="width: 100%;">
+      <mat-label>Compatibility Type</mat-label>
+      <mat-select id="tmx-comp-type" name="type" cuiMatSelectAccessibility [(ngModel)]="model.compatibilityTypeCode" required>
+        @for (reason of compatibilityReasons; track reason) {
+          <mat-option [value]="reason.code">{{ reason.description }}</mat-option>
+        }
+      </mat-select>
+      <mat-error>Compatibility Type is required</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full max-w-6xl" appearance="outline" [hideRequiredMarker]="true">
+      <mat-label>Details</mat-label>
+      <textarea
+        matInput
+        [(ngModel)]="model.detailedDescription"
+        cdkTextareaAutosize
+        #additionalNoteText
+        #autosize="cdkTextareaAutosize"
+        cdkAutosizeMinRows="3"
+        cdkAutosizeMaxRows="20"
+        maxlength="2000"
+        required
+      ></textarea>
+      <mat-error>Please enter details</mat-error>
+      <mat-hint id="exampleTextareaHint" align="end">
+        <div>{{additionalNoteText.value?.length || 0}}/2000 maximum characters</div>
+      </mat-hint>
+    </mat-form-field>
+
+    <mat-label><b>Action Taken</b></mat-label>
+    <ul>
+      @for (action of compatibilityActions; track action) {
+        <li>
+          <mat-checkbox [value]="action.code" [checked]="isSelected(action.code)"
+          (change)="updateSelectedActions(action.code)">{{ action.description }}</mat-checkbox>
+        </li>
+      }
+    </ul>
+
+    <mat-checkbox [checked]="model.nonIssueFlag" (change)="model.nonIssueFlag = $event.checked">Non-Issue, No Action Taken</mat-checkbox>
+
+  </div>
+</div>

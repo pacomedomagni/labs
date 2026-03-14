@@ -1,0 +1,47 @@
+<mat-card appearance="outlined" class="w-2/3 mx-auto">
+  <div class="flex flex-wrap justify-center">
+    <mat-form-field appearance="outline">
+      <mat-label>State</mat-label>
+      <mat-select id="tmx-elig-zip-state" name="type" cuiMatSelectAccessibility [(ngModel)]="model.state">
+        <mat-option>None</mat-option>
+        @for (state of states; track state) {
+          <mat-option [value]="state">{{ state.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="ml-xs">
+      <mat-label>Zip Code</mat-label>
+      <input id="tmx-elig-zip-code" type="text" matInput cuiNumbersOnly maxlength="5" minlength="5" [(ngModel)]="model.zipCode">
+      <mat-error>Zip Code must be 5 digits</mat-error>
+    </mat-form-field>
+
+    <span>
+      <button mat-flat-button color="primary" class="ml-xs header-search-button" (click)="search(model)" [disabled]="shouldDisableSearch()">Search</button>
+    </span>
+  </div>
+</mat-card>
+
+<div class="pt-xxs w-2/3 mx-auto">
+  @if (dataSource.data.length > 0) {
+    <mat-card appearance="outlined">
+      <table mat-table [dataSource]="dataSource" class="cui-table">
+        <ng-container matColumnDef="state">
+          <th mat-header-cell *matHeaderCellDef>State</th>
+          <td mat-cell *matCellDef="let item">{{ item.state }}</td>
+        </ng-container>
+        <ng-container matColumnDef="zipCode">
+          <th mat-header-cell *matHeaderCellDef>Zip Code</th>
+          <td mat-cell *matCellDef="let item">{{ item.zipCode }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+    </mat-card>
+  } @else {
+    <mat-card appearance="outlined">
+      <tmx-empty-state icon="search_off" primaryText="Eligible Zip Codes" [secondaryText]="message"></tmx-empty-state>
+    </mat-card>
+  }
+</div>
+

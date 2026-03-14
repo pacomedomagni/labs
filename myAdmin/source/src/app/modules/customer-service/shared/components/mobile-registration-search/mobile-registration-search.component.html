@@ -1,0 +1,89 @@
+<mat-card appearance="outlined" class="search-card">
+  <div class="mobile-registration-search">
+    <h1>Mobile Registration Search</h1>
+    <div class="flex ml-s mr-s mt-s justify-center">
+      <tmx-text-control
+        id="mobile-registration-policy-number"
+        label="Policy Number"
+        maxlength="9"
+        [(model)]="policyNumber"
+        (keyUpEnter)="onPolicySearch(policyNumber)">
+      </tmx-text-control>
+      <span>
+        <button
+          mat-flat-button
+          color="primary"
+          class="ml-xxs search-button"
+          type="button"
+          aria-label="Search for Policy Number"
+          [disabled]="!policyNumber"
+          (click)="onPolicySearch(policyNumber)">
+          Search
+        </button>
+      </span>
+    </div>
+  </div>
+</mat-card>
+
+<div class="mt-s" role="status" aria-live="polite">
+  @if (isLoading) {
+    <mat-card appearance="outlined" class="mt-s">
+      <div class="loading-container">
+        <span class="ml-s">Searching for policy {{ searchedPolicyNumber }}...</span>
+      </div>
+    </mat-card>
+  } @else if (!hasSearched) {
+    <mat-card appearance="outlined" class="mt-s">
+      <tmx-empty-state icon="search" primaryText="Please search for a policy"
+        secondaryText="Please provide a policy number to begin your search">
+      </tmx-empty-state>
+    </mat-card>
+  } @else if (results.length === 0) {
+    <mat-card appearance="outlined" class="mt-s">
+      <tmx-empty-state svgIcon="ubi_sadcone" primaryText="Uh oh..."
+        secondaryText="Policy Not Found.">
+      </tmx-empty-state>
+    </mat-card>
+  } @else {
+    <mat-card appearance="outlined" class="mt-s">
+      <div class="search-results">
+        <div class="policy-label">Policy: <span class="policy-value">{{ searchedPolicyNumber }}</span>@if (policyFeatures) { <span class="policy-features ml-xxs">{{ policyFeatures }}</span>}</div>
+        <table class="results-table" aria-label="Mobile registration search results">
+          <thead>
+            <tr>
+              <th scope="col" class="expand-column" aria-hidden="true"></th>
+              <th scope="col">Telematics ID</th>
+              <th scope="col">Mobile Phone #</th>
+              <th scope="col">Features</th>
+              <th scope="col">Registration Status</th>
+              <th scope="col" class="actions-column" aria-hidden="true"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of results; track row.telematicsId) {
+              <!--aria-hidden must be removed when chevron becomes interactive-->
+              <tr>
+                <td class="expand-column" aria-hidden="true"><mat-icon>chevron_right</mat-icon></td>
+                <td>{{ row.telematicsId }}</td>
+                <td>{{ row.mobilePhone | phoneNumber }}</td>
+                <td>{{ row.features }}</td>
+                <td>{{ row.registrationStatus }}</td>
+                <td class="actions-column">
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    aria-disabled="true"
+                    matTooltip="Actions coming soon"
+                    [attr.aria-label]="'Actions for telematics ID ' + row.telematicsId + ' - currently unavailable'">
+                    Actions
+                    <mat-icon matSuffix>arrow_drop_down</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </mat-card>
+  }
+</div>

@@ -1,0 +1,147 @@
+<div class="justify-center">
+	<div class="full-width">
+		@if (FilterTypes?.length > 0) {
+			<div class="filters">
+				<mat-form-field class="filter-select" appearance="outline"
+					[hideRequiredMarker]="true">
+					<mat-select [(ngModel)]="currentFilter" placeholder="Select Filter">
+						@for (filter of FilterTypes; track filter) {
+							<mat-option [value]="filter.name">
+								{{ filter.label }}
+							</mat-option>
+						}
+					</mat-select>
+				</mat-form-field>
+				<div class="filter-input">
+					<tmx-text-control id="filterValue" label="Filter"
+					[(model)]="value"></tmx-text-control>
+				</div>
+				<button mat-flat-button color="primary" class="apply-button"
+				(click)="addFilter(currentFilter, value)">Apply</button>
+			</div>
+		}
+		@if ((filter$ | async).length > 0) {
+			<div class="filter-list">
+				@for (filterValues of (filter$ | async); track filterValues) {
+					<div>
+						<mat-card appearance="outlined" class="filter-card">
+							<ng-container>
+								<div>
+									{{filterValues.property}} is
+									{{filterValues.filter}}
+								</div>
+								<button type="button" color="primary"
+									(click)="clearFilter(filterValues)"
+									class="mat-focus-indicator dialog-header-close-button mat-icon-button mat-button-base ng-star-inserted">
+									<span class="mat-button-wrapper">
+										<mat-icon role="img"
+											class="mat-icon notranslate material-icons mat-ligature-font mat-icon-no-color"
+										data-mat-icon-type="font">cancel</mat-icon>
+									</span>
+									<span
+									class="mat-ripple mat-button-ripple mat-button-ripple-round"></span>
+									<span class="mat-button-focus-overlay"></span>
+								</button>
+							</ng-container>
+						</mat-card>
+					</div>
+				}
+				<button mat-flat-button color="primary"
+					[disabled]="(filter$ | async).length === 0"
+				(click)="clearAllFilter($event)">Clear All Filters</button>
+			</div>
+		}
+
+	</div>
+	<mat-paginator [length]="totalRows$ | async"
+		[pageIndex]="filterSortEvent.pageEvent.pageIndex"
+		[pageSize]="filterSortEvent.pageEvent.pageSize"
+		[pageSizeOptions]="pageSizeOptions"
+	(page)="pageChangedEvent($event)"></mat-paginator>
+
+
+	@if (displayedColumns.length > 0) {
+		<div class="table">
+			<table mat-table #table [dataSource]="displayedRows$" matSort
+				#tbSort="matSort">
+				@for (column of columnDefinition; track column) {
+					<!-- @if (column.component) {
+						<ng-container [matColumnDef]="column.name">
+							<mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="true">
+								Action
+							</mat-header-cell>
+							<mat-cell *matCellDef="let element">
+								<ng-container *ngTemplateOutlet="element.component"></ng-container>
+							</mat-cell>
+						</ng-container>
+					}
+					@if (!column.component) { -->
+						<ng-container [matColumnDef]="column.name">
+							<mat-header-cell *matHeaderCellDef mat-sort-header
+								[disabled]="isSortingDisabled(column)" class="column-large">
+								{{column.label}}
+							</mat-header-cell>
+							<mat-cell class="column-large" *matCellDef="let element">
+								@if (column.functionName) {
+									<div>
+										<button class="mat-tooltip-trigger cui-link"
+											(click)="clickFunction(column.functionName, element)">
+											@if (!column.format) {
+												<div>
+													{{element[column.value] ?? ''}}
+												</div>
+											}
+											@if (column.format && column.format === 'DateTime') {
+												<div>
+													{{element[column.value] | date: formats.DATE_TIME_LONG}}
+												</div>
+											}
+											@if (column.format && column.format === 'Duration') {
+												<div>
+													{{element[column.value] | duration }}
+												</div>
+											}
+											@if (column.format && column.format === 'KmToMiles') {
+												<div>
+													{{element[column.value] | kmToMiles }}
+												</div>
+											}
+										</button>
+									</div>
+								}
+								@if (!column.functionName) {
+									<div>
+										@if (!column.format) {
+											<div>
+												{{element[column.value] ?? ''}}
+											</div>
+										}
+										@if (column.format && column.format === 'DateTime') {
+											<div>
+												{{element[column.value] | date: formats.DATE_TIME_LONG}}
+											</div>
+										}
+										@if (column.format && column.format === 'Duration') {
+											<div>
+												{{element[column.value] | duration }}
+											</div>
+										}
+										@if (column.format && column.format === 'KmToMiles') {
+											<div>
+												{{element[column.value] | kmToMiles }}
+											</div>
+										}
+									</div>
+								}
+							</mat-cell>
+						</ng-container>
+					<!-- } -->
+				}
+				<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+				<mat-row *matRowDef="let row; columns: displayedColumns;"
+				[ngClass]="{'excluded' : row.excluded}"></mat-row>
+			</table>
+		</div>
+	}
+
+</div>

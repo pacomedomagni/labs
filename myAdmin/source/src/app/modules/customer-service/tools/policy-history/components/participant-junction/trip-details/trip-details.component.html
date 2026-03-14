@@ -1,0 +1,147 @@
+@if (trips.length > 0) {
+  <mat-tab-group>
+    <mat-tab label="Trip Summary">
+      <table mat-table [dataSource]="summaryDataSource" class="cui-table tab-table" #summarySort="matSort" matSort matSortDisableClear>
+        <ng-container matColumnDef="seqId">
+          <th mat-header-cell *matHeaderCellDef class="text-left">Trip SeqID</th>
+          <td mat-cell *matCellDef="let item" class="text-left">
+            <button class="cui-link" (click)="openTripDetails(item);"	matTooltip="View Trip Details" matTooltipPosition="above">{{item.seqId}}</button>
+          </td>
+          <td mat-footer-cell *matFooterCellDef	[attr.colspan]="isMobile ? 12 : 8">
+            <div class="flex justify-end">
+              <button mat-flat-button color="primary"	class="ml-xxs header-search-button" (click)="getTripSummaryCsvFileExport()">Export to CSV</button>
+              <mat-paginator #summaryPaginator
+                [length]="trips.length"
+                [pageIndex]="0"
+                [pageSize]="10"
+              [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+            </div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="tripDate">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header	class="w-1/6">Trip Start</th>
+          <td mat-cell *matCellDef="let item" class="w-1/6"><span>{{ item.tripDate | date: formats.DATE_TIME_LONG }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="end">
+          <th mat-header-cell *matHeaderCellDef class="w-1/6">Trip End</th>
+          <td mat-cell *matCellDef="let item" class="w-1/6"><span>{{ item.tripEndDate | date: formats.DATE_TIME_LONG }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="duration">
+          <th mat-header-cell *matHeaderCellDef>Trip Duration</th>
+          <td mat-cell *matCellDef="let item"><span>{{ item.duration.hours | number: '2.0' }}:{{ item.duration.minutes | number: '2.0' }}:{{ item.duration.seconds | number: '2.0' }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="mileage">
+          <th mat-header-cell *matHeaderCellDef>Trip Mileage</th>
+          <td mat-cell *matCellDef="let item"><span>{{ item.mileage }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="hb">
+          <th mat-header-cell *matHeaderCellDef>Hard Brakes</th>
+          <td mat-cell *matCellDef="let item"><span>{{ item.hardBrakes }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="ha">
+          <th mat-header-cell *matHeaderCellDef>Hard Accels</th>
+          <td mat-cell *matCellDef="let item"><span>{{ item.hardAccelerations }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="hrs">
+          <th mat-header-cell *matHeaderCellDef>High Risk Seconds</th>
+          <td mat-cell *matCellDef="let item"><span>{{ item.highRiskSeconds }}</span></td>
+        </ng-container>
+        @if (isMobile) {
+          <ng-container matColumnDef="appHandsFree">
+            <th mat-header-cell *matHeaderCellDef>App, Hands Free</th>
+            <td mat-cell *matCellDef="let item"><span>{{ getHHMMSSDisplay(item.distractedDrivingInfo.applicationUsageHandsFree) }}</span></td>
+          </ng-container>
+          <ng-container matColumnDef="appInHand">
+            <th mat-header-cell *matHeaderCellDef>App, In Hand</th>
+            <td mat-cell *matCellDef="let item"><span>{{ getHHMMSSDisplay(item.distractedDrivingInfo.applicationUsageInHand) }}</span></td>
+          </ng-container>
+          <ng-container matColumnDef="phoneHandsFree">
+            <th mat-header-cell *matHeaderCellDef>Phone, Hands Free</th>
+            <td mat-cell *matCellDef="let item"><span>{{ getHHMMSSDisplay(item.distractedDrivingInfo.phoneUsageHandsFree) }}</span></td>
+          </ng-container>
+          <ng-container matColumnDef="phoneInHand">
+            <th mat-header-cell *matHeaderCellDef>Phone, In Hand</th>
+            <td mat-cell *matCellDef="let item"><span>{{ getHHMMSSDisplay(item.distractedDrivingInfo.phoneUsageInHand) }}</span>
+          </td>
+        </ng-container>
+      }
+      <tr mat-header-row *matHeaderRowDef="summaryColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: summaryColumns"></tr>
+      <tr mat-footer-row *matFooterRowDef="['seqId']; sticky: true"></tr>
+    </table>
+  </mat-tab>
+  <mat-tab label="Events">
+    <!-- <table mat-table [dataSource]="eventsDataSource" class="cui-table tab-table" matTableExporter #eventsExporter="matTableExporter" *ngIf="events.length > 0, else noData" -->
+    @if (events.length > 0) {
+      <table mat-table [dataSource]="eventsDataSource" class="cui-table tab-table"
+        #eventsSort="matSort" matSort matSortDisableClear>
+        <ng-container matColumnDef="seqId">
+          <th mat-header-cell *matHeaderCellDef class="text-left">Event SeqID</th>
+          <td mat-cell *matCellDef="let item" class="text-left">{{ item.eventSeqId }}</td>
+          <td mat-footer-cell *matFooterCellDef	[attr.colspan]="8">
+            <div class="flex justify-end">
+              <button mat-flat-button color="primary"	class="ml-xxs header-search-button" (click)="getDeviceEventsCsvFileExport()">Export to CSV</button>
+              <!-- <button (click)="eventsExporter.exportTable('xlsx', {fileName:'TripEvents', sheet: 'sheet_name', Props: {Author: 'TMX Admin'}})"
+              matTooltip="Export to Excel"
+              matTooltipPosition="above"
+              mat-icon-button
+              aria-label="export-file"
+              class="my-auto">
+              <mat-icon>file_download</mat-icon>
+            </button> -->
+            <mat-paginator #eventsPaginator
+              [length]="events.length"
+              [pageIndex]="0"
+              [pageSize]="10"
+            [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+          </div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="eventTime">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header	class="w-1/6">Event Date</th>
+        <td mat-cell *matCellDef="let item" class="w-1/6"><span>{{ item.eventTime | date: formats.DATE_TIME_LONG }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="desc">
+        <th mat-header-cell *matHeaderCellDef class="w-1/6">Event Description</th>
+        <td mat-cell *matCellDef="let item" class="w-1/6"><span>{{ item.eventDescription }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="code">
+        <th mat-header-cell *matHeaderCellDef>Event Code</th>
+        <td mat-cell *matCellDef="let item"><span>{{ item.eventCode }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="protoCode">
+        <th mat-header-cell *matHeaderCellDef>Protocol Code</th>
+        <td mat-cell *matCellDef="let item"><span>{{ item.protocolCode }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="vin">
+        <th mat-header-cell *matHeaderCellDef>VIN</th>
+        <td mat-cell *matCellDef="let item"><span>{{ item.vin }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="odometer">
+        <th mat-header-cell *matHeaderCellDef>Odometer Reading</th>
+        <td mat-cell *matCellDef="let item"><span>{{ item.odometerReading }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="create">
+        <th mat-header-cell *matHeaderCellDef class="w-1/6">Create Date</th>
+        <td mat-cell *matCellDef="let item" class="w-1/6"><span>{{ item.createDate | date: formats.DATE_TIME_LONG }}</span></td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="eventColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: eventColumns"></tr>
+      <tr mat-footer-row *matFooterRowDef="['seqId']; sticky: true"></tr>
+    </table>
+  } @else {
+    <tmx-empty-state icon="edit_road"
+      primaryText="Trip Summary"
+      [secondaryText]="'There doesn\'t seem to be any ' + (trips.length === 0 ? 'trips' : 'events') + ' related to this participant'">
+    </tmx-empty-state>
+  }
+</mat-tab>
+</mat-tab-group>
+} @else {
+  <tmx-empty-state icon="edit_road"
+    primaryText="Trip Summary"
+    [secondaryText]="'There doesn\'t seem to be any ' + (trips.length === 0 ? 'trips' : 'events') + ' related to this participant'">
+  </tmx-empty-state>
+}
+
+

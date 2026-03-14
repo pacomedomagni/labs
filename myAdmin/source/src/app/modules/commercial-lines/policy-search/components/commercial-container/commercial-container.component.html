@@ -1,0 +1,19 @@
+<tmx-policy-search [showPolicySearch]="true"
+  (policySearch)="onPolicySearch($event)" [showSerialNumberSearch]="true"
+  (serialNumberSearch)="searchBySerialNumber($event)"
+  [showEmptyDataPanel]="policyData === undefined && (query.multiPolicy$ | async) === undefined"
+  [showSearchErrorPanel]="searchHasErrors"
+  [searchErrorMessage]="searchErrorMessage">
+</tmx-policy-search>
+
+@if (policyData && !searchHasErrors) {
+  <div class="flex flex-wrap justify-center pt-xxs"
+    [@fadeAnim]>
+    <tmx-commercial-policy-details class="flex"></tmx-commercial-policy-details>
+    <mat-card appearance="outlined" class="participant-accordion mx-auto mat-accordion-multi">
+      <mat-card-content>
+        <tmx-commercial-participant-details></tmx-commercial-participant-details>
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

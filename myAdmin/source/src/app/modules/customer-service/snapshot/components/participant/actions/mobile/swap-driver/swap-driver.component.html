@@ -1,0 +1,26 @@
+@if (swappableParticipants?.length > 0) {
+  <div class="flex flex-col p-xs pb-0">
+    <tmx-data-list>
+      <tmx-data-list-row labelSpan="4" label="Current Driver:">
+        {{ participant.mobileDeviceDetails.mobileDeviceAliasName }}
+        {{ participant.registrationDetails.mobileRegistrationCode | phoneNumber }}
+      </tmx-data-list-row>
+      <tmx-data-list-row labelSpan="40"  label="Please select driver to swap with:">
+        <mat-form-field id="tmx-pd-suffix" appearance="outline">
+          <mat-select name="driver" cuiMatSelectAccessibility [(ngModel)]="model.destParticipant">
+            @for (participant of swappableParticipants; track participant) {
+              <mat-option [value]="participant.snapshotDetails.participantSeqId">
+                {{ participant.mobileDeviceDetails.mobileDeviceAliasName }}
+                {{ participant.registrationDetails.mobileRegistrationCode | phoneNumber }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </tmx-data-list-row>
+    </tmx-data-list>
+  </div>
+} @else {
+  <tmx-empty-state icon="group" primaryText="Unable to Swap Drivers" secondaryText="At least two drivers must be in Mobile 3.0 and in a Mobile Registration Status of Registration Complete.">
+  </tmx-empty-state>
+}
+

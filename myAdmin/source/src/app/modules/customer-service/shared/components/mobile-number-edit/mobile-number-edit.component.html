@@ -1,0 +1,15 @@
+<div class="flex flex-col p-xs pb-0"> 
+	
+	<mat-form-field appearance="outline">
+		<mat-label>Current Mobile Phone Number</mat-label>
+		<input [ngModel]="currentMobileNumber" type="text" matInput phoneNumberFormat [disabled]="true">
+	</mat-form-field>
+
+	<mat-form-field appearance="outline" [hideRequiredMarker]="true">
+		<mat-label>New Mobile Phone Number</mat-label>
+		<input [(ngModel)]="model.mobileNumber" id="tmx-mob-phn" type="text" matInput phoneNumberFormat required minlength="14">
+
+		<mat-error>Please enter a valid phone number </mat-error>
+	</mat-form-field>
+
+</div>

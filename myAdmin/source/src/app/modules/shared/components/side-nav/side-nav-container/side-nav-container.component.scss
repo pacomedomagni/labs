@@ -1,0 +1,21 @@
+@use '@angular/material';
+@use '../../../../../../styles/variables';
+
+$content-container-padding-xs: 1.6rem;
+
+.tmx-sidenav-container {
+	box-sizing: border-box;
+	flex: 1;
+	height: 100vh;
+	overflow: auto;
+}
+
+.tmx-sidenav-content {
+	font-weight: 400;
+	padding: 0 4rem 4rem;
+
+	@media (max-width: 599px) {
+		padding-left: $content-container-padding-xs;
+		padding-right: $content-container-padding-xs;
+	}
+}

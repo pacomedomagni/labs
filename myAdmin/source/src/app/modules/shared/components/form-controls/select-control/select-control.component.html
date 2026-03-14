@@ -1,0 +1,15 @@
+<mat-form-field appearance="outline" [hideRequiredMarker]="true" class="w-full">
+	<mat-label>{{ label }}</mat-label>
+	<mat-select
+		cuiMatSelectAccessibility
+		[id]="id"
+		[disabled]="isDisabled"
+		[name]="name ? name : id"
+		[required]="isRequired"
+		[(ngModel)]="model"
+		(selectionChange)="onSelectionChange($event.value)">
+		@for (item of options; track item) {
+			<mat-option [value]="item.value">{{item.display ? item.display : item.value}}</mat-option>
+		}
+	</mat-select>
+</mat-form-field>

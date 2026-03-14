@@ -1,0 +1,32 @@
+<tmx-policy-search
+  [showPolicySearch]="true"
+  (policySearch)="onPolicySearch($event)"
+  [showPhoneNumberSearch]="true"
+  (phoneNumberSearch)="onPhoneNumberSearch($event)"
+  [showEmptyDataPanel]="policyData === undefined && (query.multiPolicy$ | async) === undefined"
+  [showSearchErrorPanel]="searchHasErrors"
+  [searchErrorMessage]="searchErrorMessage">
+</tmx-policy-search>
+
+<tmx-customer-service-cross-app-banner
+  [currentFeature]="features.AccidentDetection"
+  [policyNumber]="policyData?.policyNumber">
+</tmx-customer-service-cross-app-banner>
+
+@if (policyData && !searchHasErrors) {
+  <div class="flex flex-wrap justify-center pt-xxs" [@fadeAnim]>
+    <tmx-are-policy-details class="mx-auto pb-xxs"></tmx-are-policy-details>
+    <mat-accordion #participantDetailsAccordion="matAccordion" multi class="participant-accordion mx-auto" [@.disabled]="disableAnimation">
+      @for (participant of (query.policy$ | async)?.participants; track participantTracker(i, participant); let i = $index) {
+        <tmx-are-participant-details
+        [participant]="participant" [label]="(query.policy$ | async)?.participants.length > 1 ? '(' + (i + 1) + ' of ' + (query.policy$ | async)?.participants.length +')' : undefined"></tmx-are-participant-details>
+      }
+    </mat-accordion>
+  </div>
+}
+
+@if (!searchHasErrors && (query.multiPolicy$ | async)) {
+  <div [@fadeAnim]>
+    <tmx-are-multi-policy-details class="mx-auto pb-xxs"></tmx-are-multi-policy-details>
+  </div>
+}

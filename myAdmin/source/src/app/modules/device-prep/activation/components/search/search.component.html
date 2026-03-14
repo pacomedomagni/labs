@@ -1,0 +1,18 @@
+<form #form="ngForm">
+	
+	<div class="flex flex-wrap justify-center">
+		<mat-form-field appearance="outline" [hideRequiredMarker]="true">
+			<mat-label>SIM Activate/De-Activate for Batch/Lot/Device Serial Number</mat-label>
+			<input [(ngModel)]="query" id="tmx-dp-sim" name="sim" type="text" matInput required>
+			<mat-error>SIM is required</mat-error>
+		</mat-form-field>
+	</div>
+
+
+	<div class="flex flex-wrap justify-center">
+		<button mat-flat-button color="primary" [disabled]="form.invalid" class="search-button" (click)="getStatus()">Get Status</button>
+		<button mat-flat-button color="primary" [disabled]="form.invalid" class="ml-xxs search-button" (click)="activate()">Activate</button>
+		<button mat-flat-button color="primary" [disabled]="form.invalid" class="ml-xxs search-button" (click)="deactivate()">De-Activate</button>
+	</div>
+
+</form>	

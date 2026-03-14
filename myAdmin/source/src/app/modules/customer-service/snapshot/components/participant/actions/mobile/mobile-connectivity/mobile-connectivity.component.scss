@@ -1,0 +1,12 @@
+:host {
+	table, th {
+		text-align: center;
+	}
+	.mat-mdc-footer-row {
+		font-weight: bold;
+	}
+}
+
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-surface .mat-mdc-dialog-content {
+	padding-bottom: 0;
+}

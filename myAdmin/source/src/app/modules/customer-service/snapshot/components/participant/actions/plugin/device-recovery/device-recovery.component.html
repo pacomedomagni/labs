@@ -1,0 +1,92 @@
+@if (suspensionHistorydataSource?.data.length > 0 || recoveryInfoDataSource?.data.length > 0) {
+  <div>
+    <div>Suspension History</div>
+    <table mat-table
+      [dataSource]="suspensionHistorydataSource"
+      class="cui-table mb-xxxl">
+      <ng-container matColumnDef="Device">
+        <th mat-header-cell
+        *matHeaderCellDef>Device</th>
+        <td mat-cell
+        *matCellDef="let suspensionItem">{{ suspensionItem.deviceSerialNumber}}</td>
+      </ng-container>
+      <ng-container matColumnDef="Begin Date">
+        <th mat-header-cell
+        *matHeaderCellDef>Begin Date</th>
+        <td mat-cell
+          *matCellDef="let suspensionItem">{{suspensionItem.startDate | date: 'MM/dd/yyyy' }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="End Date">
+        <th mat-header-cell
+        *matHeaderCellDef>End Date</th>
+        <td mat-cell
+        *matCellDef="let suspensionItem">{{ suspensionItem.endDate | date: 'MM/dd/yyyy' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="Days">
+        <th mat-header-cell
+        *matHeaderCellDef>Days</th>
+        <td mat-cell
+        *matCellDef="let suspensionItem">{{ suspensionItem.daysSuspended }}</td>
+      </ng-container>
+      <ng-container matColumnDef="User">
+        <th mat-header-cell
+        *matHeaderCellDef>User</th>
+        <td mat-cell
+        *matCellDef="let suspensionItem">{{ suspensionItem.userName }}</td>
+      </ng-container>
+      <tr mat-header-row
+      *matHeaderRowDef="suspensionHistoryTopColumns; sticky: true"></tr>
+      <tr mat-row
+      *matRowDef="let row; columns: suspensionHistoryTopColumns"></tr>
+    </table>
+    <div>Requested Devices</div>
+    <table mat-table
+      [dataSource]="recoveryInfoDataSource"
+      class="cui-table mb-xxxl">
+      <ng-container matColumnDef="Device">
+        <th mat-header-cell
+        *matHeaderCellDef>Device</th>
+        <td mat-cell
+        *matCellDef="let recoveryItem">{{ recoveryItem.deviceSerialNumber}}</td>
+      </ng-container>
+      <ng-container matColumnDef="Requested Date">
+        <th mat-header-cell
+        *matHeaderCellDef>Requested Date</th>
+        <td mat-cell
+          *matCellDef="let recoveryItem">{{recoveryItem.returnRequestDate | date: 'MM/dd/yyyy' }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="Suspended">
+        <th mat-header-cell
+        *matHeaderCellDef>Suspend(ed)</th>
+        <td mat-cell
+          *matCellDef="let recoveryItem; let i = index"><mat-checkbox #suspendCheckboxes (change)="suspensionCheckBoxChanged($event,i)" [checked]="recoveryItem.isSuspended" [disabled]="disableSuspensionCheckBox(recoveryItem, model.recoveryItems[i])"></mat-checkbox></td>
+        </ng-container>
+        <ng-container matColumnDef="Abandoned">
+          <th mat-header-cell
+          *matHeaderCellDef>Abandon(ed)</th>
+          <td mat-cell
+            *matCellDef="let recoveryItem; let i = index"><mat-checkbox #abandonCheckboxes (change)="abandonCheckBoxChanged($event,i)" [checked]="recoveryItem.isAbandoned" [disabled]="disableAbandonCheckBox(recoveryItem)"></mat-checkbox></td>
+          </ng-container>
+          <ng-container matColumnDef="Received Date">
+            <th mat-header-cell
+            *matHeaderCellDef>Received Date</th>
+            <td mat-cell
+              *matCellDef="let recoveryItem">@if ((recoveryItem.deviceReceivedDate | date: 'MM/dd/yyyy').toString() != '01/01/0001') {
+              <span>{{ recoveryItem.deviceReceivedDate | date: 'MM/dd/yyyy' }}</span>
+            }</td>
+          </ng-container>
+          <tr mat-header-row
+          *matHeaderRowDef="recoveryInfoTopColumns; sticky: true"></tr>
+          <tr mat-row
+          *matRowDef="let row; columns: recoveryInfoTopColumns" [ngClass]="{'make-gray': (row.deviceReceivedDate | date: 'MM/dd/yyyy').toString() !== '01/01/0001'? true:false }"></tr>
+        </table>
+      </div>
+    } @else {
+      <tmx-empty-state icon="search_off"
+        primaryText="Device Recovery"
+        secondaryText="No device recovery data found">
+      </tmx-empty-state>
+    }
+

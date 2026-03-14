@@ -1,0 +1,19 @@
+<mat-accordion class="table-accordion" multi>
+  <section class="mat-elevation-z2 mat-header-row">
+    <span class="mat-header-cell">Participant SeqID</span>
+    <span class="mat-header-cell">Name</span>
+  </section>
+  @for (participant of participantInfo; track participant) {
+    <mat-expansion-panel>
+      <mat-expansion-panel-header class="mat-row">
+        <span class="mat-cell"><button class="cui-link"
+          (click)="$event.stopPropagation(); openTripDetails(participant.id);"
+          matTooltip="View Trip & Events"
+        matTooltipPosition="above">{{participant.id}}</button></span>
+        <span class="mat-cell">{{ participant.displayName }}</span>
+      </mat-expansion-panel-header>
+      <tmx-policy-history-pj-details
+      [Data]="(junctionData$ | async)[participant.id]"></tmx-policy-history-pj-details>
+    </mat-expansion-panel>
+  }
+</mat-accordion>

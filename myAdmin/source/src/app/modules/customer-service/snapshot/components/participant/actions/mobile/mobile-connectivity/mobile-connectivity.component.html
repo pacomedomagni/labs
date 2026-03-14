@@ -1,0 +1,97 @@
+@if (displayMobileConexts.length > 0) {
+  <table mat-table [dataSource]="dataSource" class="cui-table">
+    <!--- Note that these columns can be defined in any order.
+    The actual rendered columns are set as a property on the row definition" -->
+    <ng-container matColumnDef="mobileDeviceContextOffSetDateTime">
+      <th mat-header-cell *matHeaderCellDef> Heartbeat Date/Time </th>
+      <ng-container *matCellDef="let element">
+        @if (!element.gapText) {
+          <td mat-cell [attr.colspan]="element.MobileDeviceContextOffSetDateTime === '' ? '0' : '1'">
+            {{element.mobileDeviceContextOffSetDateTime | date:'M/d/yyyy hh:mm:ss a'}}
+          </td>
+        }
+      </ng-container>
+      <td mat-footer-cell *matFooterCellDef> <div> Total Percent "On" </div> </td>
+    </ng-container>
+    <ng-container matColumnDef="gpsLocationServicesInd">
+      <th mat-header-cell *matHeaderCellDef> Location Services </th>
+      <ng-container *matCellDef="let element">
+        @if (!element.gapText) {
+          <td mat-cell [attr.colspan]="element.gpsLocationServicesInd === '' ? '0' : '1'">
+            {{element.gpsLocationServicesInd === 1? "On":"Off"}}
+          </td>
+        }
+      </ng-container>
+      <td mat-footer-cell *matFooterCellDef> {{getTotalLocationServices() | percent}} </td>
+    </ng-container>
+    <ng-container matColumnDef="backgroundAppRefreshInd">
+      <th mat-header-cell *matHeaderCellDef> Background App Refresh </th>
+      <ng-container *matCellDef="let element">
+        @if (!element.gapText) {
+          <td mat-cell [attr.colspan]="element.backgroundAppRefreshInd === '' ? '0' : '1'">
+          {{element.backgroundAppRefreshInd === 1 ? "On":(element.backgroundAppRefreshInd === 0 ?"Off": "Unknown")}} </td>
+        }
+      </ng-container>
+      <td mat-footer-cell *matFooterCellDef> {{getTotalBackgroundAppRefresh() | percent}} </td>
+    </ng-container>
+    <ng-container matColumnDef="pushEnabledInd">
+      <th mat-header-cell *matHeaderCellDef> Push Notifications </th>
+      <ng-container *matCellDef="let element">
+        @if (!element.gapText) {
+          <td mat-cell [attr.colspan]="element.pushEnabledInd === '' ? '0' : '1'"> {{element.pushEnabledInd === 1? "On": (element.pushEnabledInd === 0?"Off":"Unknown")}}
+          </td>
+        }
+      </ng-container>
+      <td mat-footer-cell *matFooterCellDef> {{getTotalPushNotifications() | percent}} </td>
+    </ng-container>
+    <ng-container matColumnDef="lowPowerModeInd">
+      <th mat-header-cell *matHeaderCellDef> Low Power Mode </th>
+      <ng-container *matCellDef="let element">
+        @if (!element.gapText) {
+          <td mat-cell [attr.colspan]="element.lowPowerModeInd === '' ? '0' : '1'"> {{element.lowPowerModeInd === 1? "On": (element.lowPowerModeInd === 0?"Off":"Unknown")}}
+          </td>
+        }
+      </ng-container>
+      <td mat-footer-cell *matFooterCellDef> {{getTotalLowPowerMode() | percent}} </td>
+    </ng-container>
+    <ng-container matColumnDef="batteryLevelAmt">
+      <th mat-header-cell *matHeaderCellDef> Battery Level </th>
+      <ng-container *matCellDef="let element">
+        @if (!element.gapText) {
+          <td mat-cell [attr.colspan]="element.batteryLevelAmt === '' ? '0' : '1'"> {{element.batteryLevelAmt | percent}}
+          </td>
+        }
+      </ng-container>
+      <td mat-footer-cell *matFooterCellDef> </td>
+    </ng-container>
+    <ng-container matColumnDef="gapText">
+      <th mat-header-cell *matHeaderCellDef> Gap </th>
+      <ng-container *matCellDef="let element">
+        @if (element.gapText) {
+          <td mat-cell [attr.colspan]="element.gapText ? '6' : '0'">
+          {{element.gapText}} </td>
+        }
+      </ng-container>
+      <td mat-footer-cell *matFooterCellDef> </td>
+    </ng-container>
+    <ng-container matColumnDef="paginationHolder">
+      <td mat-footer-cell colspan="7" *matFooterCellDef>
+        <div class="flex justify-end">
+          <mat-paginator [length]="dataSource"
+            [pageIndex]="0"
+            [pageSize]="500"
+          [pageSizeOptions]="[10, 25, 100, 500, 1000]"></mat-paginator>
+        </div>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedHeaderColumns; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <tr mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></tr>
+    <tr mat-footer-row *matFooterRowDef="displayedFooterColumns; sticky: true"></tr>
+  </table>
+} @else {
+  <tmx-empty-state icon="edit_road"
+    primaryText="Mobile Connectivity"
+  secondaryText="No heartbeats found"></tmx-empty-state>
+}
+

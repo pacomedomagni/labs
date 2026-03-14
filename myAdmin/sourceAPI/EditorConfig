@@ -1,0 +1,13 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+indent_style = space
+indent_size = 4
+tab_width = 4
+max_line_length = 120
+quote_type = double
+curly_bracket_next_line = true
+csharp_prefer_braces = true
+
+dotnet_diagnostic.IDE1006.severity = error

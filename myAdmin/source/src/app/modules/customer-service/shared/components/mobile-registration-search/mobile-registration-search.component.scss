@@ -1,0 +1,76 @@
+
+.search-card {
+  background-color: #ffffff;
+}
+
+.results-table {
+  width: 100%;
+  margin-top: 1em;
+  border-collapse: collapse;
+
+  th, td {
+    text-align: left;
+    padding: 0.5em;
+  }
+
+  thead tr {
+    border-bottom: 1px solid var(--border-color, #ddd);
+  }
+
+  th {
+    font-weight: bold;
+  }
+
+  .expand-column {
+    width: 40px;
+    padding: 0.5em 0;
+
+    mat-icon {
+      vertical-align: middle;
+      cursor: pointer;
+    }
+  }
+
+  .actions-column {
+    width: auto;
+    text-align: right;
+    white-space: nowrap;
+  }
+}
+.mobile-registration-search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.mobile-registration-search .flex {
+  align-items: center;
+}
+
+.mobile-registration-search .search-button {
+  margin-top: -24px;
+  margin-bottom: 0;
+  align-self: center;
+}
+
+.policy-label {
+  font-weight: bold;
+  text-align: left;
+}
+
+.policy-value {
+  font-weight: normal;
+}
+
+.policy-features {
+  font-weight: normal;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
