@@ -26,9 +26,9 @@ export class LotManagementService {
     }
 
     /** Lookup lot by device serial number */
-    findLot(deviceSerialNumber: string): Observable<DeviceLot> {
+    getLotByDeviceSerialNumber(deviceSerialNumber: string): Observable<DeviceLot> {
         return this.api.get<DeviceLot>({
-            uri: `${this.controller}/FindLot/${deviceSerialNumber}`,
+            uri: `${this.controller}/GetLotByDeviceSerialNumber/${deviceSerialNumber}`,
         });
     }
 
@@ -52,27 +52,29 @@ export class LotManagementService {
         });
     }
 
-    activateAllDevicesInLot(lotSeqId: number): Observable<Resource> {
+    activateAllDevicesInLot(lotSeqId: number, lotType: DeviceLotType): Observable<Resource> {
         return this.api.post<Resource>({
             uri: `${this.controller}/ActivateLot`,
             payload: {
                 lotSeqId: lotSeqId,
+                lotType: lotType,
                 action: DeviceActivationAction.Activate,
             },
         });
     }
 
-    deactivateAllDevicesInLot(lotSeqId: number): Observable<Resource> {
+    deactivateAllDevicesInLot(lotSeqId: number, lotType: DeviceLotType): Observable<Resource> {
         return this.api.post<Resource>({
             uri: `${this.controller}/ActivateLot`,
             payload: {
                 lotSeqId: lotSeqId,
+                lotType: lotType,   
                 action: DeviceActivationAction.Deactivate,
             },
         });
     }
 
-    updateLotStatus(lotSeqID: number, lotType: number, status: DeviceLotStatus) : Observable<Resource> {
+    updateLotStatus(lotSeqID: number, lotType: DeviceLotType, status: DeviceLotStatus) : Observable<Resource> {
         return this.api.post<Resource>({
             uri: `${this.controller}/UpdateLot`,
             payload: {

@@ -30,18 +30,64 @@
 
   <!-- Main Content -->
   <div class="main-content">
-    <!-- Tabs -->
-    <mat-tab-group (selectedIndexChange)="onTabChange($event)" class="fulfillment-tabs">
-      <mat-tab label="PENDING ORDERS">
-        <tmx-pending-orders [orders]="pendingOrderData()" (orderSelected)="onOrderSelected($event)"></tmx-pending-orders>
-      </mat-tab>
+    <div class="tabs-search-container">
+      <!-- Tabs -->
+      <mat-tab-group [selectedIndex]="selectedTab()" (selectedIndexChange)="onTabChange($event)" class="fulfillment-tabs">
+        <mat-tab label="PENDING ORDERS"></mat-tab>
+        <mat-tab label="COMPLETED ORDERS"></mat-tab>
+      </mat-tab-group>
+
+      <!-- Search Section -->
+      <div class="search-container">
+        <mat-form-field appearance="outline" class="search-type-dropdown">
+          <mat-label>Search By</mat-label>
+          <mat-select [(value)]="searchType" (selectionChange)="onSearchTypeChange()">
+            <mat-option value="orderNumber">Order Number</mat-option>
+            <mat-option value="email">Email Address</mat-option>
+            <mat-option value="deviceSerial">Device Serial Number</mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+        <div class="search-input-wrapper">
+          <mat-form-field appearance="outline" class="search-input">
+            <mat-label>Search</mat-label>
+            <input 
+              matInput 
+              [(ngModel)]="searchValue"
+              (ngModelChange)="searchError = ''"
+              (keyup.enter)="onSearch()" 
+              [placeholder]="searchPlaceholder()"
+              [maxlength]="searchMaxLength()"
+              [pattern]="searchPattern()"
+              [type]="searchType === 'email' ? 'email' : 'text'"
+              name="searchInput"
+              #searchInput="ngModel">
+            <button mat-icon-button matSuffix (click)="onSearch()" [disabled]="searchInput.invalid">
+              <mat-icon>search</mat-icon>
+            </button>
+            <mat-error *ngIf="searchInput.invalid && !searchError">
+              {{ searchErrorMessage() }}
+            </mat-error>
+          </mat-form-field>
+          @if (searchError) {
+            <div class="search-error-message">{{ searchError }}</div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" [ngSwitch]="selectedTab()">
+      <div *ngSwitchCase="0">
+        <tmx-pending-orders [orders]="pendingOrderData()" (orderSelected)="onPendingOrderSelected($event)"></tmx-pending-orders>
+      </div>
       
-      <mat-tab label="COMPLETED ORDERS">
+      <div *ngSwitchCase="1">
         <tmx-completed-orders
           [orderData]="completedOrderData()"
-          (orderSelected)="onOrderSelected($event)">
+          (orderSelected)="onCompletedOrderSelected($event)">
         </tmx-completed-orders>
-      </mat-tab>
-    </mat-tab-group>
+      </div>
+    </div>
   </div>
 </div>

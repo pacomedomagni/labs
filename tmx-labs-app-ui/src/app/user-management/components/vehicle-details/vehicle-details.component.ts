@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIcon } from '@angular/material/icon';
 import { VehicleDetailsService } from '../../services/vehicle-details.service';
+import { UserInfoService } from 'src/app/shared/services/user-info/user-info.service';
 import { VehicleDetails } from 'src/app/shared/data/vehicle/resources';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -23,6 +24,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class VehicleDetailsComponent implements ControlValueAccessor {
     private readonly vehicleDetailService = inject(VehicleDetailsService);
+    private readonly userInfoService = inject(UserInfoService);
     private readonly destroyRef = inject(DestroyRef);
 
     @ViewChild(MatTable) table!: MatTable<VehicleDetails>;
@@ -32,6 +34,15 @@ export class VehicleDetailsComponent implements ControlValueAccessor {
 
     private vehicles: VehicleDetails[] = [];
     disabled = false;
+    isAdmin = false;
+
+    constructor() {
+        this.userInfoService.userInfo$
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => {
+                this.isAdmin = this.userInfoService.getUserAccess(['isLabsAdmin']);
+            });
+    }
 
     // ControlValueAccessor callbacks
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -67,6 +78,9 @@ export class VehicleDetailsComponent implements ControlValueAccessor {
 
     // Component methods
     addVehicle(): void {
+        if (!this.isAdmin) {
+            return;
+        }
         this.vehicleDetailService
             .addVehicle()
             .pipe(takeUntilDestroyed(this.destroyRef))

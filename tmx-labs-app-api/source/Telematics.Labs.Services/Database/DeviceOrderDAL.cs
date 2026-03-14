@@ -7,6 +7,7 @@ using Dapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Progressive.Telematics.Labs.Business.Resources.Resources.Device;
+using Progressive.Telematics.Labs.Business.Resources.Resources.FulFillment;
 using Progressive.Telematics.Labs.Services.Database.Models.DeviceOrder;
 using Progressive.Telematics.Labs.Shared.Attributes;
 using Progressive.Telematics.Labs.Shared.Configs;
@@ -32,11 +33,34 @@ namespace Progressive.Telematics.Labs.Services.Database
         Task<int> ProcessedOrderCount();
 
         /// <summary>
+        /// Get vehicles for a device order
+        /// </summary>
+        /// <param name="deviceOrderSeqId">Device Order Seq ID</param>
+        /// <returns>List of vehicles associated with the order</returns>
+        Task<IEnumerable<OrderVehicle>> GetVehiclesByDeviceOrderSeqId(int deviceOrderSeqId);
+
+        /// <summary>
         /// Get fulfillment orders by status codes (cross-database query to LabsMyScore + LabsHomebase)
         /// </summary>
         /// <param name="statusCodes">Status codes to filter by (e.g. 1,2 for pending; 3 for completed)</param>
         Task<IEnumerable<FulfillmentOrderDataModel>> GetFulfillmentOrdersByStatus(int[] statusCodes);
 
+        /// <summary>
+        /// Updates a device order record
+        /// </summary>
+        /// <param name="deviceOrderSeqId">Primary key of the device order</param>
+        /// <param name="participantGroupSeqId">Optional participant group sequence ID</param>
+        /// <param name="deviceOrderStatusCode">Optional device order status code</param>
+        /// <param name="shipDateTime">Optional ship date time</param>
+        /// <param name="processedDateTime">Optional processed date time</param>
+        /// <param name="fulfilledByUserId">Optional user ID who fulfilled the order</param>
+        Task UpdateDeviceOrder(
+            int deviceOrderSeqId,
+            int? participantGroupSeqId = null,
+            int? deviceOrderStatusCode = null,
+            DateTime? shipDateTime = null,
+            DateTime? processedDateTime = null,
+            string fulfilledByUserId = null);
     }
 
     public class DeviceOrderDAL : DbContext, IDeviceOrderDAL
@@ -94,6 +118,16 @@ namespace Progressive.Telematics.Labs.Services.Database
             return await ExecuteScalarAsync<int>(storedProc, parms);
         }
 
+        public async Task<IEnumerable<OrderVehicle>> GetVehiclesByDeviceOrderSeqId(int deviceOrderSeqId)
+        {
+            const string storedProc = "dbo.usp_Vehicle_SelectByDeviceOrderSeqId";
+
+            var parms = new DynamicParameters()
+                .Parameter("@Parm_DeviceOrderSeqID", deviceOrderSeqId, DbType.Int32);
+
+            return await ExecuteStoredProcedureAsync<OrderVehicle>(storedProc, parms);
+        }
+
         public async Task<IEnumerable<FulfillmentOrderDataModel>> GetFulfillmentOrdersByStatus(int[] statusCodes)
         {
             const string storedProc = "dbo.usp_FulfillmentOrder_SelectByStatus";
@@ -103,6 +137,28 @@ namespace Progressive.Telematics.Labs.Services.Database
 
             return await ExecuteStoredProcedureAsync<FulfillmentOrderDataModel>(storedProc, parms);
         }
+
+        public async Task UpdateDeviceOrder(
+            int deviceOrderSeqId,
+            int? participantGroupSeqId = null,
+            int? deviceOrderStatusCode = null,
+            DateTime? shipDateTime = null,
+            DateTime? processedDateTime = null,
+            string fulfilledByUserId = null)
+        {
+            const string storedProc = "dbo.usp_DeviceOrder_UpdateByPrimaryKey";
+
+            var parms = new DynamicParameters()
+                .Parameter("@Parm_DeviceOrderSeqID", deviceOrderSeqId, DbType.Int32)
+                .Parameter("@Parm_ParticipantGroupSeqID", participantGroupSeqId, DbType.Int32)
+                .Parameter("@Parm_DeviceOrderStatusCode", deviceOrderStatusCode, DbType.Int32)
+                .Parameter("@Parm_ShipDateTime", shipDateTime, DbType.DateTime)
+                .Parameter("@Parm_ProcessedDateTime", processedDateTime, DbType.DateTime)
+                .Parameter("@Parm_FulfilledByUserID", fulfilledByUserId, DbType.String, 50);
+
+            await ExecuteNonQueryAsync(storedProc, parms);
+        }
+
 
         private static DataTable CreateDetailTable(CreateReplacementDeviceOrderModel model)
         {

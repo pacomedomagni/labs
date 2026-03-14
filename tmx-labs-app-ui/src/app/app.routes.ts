@@ -132,8 +132,9 @@ export const routes: Routes = [
                 path: ApplicationGroupIds.DeviceReturn,
                 data: {
                     breadcrumb: 'Device Return',
+                    roles: [UserRoles.LabsAdmin]
                 },
-                canActivate: [AuthGuard],
+                canActivate: [RolesAuthGuard],
                 loadComponent: () =>
                     import('./device-return/device-return.component').then(
                         (m) => m.DeviceReturnComponent,
@@ -160,8 +161,9 @@ export const routes: Routes = [
                         label: 'Order Fulfillment',
                         disable: true,
                     },
+                    roles: [UserRoles.LabsAdmin]
                 },
-                canActivate: [AuthGuard],
+                canActivate: [RolesAuthGuard],
                 loadComponent: () =>
                     import('./fulfillment/fulfillment.component').then(
                         (m) => m.CustomerServiceFulfillmentComponent,
@@ -200,6 +202,10 @@ export const routes: Routes = [
                             },
                             {
                                 path: 'DeviceRecovery',
+                                data: {
+                                    roles: [UserRoles.LabsAdmin]
+                                },
+                                canActivate: [RolesAuthGuard],
                                 loadComponent: () =>
                                     import('./device-recovery/device-recovery.component').then(
                                         (m) => m.CustomerServiceDeviceRecoveryComponent,
@@ -207,6 +213,10 @@ export const routes: Routes = [
                             },
                             {
                                 path: 'SnapshotJourney',
+                                data: {
+                                    roles: [UserRoles.LabsAdmin]
+                                },
+                                canActivate: [RolesAuthGuard],
                                 loadComponent: () =>
                                     import('./snapshot-journey/snapshot-journey.component').then(
                                         (m) => m.CustomerServiceSnapshotJourneyComponent,

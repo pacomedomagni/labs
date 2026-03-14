@@ -6,6 +6,7 @@ using Progressive.Telematics.Labs.Business.Resources.DevicePrep;
 using Progressive.Telematics.Labs.Business.Resources.Resources.BenchTest;
 using Progressive.Telematics.Labs.Business.Resources.Shared;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Progressive.Telematics.Labs.Api.Controllers.DevicePrep.BenchTest
@@ -135,6 +136,11 @@ namespace Progressive.Telematics.Labs.Api.Controllers.DevicePrep.BenchTest
             }
 
             var response = await Orchestrator.VerifyBenchTest(request);
+
+            if(response.Results.Any(t => !t.Success))
+            {
+                return BadRequest(response);
+            }
 
             if (response.HasErrorCode("NoDevicesFound"))
             {

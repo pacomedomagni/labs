@@ -8,8 +8,8 @@
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>State</mat-label>
         <mat-select multiple
-                    [value]="selectedStates()"
-                    (selectionChange)="selectedStates.set($event.value)">
+                    [value]="unappliedStates()"
+                    (selectionChange)="unappliedStates.set($event.value)">
           @for (state of availableStates(); track state) {
             <mat-option [value]="state">{{ state }}</mat-option>
           }
@@ -20,8 +20,8 @@
     <!-- Snapshot Version Filter -->
     <div class="filter-section">
       <div class="filter-label">Snapshot Version</div>
-      <mat-button-toggle-group [value]="selectedSnapshotVersion()"
-                               (change)="selectedSnapshotVersion.set($event.value)"
+      <mat-button-toggle-group [value]="unappliedSnapshotVersion()"
+                               (change)="unappliedSnapshotVersion.set($event.value)"
                                class="snapshot-toggle-group">
         <mat-button-toggle value="all">All Snapshot Versions</mat-button-toggle>
         <mat-button-toggle value="3.0">Snapshot 3.0</mat-button-toggle>
@@ -33,8 +33,8 @@
     <!-- Device Type Filter -->
     <div class="filter-section">
       <div class="filter-label">Device Type</div>
-      <mat-radio-group [value]="selectedDeviceType()"
-                       (change)="selectedDeviceType.set($event.value)"
+      <mat-radio-group [value]="unappliedDeviceType()"
+                       (change)="unappliedDeviceType.set($event.value)"
                        class="radio-group">
         <mat-radio-button value="all">All Devices</mat-radio-button>
         <mat-radio-button value="w8w9">W8/W9</mat-radio-button>
@@ -47,28 +47,35 @@
     <div class="filter-section">
       <div class="filter-label">Order Status</div>
       <div class="checkbox-group">
-        <mat-checkbox [checked]="allStatusesSelected()"
-                      [indeterminate]="selectedStatuses().length === 1"
+        <mat-checkbox [checked]="allUnappliedStatusesSelected()"
+                      [indeterminate]="unappliedStatuses().length === 1"
                       (change)="onSelectAllStatuses($event.checked)">
           Select All
         </mat-checkbox>
-        <mat-checkbox [checked]="selectedStatuses().includes('Pending Assignment')"
+        <mat-checkbox [checked]="unappliedStatuses().includes('Pending Assignment')"
                       (change)="onStatusToggle('Pending Assignment', $event.checked)">
           Pending Assignment
         </mat-checkbox>
-        <mat-checkbox [checked]="selectedStatuses().includes('Ready to Print')"
+        <mat-checkbox [checked]="unappliedStatuses().includes('Ready to Print')"
                       (change)="onStatusToggle('Ready to Print', $event.checked)">
           Ready to Print
         </mat-checkbox>
       </div>
     </div>
 
-    <!-- Clear Button -->
-    <div class="clear-button-container">
+    <!-- Action Buttons -->
+    <div class="action-buttons-container">
+      <button mat-flat-button
+              color="primary"
+              (click)="applyFilters()"
+              [disabled]="!hasUnappliedChanges()"
+              class="apply-button">
+        APPLY
+      </button>
       <button mat-flat-button
               color="primary"
               (click)="clearFilters()"
-              [disabled]="isFilterDefault()"
+              [disabled]="isUnappliedFilterDefault() && isAppliedFilterDefault()"
               class="clear-button">
         CLEAR
       </button>
@@ -102,6 +109,9 @@
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Order Date</th>
           <td mat-cell *matCellDef="let order">
             {{ order.orderDate | date:'M/d/yyyy h:mm:ss a' }}
+            @if (isOldOrder(order)) {
+              <mat-icon class="clock-icon" matTooltip="Order over 5 days" inline>schedule</mat-icon>
+            }
           </td>
         </ng-container>
 
@@ -131,7 +141,6 @@
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"
-            [class.old-order]="isOldOrder(row)"
             tabindex="0"
             [attr.aria-label]="'Order ' + row.orderNumber + ', ' + row.state + ', ' + row.nbrDevicesNeeded + ' devices, ' + row.deviceOrderStatusDescription">
         </tr>

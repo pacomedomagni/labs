@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { VehicleDetailsComponent } from './vehicle-details.component';
 import { VehicleDetailsService } from '../../services/vehicle-details.service';
 import { VehicleDetails } from 'src/app/shared/data/vehicle/resources';
+import { UserInfoService } from 'src/app/shared/services/user-info/user-info.service';
+import { UserInfo } from 'src/app/shared/data/application/resources';
 
 describe('VehicleDetailsComponent', () => {
     let component: VehicleDetailsComponent;
@@ -41,10 +43,25 @@ describe('VehicleDetailsComponent', () => {
             'updateVehicle'
         ]);
 
+        // Mock UserInfoService with admin user
+        const mockUserInfo: UserInfo = {
+            lanId: 'admin123',
+            name: 'Test Admin',
+            isLabsAdmin: true,
+            isLabsUser: true
+        };
+        
+        const mockUserInfoService = {
+            userInfo: new BehaviorSubject<UserInfo>(mockUserInfo),
+            userInfo$: new BehaviorSubject<UserInfo>(mockUserInfo).asObservable(),
+            getUserAccess: jasmine.createSpy('getUserAccess').and.returnValue(of(true))
+        };
+
         await TestBed.configureTestingModule({
             imports: [VehicleDetailsComponent, NoopAnimationsModule],
             providers: [
-                { provide: VehicleDetailsService, useValue: vehicleDetailsServiceSpy }
+                { provide: VehicleDetailsService, useValue: vehicleDetailsServiceSpy },
+                { provide: UserInfoService, useValue: mockUserInfoService }
             ]
         }).compileComponents();
 

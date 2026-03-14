@@ -34,6 +34,17 @@ export interface VehicleDetails{
     vehicleSeqID?: number;
 }
 
+export interface AssignedVehicleDetails extends VehicleDetails{
+    deviceSerialNumber: string;
+}
+
+export interface OrderVehicleDetails extends AssignedVehicleDetails{
+    deviceSeqID: number;
+    deviceOrderSeqID: number;
+    deviceOrderDetailSeqID: number;
+    participantSeqID: number;
+}
+
 // export interface Vehicle extends VehicleDetails {
 //     vehicleSeqID?: number;
 // }

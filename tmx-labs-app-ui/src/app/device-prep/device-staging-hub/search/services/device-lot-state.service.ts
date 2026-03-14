@@ -7,12 +7,17 @@ import { DeviceLot, DeviceLotStatus } from 'src/app/shared/data/lot-management/r
 export class DeviceLotStateService {
     // State signals
     private readonly _deviceLot = signal<DeviceLot | null>(null);
+    private readonly _deviceFilter = signal<string | null>(null);
 
-    // Public readonly signal
+    // Public readonly signals
     readonly deviceLot = this._deviceLot.asReadonly();
+
+    /** Represents the current device filter. Will be populated if only one device should be shown. */
+    readonly deviceFilter = this._deviceFilter.asReadonly();
 
     // Computed signals
     readonly hasDeviceLot = computed(() => this._deviceLot() !== null);
+    readonly isDeviceSearch = computed(() => this._deviceFilter() !== null);
 
     readonly deviceLotStatus = computed(() => this._deviceLot()?.statusCode);
 
@@ -23,16 +28,20 @@ export class DeviceLotStateService {
 
     /**
      * Set the current device lot
+     * @param lot The device lot to set as the current context
+     * @param deviceFilter Optional serial number filter to apply to the device list within the lot context
      */
-    setDeviceLot(lot: DeviceLot | null): void {
-        this._deviceLot.set(lot);
+    setDeviceLot(lot: DeviceLot | null, deviceFilter?: string): void {
+        this._deviceLot.set(lot ? { ...lot, lastUpdatedAt: Date.now() } : null);
+        this._deviceFilter.set(deviceFilter ?? null);
     }
 
     /**
-     * Clear the current device lot
+     * Clear the current device lot and search context
      */
     clearDeviceLot(): void {
         this._deviceLot.set(null);
+        this._deviceFilter.set(null);
     }
 
     /**

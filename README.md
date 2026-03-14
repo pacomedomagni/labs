@@ -1,18 +1,17 @@
-Test Intent: Validate that screen readers correctly announce both success messages and error messages related to invalid date/time formats, ensuring accessibility compliance.
+Test Intent: Validate the display and wrapping behavior of the Nickname/YMM field at 150% browser zoom, ensuring compliance with accessibility standards for text scaling.
 
 Steps to Recreate:
 
 Navigate URL: https://tmx-labs-app-main-pro-tmx-labs-app-test.np.glb.pgrcloud.app/Portal
 Click Customer Service >>Enter LastName/Email/DeviceId>>Click Search>>Click on a participant (if needed)
-Click Actions>>Click General>> Click Exclude Trips>>Click Add>>Click external links
-Enter a valid date/time and submit the form to trigger a success message.
-Enter an invalid date/time format and submit the form to trigger an error message.
-Use a screen reader (e.g., NVDA, JAWS, VoiceOver) to verify if the messages are announced.
-Expected Results: Screen reader should announce both the success message and the invalid date/time format error message to the user.
-Excluded date range added.
-Excluded date range updated.
-Excluded date range removed.
-Invalid date format. Please use MM/DD/YYYY.
-Invalid time format. Please use HH:MM AM/PM.
+Set display resolution to 1920 x 1200.
+Observe Participant section - Nickname/YMM field.
+Adjust browser zoom to 150%.
+Observe the text wrapping behavior.
+Expected Results: The Nickname/YMM field should wrap text appropriately at 150% scale, maintaining readability and layout integrity per accessibility standards.
 
-Actual Results: Screen reader does not announce the success message or the invalid date/time format error message.
+Actual Results: Text in the Nickname/YMM field does not wrap properly at 150% scale, causing display issues and reducing readability.
+
+Business Impact: Users requiring increased text size for accessibility cannot view Nickname/YMM field content properly, potentially violating accessibility compliance and impacting user experience.
+
+Impact on Logging and Analysis: Not specified.

@@ -12,6 +12,7 @@ export interface DialogOptions {
     confirmText?: string;
     cancelText?: string;
     hideCancelButton?: boolean;
+    hideSubmitButton?: boolean;
     alignTextLeft?: boolean;
     helpKey?: string;
 }

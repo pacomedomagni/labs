@@ -1,0 +1,12 @@
+<cui-vertical-stepper #stepper [linear]="true">
+    <cui-step class="flex justify-end" label="Assign Devices" aria-label="Step 1 of 2: Assign Devices" [stepControl]="deviceAssignmentForm.stepControl" [summary]="vehicleYMMSN()" [editable]="false">
+        <tmx-assign-devices #deviceAssignmentForm [(vehicles)]="vehicles" (lastRowValidated)="lastDeviceAssigned()"></tmx-assign-devices>
+        <div class="flex justify-end pt-4">
+            <button mat-flat-button matStepperNext color="primary" [disabled]="!deviceAssignmentForm.valid()">
+                <mat-icon>arrow_forward</mat-icon>
+                <span>Next</span>
+            </button>
+        </div>
+    </cui-step>
+    <cui-step label="Print Shipping Label" aria-label="Step 2 of 2: Print Shipping Label" [editable]="false"> To be completed in Product Backlog Item 6982228</cui-step>
+</cui-vertical-stepper>

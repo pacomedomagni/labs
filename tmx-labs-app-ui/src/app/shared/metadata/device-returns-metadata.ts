@@ -9,5 +9,5 @@ export const metadata: ApplicationGroupMetadata = {
     faIcon: faTruckRampBox,
     isReady: true,
     applications: [],
-    access: ['isLabsUser'],
+    access: ['isLabsAdmin'],
 };

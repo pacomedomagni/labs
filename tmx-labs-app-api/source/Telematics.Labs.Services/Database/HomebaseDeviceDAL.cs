@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
@@ -16,6 +17,8 @@ namespace Progressive.Telematics.Labs.Services.Database
     {
         Task<IEnumerable<HomebaseDeviceDataModel>> GetDevicesBySeqIds(IEnumerable<int> deviceSeqIds);
         Task<IEnumerable<HomebaseDeviceDataModel>> GetDevicesBySerialNumbers(IEnumerable<string> serialNumbers);
+        Task<DataTable> GetDeviceSpecs();
+        Task<IEnumerable<HomebaseDeviceDataModel>> GetAllDevices();
     }
 
     public class LabsMyScoreDeviceDal : DbContext, ILabsMyScoreDeviceDAL
@@ -152,6 +155,43 @@ namespace Progressive.Telematics.Labs.Services.Database
             return devices;
         }
 
+        public async Task<DataTable>GetDeviceSpecs()
+        {
+            DynamicParameters parms = new DynamicParameters();
+            const string deviceTypesStoredProc = "dbo.usp_DeviceSpec_SelectAll";
+            var version = (await ExecuteDataFillAsync(deviceTypesStoredProc, parms));
+            return version.FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<HomebaseDeviceDataModel>> GetAllDevices()
+        {
+            const string deviceStoredProc = "dbo.usp_XirgoDevice_SelectAll";
+
+            var records = await ExecuteStoredProcedureAsync<XirgoDeviceRecord>(deviceStoredProc, null);
+
+            if (records == null || !records.Any())
+            {
+                return Enumerable.Empty<HomebaseDeviceDataModel>();
+            }
+
+            var devices = records.Select(record => new HomebaseDeviceDataModel
+            {
+                DeviceSeqID = record.DeviceSeqID,
+                DeviceSerialNumber = record.DeviceSerialNumber,
+                SIM = record.SIM,
+                DeviceStatusCode = record.DeviceStatusCode ?? record.StatusCode,
+                DeviceLocationCode = record.DeviceLocationCode ?? record.LocationCode,
+                DeviceManufacturer = record.DeviceManufacturer ?? record.Manufacturer,
+                DeviceTypeDescription = record.DeviceTypeDescription ?? record.DeviceVersion,
+                ReportedVIN = record.ReportedVIN ?? record.DeviceReportedVIN,
+                DeviceShipDateTime = record.DeviceShipDateTime ?? record.ShipDateTime,
+                FirstContactDateTime = record.FirstContactDateTime,
+                LastContactDateTime = record.LastContactDateTime,
+                LastUploadDateTime = record.LastUploadDateTime,
+            }).ToList();
+
+            return devices;
+        }
         private sealed class XirgoDeviceRecord
         {
             public int DeviceSeqID { get; set; }

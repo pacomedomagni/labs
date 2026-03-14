@@ -1,12 +1,14 @@
 using Dapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Progressive.Telematics.Labs.Business.Resources.DevicePrep;
 using Progressive.Telematics.Labs.Business.Resources.Resources.BenchTest;
 using Progressive.Telematics.Labs.Services.Database.Models;
 using Progressive.Telematics.Labs.Shared.Attributes;
 using Progressive.Telematics.Labs.Shared.Configs;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Progressive.Telematics.Labs.Services.Database
@@ -44,6 +46,15 @@ namespace Progressive.Telematics.Labs.Services.Database
         /// <param name="locationOnBoard">Location on board</param>
         /// <returns></returns>
         Task DeleteDeviceFromBoard(int boardId, int locationOnBoard);
+
+        /// <summary>
+        /// Get device by serial number
+        /// </summary>
+        /// <param name="serialNumber">Device serial number</param>
+        /// <returns>Device if found, otherwise null</returns>
+        Task<DeviceDetails> GetDeviceBySerialNumber(string serialNumber);
+
+
     }
 
     public class BenchTestDeviceDAL : DbContext, IBenchTestDeviceDAL
@@ -99,6 +110,16 @@ namespace Progressive.Telematics.Labs.Services.Database
                 .Parameter("@Parm_LocationOnBoard", locationOnBoard, dbType: DbType.Int32);
 
             await ExecuteNonQueryAsync(storedProc, parms);
+        }
+
+        public async Task<DeviceDetails> GetDeviceBySerialNumber(string serialNumber)
+        {
+            const string storedProc = "dbo.usp_XirgoDevice_SelectBySerialNumber";
+            var parms = new DynamicParameters()
+                .Parameter("@Parm_DeviceSerialNumber", serialNumber, dbType: DbType.AnsiString, size: 50);
+
+            var results = await ExecuteStoredProcedureAsync<DeviceDetails>(storedProc, parms);
+            return results?.FirstOrDefault();
         }
     }
 }

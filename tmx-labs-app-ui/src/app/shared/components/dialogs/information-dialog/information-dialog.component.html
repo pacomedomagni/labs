@@ -3,7 +3,7 @@
     aria-modal="true"
     closeButtonLabel="Close Dialog"
     [showClose]="true"
-    [showFooter]="true"
+    [showFooter]="shouldShowFooter()"
     (close)="onClose()"
 >
     <div mat-dialog-title dialog-header class="flex space-x-4">
@@ -34,15 +34,17 @@
         <ng-container *ngComponentOutlet="data.component; injector: contentInjector"></ng-container>
     </div>
     <ng-container dialog-footer mat-dialog-actions>
-        <button
-            mat-flat-button
-            color="primary"
-            class="mr-xxs"
-            id="btn-confirm"
-            (click)="onConfirm()"
-        >
-            {{ data.confirmText }}
-        </button>
+        @if (!data.hideSubmitButton) {
+            <button
+                mat-flat-button
+                color="primary"
+                class="mr-xxs"
+                id="btn-confirm"
+                (click)="onConfirm()"
+            >
+                {{ data.confirmText }}
+            </button>
+        }
         @if (!data.hideCancelButton) {
             <button mat-stroked-button color="primary" id="btn-cancel" (click)="onCancel()">
                 {{ data.cancelText }}

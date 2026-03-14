@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { BehaviorSubject, of } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,6 +14,8 @@ import { ContactDetailsFormComponent } from '../contact-details/contact-details-
 import { VehicleDetailsComponent } from '../vehicle-details/vehicle-details.component';
 import { VehicleDetails } from 'src/app/shared/data/vehicle/resources';
 import { AddAccountRequest } from 'src/app/shared/data/user-management/resources';
+import { UserInfoService } from 'src/app/shared/services/user-info/user-info.service';
+import { UserInfo } from 'src/app/shared/data/application/resources';
 
 describe('UserEnrollmentStepperComponent', () => {
     let component: UserEnrollmentStepperComponent;
@@ -36,6 +39,20 @@ describe('UserEnrollmentStepperComponent', () => {
     ];
 
     beforeEach(async () => {
+        // Mock UserInfoService with admin user
+        const mockUserInfo: UserInfo = {
+            lanId: 'admin123',
+            name: 'Test Admin',
+            isLabsAdmin: true,
+            isLabsUser: true
+        };
+        
+        const mockUserInfoService = {
+            userInfo: new BehaviorSubject<UserInfo>(mockUserInfo),
+            userInfo$: new BehaviorSubject<UserInfo>(mockUserInfo).asObservable(),
+            getUserAccess: jasmine.createSpy('getUserAccess').and.returnValue(of(true))
+        };
+
         await TestBed.configureTestingModule({
             imports: [
                 UserEnrollmentStepperComponent,
@@ -51,7 +68,10 @@ describe('UserEnrollmentStepperComponent', () => {
                 ContactDetailsFormComponent,
                 VehicleDetailsComponent
             ],
-            providers: [FormBuilder]
+            providers: [
+                FormBuilder,
+                { provide: UserInfoService, useValue: mockUserInfoService }
+            ]
         }).compileComponents();
 
         fixture = TestBed.createComponent(UserEnrollmentStepperComponent);

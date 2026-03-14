@@ -5,6 +5,7 @@ import {
     ActionDisplayRulesService,
     ActionVisibilityContext,
 } from '../action-rules/action-display-rules.service';
+import { UserInfoService } from 'src/app/shared/services/user-info/user-info.service';
 
 export enum ParticipantActionItems {
     MarkAbandoned = 'mark-abandoned',
@@ -30,6 +31,7 @@ export type EnrollmentParticipantAction = MenuButtonGroupItem;
 })
 export class ParticipantActionButtonsService {
     private readonly actionDisplayRules = inject(ActionDisplayRulesService);
+    private readonly userInfoService = inject(UserInfoService);
 
     /**
      * Creates the complete action button groups for a participant
@@ -50,6 +52,11 @@ export class ParticipantActionButtonsService {
      * Creates plug-in related action buttons
      */
     private createPlugInActions(context: ActionVisibilityContext): EnrollmentParticipantAction[] {
+        // Only admins can access plug-in actions
+        if (!this.userInfoService.data.isLabsAdmin) {
+            return [];
+        }
+
         const actions: EnrollmentParticipantAction[] = [];
 
         if (this.actionDisplayRules.canSwapDevices(context)) {
@@ -93,23 +100,30 @@ export class ParticipantActionButtonsService {
     private createGeneralActionsGroup(
         context: ActionVisibilityContext,
     ): EnrollmentParticipantAction {
+        const isAdmin = this.userInfoService.data.isLabsAdmin;
+        
+        // Non-admins can only edit nickname, edit vehicle, and view trips
         const children: EnrollmentParticipantAction[] = [
             this.createEditNicknameButton(),
             this.createEditVehicleButton(),
         ];
 
-        if (this.actionDisplayRules.canExcludeTrips(context)) {
-            children.push(this.createExcludeTripsButton());
+        // Admin-only actions
+        if (isAdmin) {
+            if (this.actionDisplayRules.canExcludeTrips(context)) {
+                children.push(this.createExcludeTripsButton());
+            }
+
+            if (this.actionDisplayRules.canOptOut(context)) {
+                children.push(this.createOptOutButton());
+            }
+
+            if (this.actionDisplayRules.canDeleteVehicle(context)) {
+                children.push(this.createDeleteParticipantButton());
+            }
         }
 
-        if (this.actionDisplayRules.canOptOut(context)) {
-            children.push(this.createOptOutButton());
-        }
-
-        if (this.actionDisplayRules.canDeleteVehicle(context)) {
-            children.push(this.createDeleteParticipantButton());
-        }
-
+        // Both admin and non-admin can view trips
         if (this.actionDisplayRules.canViewTrips(context)) {
             children.push(this.createViewTripsButton());
         }

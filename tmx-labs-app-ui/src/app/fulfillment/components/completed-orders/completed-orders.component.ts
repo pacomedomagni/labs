@@ -1,4 +1,4 @@
-import { Component, ViewChild, AfterViewInit, computed, signal, effect, input, output } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, computed, effect, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { CompletedDeviceOrder, CompletedOrdersList, ProcessedByUser } from '../../../shared/data/fulfillment/resources';
+import { OrderFilterService } from '../../services/order-filter.service';
 
 @Component({
   selector: 'tmx-completed-orders',
@@ -35,31 +36,30 @@ export class CompletedOrdersComponent implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
+  private orderFilterService = inject(OrderFilterService);
+  private filterState = this.orderFilterService.createCompletedOrderFilterState();
+
   orderData = input<CompletedOrdersList | null>(null);
   orderSelected = output<CompletedDeviceOrder>();
 
   displayedColumns: string[] = ['orderNumber', 'processedDateTime', 'shipDateTime', 'processedBy', 'state', 'deviceCount', 'devices'];
   dataSource = new MatTableDataSource<CompletedDeviceOrder>();
 
-  // Filter state signals
-  selectedProcessedBy = signal<string[]>([]);
-  startDate = signal<Date>(new Date());
-  endDate = signal<Date>(new Date());
+  // Expose filter state from service
+  unappliedProcessedBy = this.filterState.unappliedProcessedBy;
+  unappliedStartDate = this.filterState.unappliedStartDate;
+  unappliedEndDate = this.filterState.unappliedEndDate;
+  appliedProcessedBy = this.filterState.appliedProcessedBy;
+  appliedStartDate = this.filterState.appliedStartDate;
+  appliedEndDate = this.filterState.appliedEndDate;
+  isUnappliedFilterDefault = this.filterState.isUnappliedFilterDefault;
+  isAppliedFilterDefault = this.filterState.isAppliedFilterDefault;
+  hasUnappliedChanges = this.filterState.hasUnappliedChanges;
 
   // Computed: available processed-by users from API response
   availableProcessedBy = computed<ProcessedByUser[]>(() => {
     const data = this.orderData();
     return data?.processedByUsers ?? [];
-  });
-
-  // Computed: whether filters are at their default values
-  isFilterDefault = computed(() => {
-    const today = new Date();
-    const start = this.startDate();
-    const end = this.endDate();
-    return this.selectedProcessedBy().length === 0
-      && start.toDateString() === today.toDateString()
-      && end.toDateString() === today.toDateString();
   });
 
   // Computed: client-side filtered orders (date range + ProcessedBy)
@@ -70,8 +70,8 @@ export class CompletedOrdersComponent implements AfterViewInit {
     let result = data.orders;
 
     // Date range filter
-    const start = this.startDate();
-    const end = this.endDate();
+    const start = this.appliedStartDate();
+    const end = this.appliedEndDate();
     const startDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
     const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
     result = result.filter(o => {
@@ -82,7 +82,7 @@ export class CompletedOrdersComponent implements AfterViewInit {
     });
 
     // ProcessedBy filter
-    const processedBy = this.selectedProcessedBy();
+    const processedBy = this.appliedProcessedBy();
     if (processedBy.length > 0) {
       result = result.filter(o => processedBy.includes(o.processedByUserID));
     }
@@ -95,7 +95,7 @@ export class CompletedOrdersComponent implements AfterViewInit {
 
   // Computed: display names for selected processed-by users (for print)
   selectedProcessedByNames = computed(() => {
-    const selected = this.selectedProcessedBy();
+    const selected = this.appliedProcessedBy();
     if (selected.length === 0) return 'ALL';
     const users = this.availableProcessedBy();
     return selected
@@ -136,22 +136,23 @@ export class CompletedOrdersComponent implements AfterViewInit {
 
   onStartDateChange(date: Date | null): void {
     if (!date) return;
-    this.startDate.set(date);
-    if (this.endDate() < date) {
-      this.endDate.set(date);
+    this.unappliedStartDate.set(date);
+    if (this.unappliedEndDate() < date) {
+      this.unappliedEndDate.set(date);
     }
   }
 
   onEndDateChange(date: Date | null): void {
     if (!date) return;
-    this.endDate.set(date);
+    this.unappliedEndDate.set(date);
+  }
+
+  applyFilters(): void {
+    this.filterState.applyFilters();
   }
 
   clearFilters(): void {
-    const today = new Date();
-    this.selectedProcessedBy.set([]);
-    this.startDate.set(today);
-    this.endDate.set(today);
+    this.filterState.clearFilters();
   }
 
   onOrderClick(event: Event, order: CompletedDeviceOrder): void {
@@ -182,8 +183,8 @@ export class CompletedOrdersComponent implements AfterViewInit {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
 
-    const dateStr = this.formatDateForFilename(this.startDate());
-    const selectedUsers = this.selectedProcessedBy();
+    const dateStr = this.formatDateForFilename(this.appliedStartDate());
+    const selectedUsers = this.appliedProcessedBy();
     const userPart = selectedUsers.length === 1 ? selectedUsers[0] : 'ALL';
 
     link.href = url;

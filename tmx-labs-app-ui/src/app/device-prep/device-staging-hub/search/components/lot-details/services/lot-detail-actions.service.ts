@@ -4,6 +4,7 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import {
     DeviceActivationAction,
     DeviceLotStatus,
+    DeviceLotType,
 } from 'src/app/shared/data/lot-management/resources';
 import { LotManagementService } from 'src/app/shared/services/api/lot-management/lot-management.service';
 import { DialogService } from 'src/app/shared/services/dialogs/primary/dialog.service';
@@ -20,13 +21,13 @@ export class LotDetailActionsService {
     private readonly lotState = inject(DeviceLotStateService);
     private readonly notificationBannerService = inject(NotificationBannerService);
 
-    activateLot(lotSeqId: number, lotName: string): Observable<boolean> {
+    activateLot(lotSeqId: number, lotType: DeviceLotType, lotName: string): Observable<boolean> {
         return this.openActivationConfirmationDialog(lotName, DeviceActivationAction.Activate).pipe(
             switchMap((confirmed) => {
                 if (!confirmed) {
                     return of(false);
                 }
-                return this.lotService.activateAllDevicesInLot(lotSeqId).pipe(
+                return this.lotService.activateAllDevicesInLot(lotSeqId, lotType).pipe(
                     tap(() => {
                         this.deviceState.updateFieldForAllDevices('isSimActive', true);
                     }),
@@ -40,7 +41,7 @@ export class LotDetailActionsService {
         );
     }
 
-    deactivateLot(lotSeqId: number, lotName: string): Observable<boolean> {
+    deactivateLot(lotSeqId: number, lotType: DeviceLotType, lotName: string): Observable<boolean> {
         return this.openActivationConfirmationDialog(
             lotName,
             DeviceActivationAction.Deactivate,
@@ -49,7 +50,7 @@ export class LotDetailActionsService {
                 if (!confirmed) {
                     return of(false);
                 }
-                return this.lotService.deactivateAllDevicesInLot(lotSeqId).pipe(
+                return this.lotService.deactivateAllDevicesInLot(lotSeqId, lotType).pipe(
                     tap(() => {
                         this.deviceState.updateFieldForAllDevices('isSimActive', false);
                     }),
@@ -63,7 +64,7 @@ export class LotDetailActionsService {
         );
     }
 
-    updateLotStatus(lotSeqId: number, lotType: number, lotName: string): Observable<boolean> {
+    updateLotStatus(lotSeqId: number, lotType: DeviceLotType, lotName: string): Observable<boolean> {
         return this.dialogService
             .openConfirmationDialog({
                 title: 'Update Lot Status',

@@ -1,8 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { HttpContext } from '@angular/common/http';
 import { ApiService } from '../api.service';
 
-import { OrderListDetails, OrderDetails, AssingDeviceRequest, CompletedOrdersList } from '../../../data/fulfillment/resources';
+import { OrderListDetails, OrderDetails, AssingDeviceRequest, CompletedOrdersList, DeviceOrder, CompletedDeviceOrder, ValidateDeviceForFulfillmentRequest, ValidateDeviceForFulfillmentResponse } from '../../../data/fulfillment/resources';
+import { OrderVehicleDetails } from 'src/app/shared/data/vehicle/resources';
+import { SKIP_LOADING } from '../../http-interceptors/loading-interceptor';
 
 @Injectable({
     providedIn: 'root'
@@ -31,21 +34,77 @@ export class FulfillmentService {
         });
     }
 
-    getPendingOrderList(): Observable<OrderListDetails> {
+    getPendingOrderList(showLoadingIndicator = true): Observable<OrderListDetails> {
         return this.apiService.get<OrderListDetails>({
             uri: `${this.controller}/PendingOrderList`,
+            options: {
+                context: new HttpContext().set(SKIP_LOADING, !showLoadingIndicator),
+            },
         });
     }
 
-    getProcessedOrdersCount(): Observable<number> {
+    getProcessedOrdersCount(showLoadingIndicator = true): Observable<number> {
         return this.apiService.get<number>({
             uri: `${this.controller}/ProcessedOrderCount`,
+            options: {
+                context: new HttpContext().set(SKIP_LOADING, !showLoadingIndicator),
+            },
         });
     }
 
-    getCompletedOrderList(): Observable<CompletedOrdersList> {
+    getCompletedOrderList(showLoadingIndicator = true): Observable<CompletedOrdersList> {
         return this.apiService.get<CompletedOrdersList>({
             uri: `${this.controller}/CompletedOrderList`,
+            options: {
+                context: new HttpContext().set(SKIP_LOADING, !showLoadingIndicator),
+            },
+        });
+    }
+
+    getPendingOrderByNumber(orderNumber: string): Observable<DeviceOrder> {
+        return this.apiService.get<DeviceOrder>({
+            uri: `${this.controller}/GetPendingOrderByNumber?orderNumber=${orderNumber}`,
+        });
+    }
+
+    getCompletedOrderByNumber(orderNumber: string): Observable<CompletedDeviceOrder> {
+        return this.apiService.get<CompletedDeviceOrder>({
+            uri: `${this.controller}/GetCompletedOrderByNumber?orderNumber=${orderNumber}`,
+        });
+    }
+
+    getOrderByEmail(emailAddress: string): Observable<DeviceOrder[]> {
+        return this.apiService.get<DeviceOrder[]>({
+            uri: `${this.controller}/GetOrderByEmail?emailAddress=${encodeURIComponent(emailAddress)}`,
+        });
+    }
+
+    getOrderByDeviceSerialNumber(serialNumber: string): Observable<CompletedDeviceOrder> {
+        return this.apiService.get<CompletedDeviceOrder>({
+            uri: `${this.controller}/GetOrderByDeviceSerialNumber?serialNumber=${encodeURIComponent(serialNumber)}`,
+        });
+    }
+
+    getDeviceOrderVehicles(deviceOrderSeqId: number): Observable<OrderVehicleDetails[]> {
+        return this.apiService.get<OrderVehicleDetails[]>({
+            uri: `${this.controller}/GetDeviceOrderVehicles?deviceOrderSeqID=${deviceOrderSeqId}`,
+        });
+    }
+
+    validateDevice(request: ValidateDeviceForFulfillmentRequest): Observable<ValidateDeviceForFulfillmentResponse> {
+        return this.apiService.post<ValidateDeviceForFulfillmentResponse>({
+            uri: `${this.controller}/ValidateDevice`,
+            payload: request
+        });
+    }
+
+    saveDeviceAssignments(deviceOrderSeqId: number, vehicles: OrderVehicleDetails[]): Observable<void> {
+        return this.apiService.post<void>({
+            uri: `${this.controller}/SaveDeviceAssignments`,
+            payload: {
+                deviceOrderSeqId: deviceOrderSeqId,
+                vehicles: vehicles
+            }
         });
     }
 }

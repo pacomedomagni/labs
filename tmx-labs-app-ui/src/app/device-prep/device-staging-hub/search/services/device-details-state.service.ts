@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Subject } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { DeviceDetails } from 'src/app/shared/data/lot-management/resources';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { DeviceDetails, GetDevicesByLotResponse } from 'src/app/shared/data/lot-management/resources';
 import { LotManagementService } from 'src/app/shared/services/api/lot-management/lot-management.service';
 
 @Injectable({
@@ -16,7 +16,11 @@ export class DeviceDetailsStateService {
     private readonly _error = signal<string | null>(null);
 
     // Subject for handling load requests with automatic request cancellation
-    private readonly loadDevicesSubject = new Subject<{ lotSeqId: number; lotType: number }>();
+    private readonly loadDevicesSubject = new Subject<{ 
+        lotSeqId: number; 
+        lotType: number; 
+        deviceSerialNumber?: string;
+    }>();
 
     // Public readonly signals
     readonly devices = this._devices.asReadonly();
@@ -36,11 +40,15 @@ export class DeviceDetailsStateService {
     constructor() {
         // Single subscription that automatically cancels previous requests using switchMap
         this.loadDevicesSubject.pipe(
-            switchMap(({ lotSeqId, lotType }) => {
+            tap(() => {
                 this._isLoading.set(true);
                 this._error.set(null);
-                return this.lotManagementService.getDevicesByLot(lotSeqId, lotType);
-            })
+            }),
+            switchMap(({ lotSeqId, lotType, deviceSerialNumber }) =>
+                this.lotManagementService.getDevicesByLot(lotSeqId, lotType).pipe(
+                    map(response => this.filterDevicesIfNeeded(response, deviceSerialNumber))
+                )
+            )
         ).subscribe({
             next: (response) => {
                 this._devices.set(response.devices || []);
@@ -55,10 +63,30 @@ export class DeviceDetailsStateService {
     }
 
     /**
-     * Load devices for a specific lot
+     * Filter devices to a specific serial number if provided
      */
-    loadDevices(lotSeqId: number, lotType: number): void {
-        this.loadDevicesSubject.next({ lotSeqId, lotType });
+    private filterDevicesIfNeeded(
+        response: GetDevicesByLotResponse,
+        deviceSerialNumber?: string
+    ): GetDevicesByLotResponse {
+        if (!deviceSerialNumber) {
+            return response;
+        }
+
+        const filteredDevices = (response.devices || []).filter(
+            device => device.deviceSerialNumber?.toLowerCase() === deviceSerialNumber.toLowerCase()
+        );
+        return { ...response, devices: filteredDevices };
+    }
+
+    /**
+     * Load devices for a specific lot
+     * @param lotSeqId - The lot sequence ID
+     * @param lotType - The lot type
+     * @param deviceSerialNumber - Optional: filter to only this device
+     */
+    loadDevices(lotSeqId: number, lotType: number, deviceSerialNumber?: string): void {
+        this.loadDevicesSubject.next({ lotSeqId, lotType, deviceSerialNumber });
     }
 
     /**

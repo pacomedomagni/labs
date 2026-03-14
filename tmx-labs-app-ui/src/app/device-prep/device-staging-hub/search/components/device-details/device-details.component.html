@@ -1,5 +1,10 @@
 <mat-card appearance="outlined">
     <div class="device-details-header mb-4 text-3xl font-semibold">Device Details</div>
+    <div class="screen-reader-only" role="status" aria-live="polite" aria-atomic="true">
+        @if(deviceCount() !== null) {
+            <span>{{ deviceCount() }} {{ deviceCount() === 1 ? 'device found' : 'devices found' }}</span>
+        }
+    </div>
     <table mat-table [dataSource]="dataSource" class="cui-table">
         <ng-container matColumnDef="deviceId">
             <th mat-header-cell *matHeaderCellDef>Device ID</th>

@@ -33,6 +33,7 @@ export class DeviceDetailsComponent implements AfterViewInit, OnDestroy {
     readonly devices = this.deviceDetailsState.devices;
     readonly isLoading = this.deviceDetailsState.isLoading;
     readonly error = this.deviceDetailsState.error;
+    readonly deviceCount = computed(() => !this.isLoading() ? this.devices().length : null);
 
     readonly displayedColumns: string[] = ['deviceId', 'deviceStatus', 'sim', 'simStatus', 'actions'];
     dataSource = new MatTableDataSource<DeviceDetails>([]);
@@ -43,14 +44,22 @@ export class DeviceDetailsComponent implements AfterViewInit, OnDestroy {
         return lot?.lotSeqID ?? lot?.seqId;
     });
     private readonly lotType = computed(() => this.deviceLotState.deviceLot()?.type);
+    private readonly deviceFilter = computed(() => 
+        this.deviceLotState.deviceFilter()
+    );
+    private readonly lotUpdatedAt = computed(() => this.deviceLotState.deviceLot()?.lastUpdatedAt);
 
     constructor() {
         // Effect to load devices when lot changes
         effect(() => {
             const lotId = this.lotId();
             const lotType = this.lotType();
+            const deviceSerialNumber = this.deviceFilter();
+            // Access lotUpdatedAt to trigger reload when lot is set with no real updates (e.g. resubmit search)
+            this.lotUpdatedAt();
+            
             if (lotId && lotType) {
-                this.deviceDetailsState.loadDevices(lotId, lotType);
+                this.deviceDetailsState.loadDevices(lotId, lotType, deviceSerialNumber ?? undefined);
             }
         });
 

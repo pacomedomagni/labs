@@ -241,7 +241,7 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
                         {
                             DeviceSerialNumber = device.DeviceSerialNumber,
                             StatusCode = (int)DeviceStatus.ReadyForBenchTest,
-                            BenchTestStatusCode = (int)DeviceBenchTestStatus.ReadyForBenchTest
+                            BenchTestStatusCode = (int)DeviceBenchTestStatus.Started
                         }
                     });
                 }
@@ -355,30 +355,15 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
             var results = new List<DeviceUpdateResult>();
 
             // Filter devices eligible for update (ProgramCode is null)
-            var eligibleDevices = wcfResponse.Devices
-                .Where(d => d.ProgramCode == null && d.DeviceSeqID.HasValue)
+            var devices = wcfResponse.Devices
+                .Where(d => d.DeviceSeqID.HasValue)
                 .ToList();
 
-            var ineligibleDevices = wcfResponse.Devices
-                .Where(d => d.ProgramCode != null || !d.DeviceSeqID.HasValue)
-                .ToList();
 
-            // Add results for ineligible devices
-            foreach (var device in ineligibleDevices)
-            {
-                results.Add(new DeviceUpdateResult
-                {
-                    DeviceSerialNumber = device.DeviceSerialNumber,
-                    Success = false,
-                    ErrorMessage = "Device has ProgramCode assigned or missing DeviceSeqID"
-                });
-                response.FailedUpdates++;
-            }
-
-            if (eligibleDevices.Count > 0)
+            if (devices.Count > 0)
             {
                 // Prepare bulk update data
-                var deviceUpdates = eligibleDevices.Select(d => new XirgoDeviceBulkUpdateModel
+                var deviceUpdates = devices.Select(d => new XirgoDeviceBulkUpdateModel
                 {
                     DeviceSeqID = d.DeviceSeqID!.Value,
                     IsCommunicationAllowed = true,
@@ -390,7 +375,7 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
                 }).ToList();
 
                 // Prepare bulk activity log data
-                var activityLogs = eligibleDevices.Select(d => new DeviceActivityBulkInsertModel
+                var activityLogs = devices.Select(d => new DeviceActivityBulkInsertModel
                 {
                     DeviceSeqID = d.DeviceSeqID!.Value,
                     Description = $"Bench test verification: Status={d.StatusCode}, Location={d.LocationCode}"
@@ -403,7 +388,7 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
                 await _deviceActivityDAL.BulkInsertDeviceActivities(activityLogs);
 
                 // Mark all eligible devices as successful
-                foreach (var device in eligibleDevices)
+                foreach (var device in devices)
                 {
                     results.Add(new DeviceUpdateResult
                     {

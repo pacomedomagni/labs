@@ -42,6 +42,8 @@ export class FormDialogComponent implements AfterViewInit  {
 		manualSubmission: boolean;
 		title: string;
 		subtitle: string;
+		hideCancelButton: boolean;
+		hideSubmitButton: boolean;
 		helpKey: string | HelpText;
 	}>(MAT_DIALOG_DATA, { optional: true });
 	private dialogRef = inject(MatDialogRef<FormDialogComponent>);
@@ -66,6 +68,13 @@ export class FormDialogComponent implements AfterViewInit  {
 
 	shouldDisplaySubtitle(): boolean {
 		return this.data.subtitle ? true : false;
+	}
+
+	shouldShowFooter(): boolean {
+		if (this.data.manualSubmission) {
+			return false;
+		}
+		return !(this.data.hideSubmitButton && this.data.hideCancelButton);
 	}
 
 	onClose = () => {

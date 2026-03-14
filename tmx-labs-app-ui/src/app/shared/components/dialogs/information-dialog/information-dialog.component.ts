@@ -37,6 +37,7 @@ export class InformationDialogComponent {
         title: string;
         subtitle: string;
         hideCancelButton: boolean;
+        hideSubmitButton: boolean;
         helpKey: string | HelpText;
         dialogContentClass?: string | string[] | null;
     }>(MAT_DIALOG_DATA, { optional: true });
@@ -58,7 +59,9 @@ export class InformationDialogComponent {
     shouldDisplaySubtitle(): boolean {
         return this.data.subtitle || this.data.subtitleComponent ? true : false;
     }
-
+	shouldShowFooter(): boolean {
+		return !(this.data.hideSubmitButton && this.data.hideCancelButton);
+	}
 	hasInjectedSubtitleComponent(): boolean {
 		return this.data.subtitleComponent ? true : false;
 	}

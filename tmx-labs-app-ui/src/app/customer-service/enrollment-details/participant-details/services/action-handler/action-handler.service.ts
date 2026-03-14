@@ -306,22 +306,13 @@ export class ActionHandlerService {
             return;
         }
 
-        const url = this.router.serializeUrl(
-            this.router.createUrlTree(['/orderfulfillment/order'], {
-                queryParams: {
-                    deviceOrderSeqId:
-                        context.participantResource().openDeviceOrder?.deviceOrderSeqID,
-                },
-            }),
-        );
-
-        const newTab = window.open(url, '_blank');
-
-        if (!newTab) {
-            this.notificationService.error(
-                'Unable to open device order page in a new tab. Please check your popup blocker settings.',
-            );
-        }
+        // Navigate to Order Fulfillment page with deviceOrderSeqId query param
+        // The fulfillment component will automatically open the Device Order modal
+        this.router.navigate(['/OrderFulfillment'], {
+            queryParams: {
+                deviceOrderSeqId: deviceOrderSeqId,
+            },
+        });
     }
 
     private openDeleteParticipantDialog(context: ActionHandlerContext): void {

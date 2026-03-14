@@ -100,7 +100,6 @@ export class App implements OnInit {
     const filteredLinks = this.apps
       .filter(app => this.userService.getUserAccess(app.access))
       .sort((app, sort) => app.id === ApplicationGroupIds.Portal ? -1 : sort.id === ApplicationGroupIds.Portal ? 1 : 0);
-    console.log("📋 Filtered links:", filteredLinks.map(l => l.label));
     this.links.set(filteredLinks);
   }
 

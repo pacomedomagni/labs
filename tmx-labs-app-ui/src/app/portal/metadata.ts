@@ -19,8 +19,8 @@ export const metadata: ApplicationGroupMetadata = {
             description: `
 			Labs App is a web UI used for lorem ipsum dolor sit amet`,
             isReady: true,
-            access: ['isLabsUser'],
+            access: ['isLabsAdmin'],
         },
     ],
-    access: ['isLabsUser'],
+    access: ['isLabsAdmin'],
 };

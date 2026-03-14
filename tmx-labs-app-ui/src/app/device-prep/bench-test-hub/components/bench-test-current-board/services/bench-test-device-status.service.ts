@@ -116,7 +116,6 @@ export class BenchTestDeviceStatusService implements OnDestroy {
      * @returns Observable<number> - Count of completed/errored devices in the lot
      */
     subscribeToBenchTestCompletions(deviceSerialNumbers: string[]): Observable<number> {
-        console.log('Subscribing to bench test completions for devices:', deviceSerialNumbers);
         return this.deviceStatuses$.pipe(
             map((statuses) =>
                 statuses.filter(

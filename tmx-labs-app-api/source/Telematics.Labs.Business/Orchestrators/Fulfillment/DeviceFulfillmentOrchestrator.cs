@@ -2,23 +2,17 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Kerberos.NET.Entities;
 using Microsoft.Extensions.Logging;
 using Progressive.Telematics.Labs.Business.Resources.Enums;
 using Progressive.Telematics.Labs.Business.Resources.Resources.Device;
 using Progressive.Telematics.Labs.Business.Resources.Resources.FulFillment;
-using Progressive.Telematics.Labs.Services;
+using Progressive.Telematics.Labs.Business.Resources.Shared;
 using Progressive.Telematics.Labs.Services.Database;
-using Progressive.Telematics.Labs.Services.Database.Models.DeviceOrder;
 using Progressive.Telematics.Labs.Services.Wcf;
 using Progressive.Telematics.Labs.Shared;
 using Progressive.Telematics.Labs.Shared.Attributes;
-using Progressive.Telematics.Labs.Shared.CodeTableManager;
 using Progressive.Telematics.Labs.Shared.Utils;
 using WCFBusinessDeviceOrderService;
 using WCFDeviceOrderService;
@@ -26,6 +20,13 @@ using WCFDeviceOrderSummaryService;
 using WcfUserManagementService;
 
 namespace Progressive.Telematics.Labs.Business.Orchestrators.Fulfillment;
+
+public static class DeviceOrderStatus
+{
+    public const int PendingAssignment = 1;
+    public const int ReadyToPrint = 2;
+    public const int Completed = 3;
+}
 
 [SingletonService]
 
@@ -38,37 +39,48 @@ public interface IDeviceFulfillmentOrchestrator
     Task<int> GetProcessedOrderCount();
     Task<CompletedOrdersList> GetCompletedOrderList();
     Task<List<LabelPrinter>> GetLabelPrinters();
+    Task<ValidateDeviceForFulfillmentResponse> ValidateDeviceForFulfillment(ValidateDeviceForFulfillmentRequest request);
+    Task<List<OrderVehicle>> GetDeviceOrderVehicles(int deviceOrderSeqId);
+    Task<Resources.Resources.FulFillment.DeviceOrder> GetPendingOrderByNumber(string orderNumber);
+    Task<CompletedDeviceOrder> GetCompletedOrderByNumber(string orderNumber);
+    Task<List<Resources.Resources.FulFillment.DeviceOrder>> GetOrderByEmail(string emailAddress);
+    Task<CompletedDeviceOrder> GetOrderByDeviceSerialNumber(string serialNumber);
+    Task<ConfirmDeviceAssignmentResponse> SaveDeviceAssignments(ConfirmDeviceAssignmentRequest request);
 }
 public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
 {
     private readonly IWCFDeviceOrderService _wCFDeviceOrderService;
     private readonly IWCFBusinessDeviceOrderService _wCFBusinessDeviceOrderService;
-    private readonly IHomeBaseCodeTableManager _homeBaseCodeTableManager;
+    private readonly ILabsMyScoreDeviceDAL _homeBaseDeviceDAL;
     private readonly IWCFDeviceOrderSummaryService _wCFDeviceOrderSummaryService;
     private readonly IUserManagementService _userManagementService;
     private readonly IDeviceOrderDAL _deviceOrderDAL;
-    private readonly IConfigSettings _configSettings;
+    private readonly IDeviceOrderDetailDAL _deviceOrderDetailDAL;
+    private readonly IXirgoDeviceService _xirgoDeviceService;
     private readonly ILabelPrinterDAL _labelPrinterDAL;
     private readonly ILogger<DeviceFulfillmentOrchestrator> _logger;
 
     public DeviceFulfillmentOrchestrator(
         IWCFDeviceOrderService wCFDeviceOrderService,
         IWCFBusinessDeviceOrderService wCFBusinessDeviceOrderService,
-        IHomeBaseCodeTableManager homeBaseCodeTableManager,
+        ILabsMyScoreDeviceDAL homeBaseDeviceDAL,
         IWCFDeviceOrderSummaryService wCFDeviceOrderSummaryService,
         IUserManagementService userManagementService,
         IDeviceOrderDAL deviceOrderDAL,
+        IDeviceOrderDetailDAL deviceOrderDetailDAL,
+        IXirgoDeviceService xirgoDeviceService,
         IConfigSettings configSettings,
         ILabelPrinterDAL labelPrinterDAL,
         ILogger<DeviceFulfillmentOrchestrator> logger)
     {
         _wCFDeviceOrderService = wCFDeviceOrderService;
         _wCFBusinessDeviceOrderService = wCFBusinessDeviceOrderService;
-        _homeBaseCodeTableManager = homeBaseCodeTableManager;
+        _homeBaseDeviceDAL = homeBaseDeviceDAL;
         _wCFDeviceOrderSummaryService = wCFDeviceOrderSummaryService;
         _userManagementService = userManagementService;
         _deviceOrderDAL = deviceOrderDAL;
-        _configSettings = configSettings;
+        _deviceOrderDetailDAL = deviceOrderDetailDAL;
+        _xirgoDeviceService = xirgoDeviceService;
         _labelPrinterDAL = labelPrinterDAL;
         _logger = logger;
     }
@@ -110,8 +122,7 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
                 }
                 break;
             default:
-                var errMessage = string.Format("Unresolved response error from DeviceOrderService. [DeviceOrderSeqID] = {0} [FulfillDeviceOrderResponse: ] = {1}",
-                                               orderDetails.DeviceOrderSeqID, fulfillDeviceOrderResponse.ResponseStatus);
+                var errMessage = $"Unresolved response error from DeviceOrderService. [DeviceOrderSeqID] = {orderDetails.DeviceOrderSeqID} [FulfillDeviceOrderResponse: ] = {fulfillDeviceOrderResponse.ResponseStatus}";
                 throw new ApplicationException(errMessage);
         }
         return orderDetails;
@@ -135,7 +146,7 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
                     Year = od.Vehicle.Year == 0 ? "unknown" : od.Vehicle.Year.ToString(),
                     Make = od.Vehicle.Make,
                     Model = od.Vehicle.Model,
-                    ParticipantSeqID = od.Participant.ParticipantSeqID
+                    ParticipantSeqID = od.DeviceOrderDetail.ParticipantSeqID
                 }))
                 {
                     orderDetails.Vehicles.Add(veh);
@@ -144,18 +155,16 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
         }
         else
         {
-            var errMessage = string.Format("Unresolved response error from BusinessDeviceOrderService. [DeviceOrderSeqID] = {0} [ResponseStatus: ] = {1}",
-                                           orderDetails.DeviceOrderSeqID, deviceOrderResponse.ResponseStatus);
+            var errMessage = $"Unresolved response error from BusinessDeviceOrderService. [DeviceOrderSeqID] = {orderDetails.DeviceOrderSeqID} [ResponseStatus: ] = {deviceOrderResponse.ResponseStatus}";
             throw new ApplicationException(errMessage);
         }
 
-        // Load code tables dataset (this triggers lazy loading from cache or WCF service)
+        // Load device specs from database
         try
         {
-            var dataset = _homeBaseCodeTableManager.TypedDataSet;
-            if (dataset != null && dataset.Tables.Contains("DeviceSpec"))
+            var deviceSpecTable = await _homeBaseDeviceDAL.GetDeviceSpecs();
+            if (deviceSpecTable != null && deviceSpecTable.Rows.Count > 0)
             {
-                var deviceSpecTable = dataset.Tables["DeviceSpec"];
                 orderDetails.DeviceTypes = deviceSpecTable.AsEnumerable()
                     .Select(row => new DeviceType
                     {
@@ -168,9 +177,9 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
                 orderDetails.DeviceTypes = new List<DeviceType>();
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // If code table loading fails (e.g., WCF security issue), use empty list
+            _logger.LogWarning(ex, "Failed to load device specifications.");
             orderDetails.DeviceTypes = new List<DeviceType>();
         }
 
@@ -187,8 +196,7 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
         var deviceOrderSummaryResponse = await _wCFDeviceOrderSummaryService.GetByStatus(deviceOrderSummaryRequest);
         if (deviceOrderSummaryResponse.ResponseStatus != WCFDeviceOrderSummaryService.ResponseStatus.Success)
         {
-            var errMessage = string.Format("Failure on DeviceOrderSummaryService GetByStatus. [DeviceOrderStatusCode = {0}]",
-                                       orderList.DeviceOrderStatusCode);
+            var errMessage = $"Failure on DeviceOrderSummaryService GetByStatus. [DeviceOrderStatusCode = {orderList.DeviceOrderStatusCode}]";
             throw new ApplicationException(errMessage);
         }
 
@@ -206,7 +214,7 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
         var resp = await _userManagementService.GetUsersByUIDs(uids);
         if (resp.ResponseStatus != WcfUserManagementService.ResponseStatus.Success)
         {
-            var errMessage = string.Format("Failure on UserManagementService GetUsersByUIDs. [DeviceOrderStatusCode = {0}]", orderList.DeviceOrderStatusCode);
+            var errMessage = $"Failure on UserManagementService GetUsersByUIDs. [DeviceOrderStatusCode = {orderList.DeviceOrderStatusCode}]";
             throw new ApplicationException(errMessage);
         }
 
@@ -238,6 +246,8 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
         return orderList;
     }
 
+
+
     public async Task<OrdersList> GetPendingOrderList()
     {
         try
@@ -258,9 +268,9 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
 
             var allOrders = dbOrders.Select(o =>
             {
-                var state = userLookup.TryGetValue(o.ParticipantGroupExternalKey, out var user)
-                    ? (user.State ?? "").Trim()
-                    : "";
+                var hasUser = userLookup.TryGetValue(o.ParticipantGroupExternalKey, out var user);
+                var email = hasUser ? (user.Email ?? "").Trim() : "";
+                var state = hasUser ? (user.State ?? "").Trim() : "";
 
                 return new Resources.Resources.FulFillment.DeviceOrder
                 {
@@ -268,10 +278,11 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
                     OrderNumber = o.DeviceOrderSeqID.ToString(),
                     OrderDate = o.CreateDateTime,
                     State = state,
+                    Email = email,
                     NbrDevicesNeeded = o.DeviceDetailCount,
                     DeviceType = ExtractDeviceType(o.XirgoVersionDescriptions),
                     SnapshotVersion = ResolveSnapshotVersion(o.SnapshotVersionCode),
-                    DeviceOrderStatusDescription = o.StatusDescription
+                    DeviceOrderStatusDescription = GetStatusDescription(o.DeviceOrderStatusCode)
                 };
             })
             .OrderBy(o => o.OrderDate)
@@ -301,6 +312,119 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
     {
         var printers = await _labelPrinterDAL.GetLabelPrinters();
         return printers.ToList();
+    }
+
+    public async Task<Resources.Resources.FulFillment.DeviceOrder> GetPendingOrderByNumber(string orderNumber)
+    {
+        var pendingOrders = await GetPendingOrderList();
+        return pendingOrders.DeviceOrders.FirstOrDefault(o => o.OrderNumber == orderNumber);
+    }
+
+    public async Task<CompletedDeviceOrder> GetCompletedOrderByNumber(string orderNumber)
+    {
+        var completedOrders = await GetCompletedOrderList();
+        return completedOrders.Orders.FirstOrDefault(o => o.OrderNumber == orderNumber);
+    }
+
+    public async Task<List<Resources.Resources.FulFillment.DeviceOrder>> GetOrderByEmail(string emailAddress)
+    {
+        if (string.IsNullOrWhiteSpace(emailAddress))
+        {
+            return new List<Resources.Resources.FulFillment.DeviceOrder>();
+        }
+
+        var normalizedEmail = emailAddress.Trim();
+        var pendingOrders = await GetPendingOrderList();
+        return pendingOrders.DeviceOrders
+            .Where(o => string.Equals(o.Email, normalizedEmail, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    public async Task<Resources.Resources.FulFillment.CompletedDeviceOrder> GetOrderByDeviceSerialNumber(string serialNumber)
+    {
+        if (string.IsNullOrWhiteSpace(serialNumber))
+        {
+            return null;
+        }
+
+        var normalizedSerialNumber = serialNumber.Trim();
+
+        // Get detailed order data for pending statuses (1 = Pending Assignment, 2 = Ready to Print)
+        var completedOrders = await GetCompletedOrderList();
+        return completedOrders.Orders
+            .FirstOrDefault(o => o.DeviceSerialNumbers != null &&
+                o.DeviceSerialNumbers.Any(sn => string.Equals(sn, normalizedSerialNumber, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    public async Task<CompletedOrdersList> GetCompletedOrderList()
+    {
+        try
+        {
+            var dbOrders = (await _deviceOrderDAL.GetFulfillmentOrdersByStatus(new[] { 3 })).ToList();
+            if (dbOrders.Count == 0)
+            {
+                return new CompletedOrdersList
+                {
+                    Orders = new List<CompletedDeviceOrder>(),
+                    TotalCount = 0,
+                    ProcessedByUsers = new List<ProcessedByUser>()
+                };
+            }
+
+            var userLookup = await GetUsersByExternalKeysAsync(
+                dbOrders.Select(o => o.ParticipantGroupExternalKey));
+
+            var processedByLookup = await BuildProcessedByLookupAsync(
+                dbOrders.Select(o => o.FulfilledByUserID));
+
+            var orders = dbOrders.Select(o =>
+            {
+                var hasUser = userLookup.TryGetValue(o.ParticipantGroupExternalKey, out var user);
+                var state = hasUser ? (user.State ?? "").Trim() : "";
+                var email = hasUser ? (user.Email ?? "").Trim() : "";
+
+                var processedByUserID = o.FulfilledByUserID ?? "";
+                var processedBy = processedByLookup.TryGetValue(processedByUserID, out var displayName)
+                    ? displayName
+                    : processedByUserID;
+
+                var deviceSerialNumbers = string.IsNullOrEmpty(o.DeviceSerialNumbers)
+                    ? new List<string>()
+                    : o.DeviceSerialNumbers.Split(',').Where(s => !string.IsNullOrEmpty(s)).ToList();
+
+                return new CompletedDeviceOrder
+                {
+                    DeviceOrderSeqID = o.DeviceOrderSeqID,
+                    OrderNumber = o.DeviceOrderSeqID.ToString(),
+                    ProcessedDateTime = o.ProcessedDateTime,
+                    ShipDateTime = o.ShipDateTime,
+                    ProcessedBy = processedBy,
+                    ProcessedByUserID = processedByUserID,
+                    State = state,
+                    Email = email,
+                    DeviceCount = o.DeviceDetailCount,
+                    DeviceSerialNumbers = deviceSerialNumbers
+                };
+            }).ToList();
+
+            var processedByUsers = processedByLookup
+                .Select(kvp => new ProcessedByUser { UserID = kvp.Key, DisplayName = kvp.Value })
+                .OrderBy(u => u.DisplayName)
+                .ToList();
+
+            return new CompletedOrdersList
+            {
+                Orders = orders,
+                TotalCount = orders.Count,
+                ProcessedByUsers = processedByUsers
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(LoggingEvents.DeviceFulfillmentOrchestrator_GetCompletedOrders_Error, ex,
+                "Failed to get completed orders.");
+            throw;
+        }
     }
 
     private static Resources.Resources.FulFillment.DeviceOrder BuildDeviceOrder(
@@ -367,80 +491,11 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
     {
         return statusCode switch
         {
-            1 => "Pending Assignment",
-            2 => "Ready to Print",
+            DeviceOrderStatus.PendingAssignment => "Pending Assignment",
+            DeviceOrderStatus.ReadyToPrint => "Ready to Print",
+            DeviceOrderStatus.Completed => "Completed/Shipped",
             _ => "Unknown"
         };
-    }
-
-    public async Task<CompletedOrdersList> GetCompletedOrderList()
-    {
-        try
-        {
-            var dbOrders = (await _deviceOrderDAL.GetFulfillmentOrdersByStatus(new[] { 3 })).ToList();
-            if (dbOrders.Count == 0)
-            {
-                return new CompletedOrdersList
-                {
-                    Orders = new List<CompletedDeviceOrder>(),
-                    TotalCount = 0,
-                    ProcessedByUsers = new List<ProcessedByUser>()
-                };
-            }
-
-            var userLookup = await GetUsersByExternalKeysAsync(
-                dbOrders.Select(o => o.ParticipantGroupExternalKey));
-
-            var processedByLookup = await BuildProcessedByLookupAsync(
-                dbOrders.Select(o => o.FulfilledByUserID));
-
-            var orders = dbOrders.Select(o =>
-            {
-                var state = userLookup.TryGetValue(o.ParticipantGroupExternalKey, out var user)
-                    ? (user.State ?? "").Trim()
-                    : "";
-
-                var processedByUserID = o.FulfilledByUserID ?? "";
-                var processedBy = processedByLookup.TryGetValue(processedByUserID, out var displayName)
-                    ? displayName
-                    : processedByUserID;
-
-                var deviceSerialNumbers = string.IsNullOrEmpty(o.DeviceSerialNumbers)
-                    ? new List<string>()
-                    : o.DeviceSerialNumbers.Split(',').Where(s => !string.IsNullOrEmpty(s)).ToList();
-
-                return new CompletedDeviceOrder
-                {
-                    DeviceOrderSeqID = o.DeviceOrderSeqID,
-                    OrderNumber = o.DeviceOrderSeqID.ToString(),
-                    ProcessedDateTime = o.ProcessedDateTime,
-                    ShipDateTime = o.ShipDateTime,
-                    ProcessedBy = processedBy,
-                    ProcessedByUserID = processedByUserID,
-                    State = state,
-                    DeviceCount = o.DeviceDetailCount,
-                    DeviceSerialNumbers = deviceSerialNumbers
-                };
-            }).ToList();
-
-            var processedByUsers = processedByLookup
-                .Select(kvp => new ProcessedByUser { UserID = kvp.Key, DisplayName = kvp.Value })
-                .OrderBy(u => u.DisplayName)
-                .ToList();
-
-            return new CompletedOrdersList
-            {
-                Orders = orders,
-                TotalCount = orders.Count,
-                ProcessedByUsers = processedByUsers
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(LoggingEvents.DeviceFulfillmentOrchestrator_GetCompletedOrders_Error, ex,
-                "Failed to get completed orders.");
-            throw;
-        }
     }
 
     private async Task<Dictionary<string, WcfUserManagementService.User>> GetUsersByExternalKeysAsync(IEnumerable<string> keys)
@@ -448,7 +503,7 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
         var uids = keys.Where(key => !string.IsNullOrEmpty(key)).Distinct().ToArray();
         if (uids.Length == 0)
         {
-            return new Dictionary<string, WcfUserManagementService.User>();
+            return new Dictionary<string, User>();
         }
 
         var userResp = await _userManagementService.GetUsersByUIDs(uids);
@@ -457,7 +512,7 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
             return userResp.Users;
         }
 
-        return new Dictionary<string, WcfUserManagementService.User>();
+        return new Dictionary<string, User>();
     }
 
     private async Task<Dictionary<string, string>> BuildProcessedByLookupAsync(IEnumerable<string> fulfilledByUserIds)
@@ -542,6 +597,90 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
         }
 
         return "";
+    }
+
+    public async Task<ValidateDeviceForFulfillmentResponse> ValidateDeviceForFulfillment(ValidateDeviceForFulfillmentRequest request)
+    {
+        var response = new ValidateDeviceForFulfillmentResponse(request.DeviceSerialNumber);
+
+        if (string.IsNullOrWhiteSpace(request?.DeviceSerialNumber))
+        {
+            response.AddMessage(MessageCode.ErrorCode, "InvalidRequest");
+            response.AddMessage(MessageCode.ErrorDetails, "Device serial number is required");
+            return response;
+        }
+
+        var deviceResult = await _xirgoDeviceService.GetDeviceBySerialNumber(request.DeviceSerialNumber);
+
+        if (deviceResult?.Device == null)
+        {
+            response.AddMessage(MessageCode.ErrorCode, "DeviceNotFound");
+            response.AddMessage(MessageCode.ErrorDetails, $"Device with ID '{request.DeviceSerialNumber}' not found");
+            return response;
+        }
+
+        response.IsExistent = true;
+        response.IsAssigned = (deviceResult.Device.StatusCode.HasValue && deviceResult.Device.StatusCode.Value == (int)DeviceStatus.Assigned);
+
+        if (deviceResult.Device.BenchTestStatusCode.HasValue && deviceResult.Device.BenchTestStatusCode.Value == (int)DeviceBenchTestStatus.Completed)
+        {
+            response.IsBenchtested = true;
+        }
+
+        return response;
+    }
+
+    public async Task<List<OrderVehicle>> GetDeviceOrderVehicles(int deviceOrderSeqId)
+    {
+        var vehicles = await _deviceOrderDAL.GetVehiclesByDeviceOrderSeqId(deviceOrderSeqId);
+        return vehicles.ToList();
+    }
+
+    public async Task<ConfirmDeviceAssignmentResponse> SaveDeviceAssignments(ConfirmDeviceAssignmentRequest request)
+    {
+        var response = new ConfirmDeviceAssignmentResponse
+        {
+            DeviceOrderSeqID = request.DeviceOrderSeqID
+        };
+
+        foreach (var vehicle in request.Vehicles)
+        {
+
+            // Update the device with the XirgoDeviceService
+            var updateDeviceResponse = await _xirgoDeviceService.UpdateXirgoDevice(
+                vehicle.DeviceSerialNumber,
+                DeviceStatus.Assigned,
+                DeviceLocation.ShippedToCustomer,
+                true, true);
+
+            if (updateDeviceResponse.ResponseStatus != WcfXirgoService.ResponseStatus.Success)
+            {
+                response.Errors.Add($"Failed to update device {vehicle.DeviceSerialNumber}: {updateDeviceResponse.ResponseStatus}");
+                continue;
+            }
+
+            var xirgoDeviceResponse = await _xirgoDeviceService.GetDeviceBySerialNumber(vehicle.DeviceSerialNumber);
+
+            if (xirgoDeviceResponse.ResponseStatus != WcfXirgoService.ResponseStatus.Success)
+            {
+                response.Errors.Add($"Failed to retrieve device {vehicle.DeviceSerialNumber}: {updateDeviceResponse.ResponseStatus}");
+                continue;
+            }
+
+            // Update the device order detail with the assigned device
+            await _deviceOrderDetailDAL.UpdateDeviceOrderDetail(
+                vehicle.DeviceOrderDetailSeqID,
+                deviceSeqId: xirgoDeviceResponse.Device.DeviceSeqID);
+
+        }
+
+        // Update the device order status to Completed
+        var now = DateTime.UtcNow;
+        await _deviceOrderDAL.UpdateDeviceOrder(
+            request.DeviceOrderSeqID,
+            deviceOrderStatusCode: DeviceOrderStatus.ReadyToPrint);
+
+        return response;
     }
 
 }

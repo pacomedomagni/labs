@@ -35,6 +35,7 @@ export interface DeviceLot extends Resource {
     status?: DeviceLotStatus;
     typeCode?: number;
     type?: DeviceLotType;
+    lastUpdatedAt?: number;
 }
 
 export interface DeviceDetails extends Resource {

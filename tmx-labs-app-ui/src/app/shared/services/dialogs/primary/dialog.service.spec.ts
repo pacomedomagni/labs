@@ -51,6 +51,7 @@ describe('DialogService', () => {
           title: 'Confirm Action',
           subtitle: undefined,
           hideCancelButton: false,
+          hideSubmitButton: false,
           alignTextLeft: false,
           helpKey: undefined
         },
@@ -83,6 +84,7 @@ describe('DialogService', () => {
           title: 'Custom Title',
           subtitle: 'Custom Subtitle',
           hideCancelButton: true,
+          hideSubmitButton: false,
           alignTextLeft: true,
           helpKey: 'test-help'
         },
@@ -117,6 +119,7 @@ describe('DialogService', () => {
           title: 'Information',
           subtitle: undefined,
           hideCancelButton: false,
+          hideSubmitButton: false,
           helpKey: undefined,
           dialogContentClass: undefined
         },
@@ -159,6 +162,7 @@ describe('DialogService', () => {
           title: 'Test Title',
           subtitle: 'Test Subtitle',
           hideCancelButton: true,
+          hideSubmitButton: false,
           helpKey: 'info-help',
           dialogContentClass: undefined
         },
@@ -191,7 +195,9 @@ describe('DialogService', () => {
           title: 'Form Dialog',
           subtitle: undefined,
           manualSubmission: undefined,
-          helpKey: undefined
+          helpKey: undefined,
+          hideCancelButton: false,
+          hideSubmitButton: false
         },
         autoFocus: true
       });
@@ -231,7 +237,9 @@ describe('DialogService', () => {
           title: 'Custom Form',
           subtitle: 'Form Subtitle',
           manualSubmission: true,
-          helpKey: 'form-help'
+          helpKey: 'form-help',
+          hideCancelButton: false,
+          hideSubmitButton: false
         },
         autoFocus: true
       });

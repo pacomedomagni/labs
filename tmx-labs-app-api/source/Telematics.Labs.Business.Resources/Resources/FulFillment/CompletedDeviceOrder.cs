@@ -12,6 +12,7 @@ public class CompletedDeviceOrder
     public string ProcessedBy { get; set; }
     public string ProcessedByUserID { get; set; }
     public string State { get; set; }
+    public string Email { get; set; }
     public int DeviceCount { get; set; }
     public List<string> DeviceSerialNumbers { get; set; } = new();
 }

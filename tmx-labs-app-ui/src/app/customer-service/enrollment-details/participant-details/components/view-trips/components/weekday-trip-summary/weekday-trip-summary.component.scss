@@ -5,9 +5,4 @@
         width: 100%;
     }
 
-    /* Alternative with higher specificity */
-    table .mat-mdc-footer-row td {
-        @apply bg-gray-100 font-semibold;
-        border-top: 1px solid  #d1d5db !important;
-    }
 }

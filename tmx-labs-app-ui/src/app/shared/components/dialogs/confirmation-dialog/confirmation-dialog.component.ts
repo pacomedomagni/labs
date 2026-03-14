@@ -33,6 +33,7 @@ export class ConfirmationDialogComponent {
 		title: string;
 		subtitle: string;
 		hideCancelButton: boolean;
+		hideSubmitButton: boolean;
 		alignTextLeft: boolean;
 		helpKey: string | HelpText;
 	}>(MAT_DIALOG_DATA, { optional: true });
@@ -40,6 +41,10 @@ export class ConfirmationDialogComponent {
 
 	shouldDisplaySubtitle(): boolean {
 		return this.data.subtitle ? true : false;
+	}
+
+	shouldShowFooter(): boolean {
+		return !(this.data.hideSubmitButton && this.data.hideCancelButton);
 	}
 
 	onClose = () => {

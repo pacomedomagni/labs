@@ -44,6 +44,7 @@ export class TableDialogComponent implements AfterViewInit {
         title: string;
         subtitle: string;
         hideCancelButton: boolean;
+        hideSubmitButton: boolean;
         helpKey: string | HelpText;
         dialogContentClass?: string | string[] | null;
     }>(MAT_DIALOG_DATA, { optional: true });
@@ -90,7 +91,9 @@ export class TableDialogComponent implements AfterViewInit {
     shouldDisplaySubtitle(): boolean {
         return this.data.subtitle || this.data.subtitleComponent ? true : false;
     }
-
+	shouldShowFooter(): boolean {
+		return !(this.data.hideSubmitButton && this.data.hideCancelButton);
+	}
 	shouldShowPaginator = computed(() => {
         return this.childShowPaginator() ?? false;
     });

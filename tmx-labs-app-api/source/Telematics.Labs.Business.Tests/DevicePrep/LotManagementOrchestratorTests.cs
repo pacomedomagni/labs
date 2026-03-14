@@ -21,6 +21,7 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
                 Services.DeviceLot.Object,
                 Services.XirgoDevice.Object,
                 Databases.ConfigValues.Object,
+                Services.SimManagementDAL.Object,
                 Mapper);
         }
 
@@ -190,6 +191,7 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
             Services.DeviceLot.Setup(s => s.GetDeviceLot(manufacturerLotSeqId))
                 .ReturnsAsync(new WcfDeviceLotService.GetDeviceLotResponse
                 {
+                    ResponseStatus = WcfDeviceLotService.ResponseStatus.Success,
                     DeviceLot = new WcfDeviceLotService.DeviceLot
                     {
                         Name = "MFG-LOT-001",
@@ -199,11 +201,11 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
                 });
 
             // Act
-            var result = await Orchestrator.FindLot(serialNumber);
+            var result = await Orchestrator.GetLotByDeviceSerialNumber(serialNumber);
 
             // Assert
             Assert.NotNull(result);
-            // Mapper configuration would be needed for full assertion
+            Assert.Equal("MFG-LOT-001", result.Name);
             Services.XirgoDevice.Verify(s => s.GetDeviceBySerialNumber(serialNumber), Times.Once);
             Services.DeviceLot.Verify(s => s.GetDeviceLot(manufacturerLotSeqId), Times.Once);
         }
@@ -232,6 +234,7 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
             Services.DeviceLot.Setup(s => s.GetDeviceLot(manufacturerLotSeqId))
                 .ReturnsAsync(new WcfDeviceLotService.GetDeviceLotResponse
                 {
+                    ResponseStatus = WcfDeviceLotService.ResponseStatus.Success,
                     DeviceLot = new WcfDeviceLotService.DeviceLot
                     {
                         Name = "MFG-LOT-001",
@@ -243,6 +246,7 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
             Services.DeviceLot.Setup(s => s.GetDeviceLot(returnLotSeqId))
                 .ReturnsAsync(new WcfDeviceLotService.GetDeviceLotResponse
                 {
+                    ResponseStatus = WcfDeviceLotService.ResponseStatus.Success,
                     DeviceLot = new WcfDeviceLotService.DeviceLot
                     {
                         Name = "RETURN-LOT-001",
@@ -252,17 +256,18 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
                 });
 
             // Act
-            var result = await Orchestrator.FindLot(serialNumber);
+            var result = await Orchestrator.GetLotByDeviceSerialNumber(serialNumber);
 
             // Assert
             Assert.NotNull(result);
+            Assert.Equal("RETURN-LOT-001", result.Name);
             Services.XirgoDevice.Verify(s => s.GetDeviceBySerialNumber(serialNumber), Times.Once);
             Services.DeviceLot.Verify(s => s.GetDeviceLot(manufacturerLotSeqId), Times.Once);
             Services.DeviceLot.Verify(s => s.GetDeviceLot(returnLotSeqId), Times.Once);
         }
 
         [Fact]
-        public async Task FindLot_WithNoDevice_ReturnsEmptyLot()
+        public async Task FindLot_WithNoDevice_ReturnsNull()
         {
             // Arrange
             var serialNumber = "INVALID";
@@ -274,16 +279,16 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
                 });
 
             // Act
-            var result = await Orchestrator.FindLot(serialNumber);
+            var result = await Orchestrator.GetLotByDeviceSerialNumber(serialNumber);
 
             // Assert
-            Assert.NotNull(result);
+            Assert.Null(result);
             Services.XirgoDevice.Verify(s => s.GetDeviceBySerialNumber(serialNumber), Times.Once);
             Services.DeviceLot.Verify(s => s.GetDeviceLot(It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
-        public async Task FindLot_WithDeviceWithoutLotSeqID_ReturnsEmptyLot()
+        public async Task FindLot_WithDeviceWithoutLotSeqID_ReturnsNull()
         {
             // Arrange
             var serialNumber = "SN000000";
@@ -299,10 +304,10 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
                 });
 
             // Act
-            var result = await Orchestrator.FindLot(serialNumber);
+            var result = await Orchestrator.GetLotByDeviceSerialNumber(serialNumber);
 
             // Assert
-            Assert.NotNull(result);
+            Assert.Null(result);
             Services.DeviceLot.Verify(s => s.GetDeviceLot(It.IsAny<int>()), Times.Never);
         }
 
@@ -679,6 +684,7 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
             Services.DeviceLot.Setup(s => s.GetDeviceLot(manufacturerLotSeqId))
                 .ReturnsAsync(new WcfDeviceLotService.GetDeviceLotResponse
                 {
+                    ResponseStatus = WcfDeviceLotService.ResponseStatus.Success,
                     DeviceLot = new WcfDeviceLotService.DeviceLot
                     {
                         Name = "MFG-LOT-ONLY",
@@ -688,10 +694,11 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
                 });
 
             // Act
-            var result = await Orchestrator.FindLot(serialNumber);
+            var result = await Orchestrator.GetLotByDeviceSerialNumber(serialNumber);
 
             // Assert
             Assert.NotNull(result);
+            Assert.Equal("MFG-LOT-ONLY", result.Name);
             Services.DeviceLot.Verify(s => s.GetDeviceLot(It.IsAny<int>()), Times.Once);
         }
 

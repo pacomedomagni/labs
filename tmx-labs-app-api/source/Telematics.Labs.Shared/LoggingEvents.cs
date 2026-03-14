@@ -56,6 +56,7 @@ namespace Progressive.Telematics.Labs.Shared
         public static EventId ParticipantOrchestrator_DeleteVehicle_Error = 4025;
         public static EventId DeviceFulfillmentOrchestrator_GetCompletedOrders_Error = 4026;
         public static EventId DeviceFulfillmentOrchestrator_GetPendingOrders_Error = 4027;
+        public static EventId DeviceFulfillmentOrchestrator_ConfirmDeviceAssignment_Error = 4028;
     }
 }
 

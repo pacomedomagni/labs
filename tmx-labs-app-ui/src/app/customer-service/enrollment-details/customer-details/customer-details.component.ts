@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MenuButtonGroupComponent } from 'src/app/shared/components/menu-button-group/menu-button-group.component';
 import { ParticipantService } from 'src/app/shared/services/api/participant/participant.service';
@@ -10,6 +10,7 @@ import { FallbackValuePipe } from 'src/app/shared/pipes/fallback-value.pipe';
 import { DisplayDatePipe } from 'src/app/shared/pipes/display-date.pipe';
 import { MenuButtonGroupItem } from 'src/app/shared/components/menu-button-group/models/menu-button-group.models';
 import { CustomerInfo } from 'src/app/shared/data/participant/resources';
+import { UserInfoService } from 'src/app/shared/services/user-info/user-info.service';
 
 enum actionItems {
     AddVehicle = 'add-vehicle',
@@ -35,14 +36,26 @@ export class EnrollmentCustomerDetailsComponent {
     participantService = inject(ParticipantService);
     enrollmentDetailService = inject(EnrollmentDetailService);
     actionsService = inject(EnrollmentCustomerDetailsService);
+    userInfoService = inject(UserInfoService);
     rightAlignToggle = true;
 
     customer = input.required<CustomerInfo>();
-
-    actions: MenuButtonGroupItem[] = [
-        MenuButtonGroupFactory.createButton({id: actionItems.AddVehicle, label: 'Add New Vehicle' }),
-        MenuButtonGroupFactory.createButton({ id: actionItems.UpdateCustomer, label: 'Edit Customer Details' })
-    ];
+    
+    actions = computed(() => {
+        const isAdmin = this.userInfoService.data.isLabsAdmin;
+        const actionsList: MenuButtonGroupItem[] = [
+            MenuButtonGroupFactory.createButton({ id: actionItems.UpdateCustomer, label: 'Edit Customer Details' })
+        ];
+        
+        // Only admins can add new vehicles
+        if (isAdmin) {
+            actionsList.unshift(
+                MenuButtonGroupFactory.createButton({ id: actionItems.AddVehicle, label: 'Add New Vehicle' })
+            );
+        }
+        
+        return actionsList;
+    });
 
     display(value: string | null): string {
         return value && value.trim().length > 0 ? value : '--';

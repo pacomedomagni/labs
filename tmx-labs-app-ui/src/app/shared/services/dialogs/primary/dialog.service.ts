@@ -25,6 +25,7 @@ export class DialogService {
         confirmText,
         cancelText,
         hideCancelButton = false,
+        hideSubmitButton = false,
         alignTextLeft = false,
         helpKey,
         width,
@@ -40,6 +41,7 @@ export class DialogService {
                     title,
                     subtitle,
                     hideCancelButton,
+                    hideSubmitButton,
                     alignTextLeft,
                     helpKey,
                 },
@@ -61,6 +63,7 @@ export class DialogService {
         dialogContentClass,
         helpKey,
         hideCancelButton = false,
+        hideSubmitButton = false,
     }: InformationDialogOptions<T, T2>): MatDialogRef<InformationDialogComponent> {
         return this.openDialog(InformationDialogComponent, {
             ...DialogService.DefaultDialogOptions,
@@ -79,6 +82,7 @@ export class DialogService {
                     title,
                     subtitle,
                     hideCancelButton,
+                    hideSubmitButton,
                     helpKey,
                     dialogContentClass,
                 },
@@ -105,6 +109,7 @@ export class DialogService {
         dialogContentClass,
         helpKey,
         hideCancelButton = false,
+        hideSubmitButton = false,
         confirmText,
         cancelText,
     }: TableDialogOptions<T, T2>): MatDialogRef<TableDialogComponent> {
@@ -125,6 +130,7 @@ export class DialogService {
                     title,
                     subtitle,
                     hideCancelButton,
+                    hideSubmitButton,
                     helpKey,
                     dialogContentClass,
                 },
@@ -142,6 +148,8 @@ export class DialogService {
         width,
         manualSubmission,
         helpKey,
+        hideCancelButton = false,
+        hideSubmitButton = false,
     }: FormDialogOptions<TComponent>): MatDialogRef<FormDialogComponent, TResult> {
         return this.openDialog<FormDialogComponent, TResult>(FormDialogComponent, {
             ...DialogService.DefaultDialogOptions,
@@ -157,6 +165,8 @@ export class DialogService {
                     subtitle,
                     manualSubmission,
                     helpKey,
+                    hideCancelButton,
+                    hideSubmitButton,
                 },
             },
         });

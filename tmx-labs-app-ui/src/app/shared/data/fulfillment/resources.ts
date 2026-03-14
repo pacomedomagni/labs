@@ -12,6 +12,18 @@ export interface DeviceOrder {
     deviceOrderStatusDescription: string;
 }
 
+export interface CompletedDeviceOrder {
+    deviceOrderSeqID: number;
+    orderNumber: string;
+    processedDateTime: string;
+    shipDateTime: string;
+    processedBy: string;
+    processedByUserID: string;
+    state: string;
+    deviceCount: number;
+    deviceSerialNumbers: string[];
+}
+
 export interface OrderListDetails {
     deviceOrders: DeviceOrder[];
     deviceOrderStatusCode: number;
@@ -69,18 +81,6 @@ export interface AssingDeviceRequest {
     orderDetails: OrderDetails;
 }
 
-export interface CompletedDeviceOrder {
-    deviceOrderSeqID: number;
-    orderNumber: string;
-    processedDateTime: string;
-    shipDateTime: string;
-    processedBy: string;
-    processedByUserID: string;
-    state: string;
-    deviceCount: number;
-    deviceSerialNumbers: string[];
-}
-
 export interface CompletedOrdersList {
     orders: CompletedDeviceOrder[];
     totalCount: number;
@@ -95,5 +95,18 @@ export interface ProcessedByUser {
 export interface LabelPrinter {
     PrinterName: string;
     PrinterIP: string;
+}
+
+export interface ValidateDeviceForFulfillmentRequest {
+    deviceSerialNumber: string;
+}
+
+export interface ValidateDeviceForFulfillmentResponse {
+    isValid: boolean;
+    isExistent: boolean;
+    isBenchtested: boolean;
+    isAssigned: boolean;
+    benchtestingComplete: boolean;
+    deviceSerialNumber: string;
 }
 

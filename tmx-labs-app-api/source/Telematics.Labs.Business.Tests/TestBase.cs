@@ -7,6 +7,7 @@ using Moq;
 using Progressive.Telematics.Labs.Business.Mappers;
 using Progressive.Telematics.Labs.Services.Api;
 using Progressive.Telematics.Labs.Services.Wcf;
+using Progressive.Telematics.Labs.Services.Database;
 using Progressive.Telematics.Labs.Shared;
 using ServiceDeviceActivityService = Progressive.Telematics.Labs.Services.Wcf.IDeviceActivityService;
 
@@ -24,6 +25,7 @@ namespace Progressive.Telematics.Labs.Business.Tests
         public Mock<IXirgoSessionService> XirgoSession { get; set; }
         public Mock<IBenchTestBoardService> BenchTestBoard { get; set; }
         public Mock<IBenchTestService> BenchTest { get; set; }
+        public Mock<ISimManagementDAL> SimManagementDAL { get; set; }
     }
 
     public class Apis
@@ -100,7 +102,8 @@ namespace Progressive.Telematics.Labs.Business.Tests
                 XirgoDevice = new Mock<IXirgoDeviceService>(),
                 XirgoSession = new Mock<IXirgoSessionService>(),
                 BenchTestBoard = new Mock<IBenchTestBoardService>(),
-                BenchTest = new Mock<IBenchTestService>()
+                BenchTest = new Mock<IBenchTestService>(),
+                SimManagementDAL = new Mock<ISimManagementDAL>()
             };
         }
 

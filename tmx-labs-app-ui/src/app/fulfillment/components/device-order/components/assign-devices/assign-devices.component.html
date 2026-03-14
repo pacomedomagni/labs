@@ -1,0 +1,45 @@
+<span class="pb-8"
+    >For each vehicle, enter a Snapshot device ID and select 'Next' to continue.</span
+>
+<div class="flex flex-col gap-4 pt-8">
+    @for (vehicle of vehicles(); track vehicle.vehicleSeqID; let i = $index; let last = $last) {
+        <div class="grid grid-cols-2 gap-4 items-center py-4">
+            <div>
+                <div class="font-semibold">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</div>
+            </div>
+            <div>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                    <mat-label>Device Serial Number</mat-label>
+                    <input
+                        #deviceInput
+                        matInput
+                        [formControl]="getFormControl(i)"
+                        (keydown.enter)="deviceInput.blur()"
+                        (blur)="handleInput(i, last)"
+                    />
+                    @if (getFormControl(i).hasError('required')) {
+                        <mat-error>Device serial number is required</mat-error>
+                    }
+                    @else if (getFormControl(i).hasError('minlength')) {
+                        <mat-error>Must be at least 3 characters</mat-error>
+                    }
+                    @else if (getFormControl(i).hasError('deviceDuplicate')) {
+                        <mat-error>This device has already been entered for another vehicle in this order.</mat-error>
+                    }
+                    @else if (getFormControl(i).hasError('deviceNotFound')) {
+                        <mat-error>The device entered is invalid or does not exist. Please try assigning another device.</mat-error>
+                    }
+                    @else if (getFormControl(i).hasError('deviceNotBenchtested')) {
+                        <mat-error>This device has not completed benchtesting.  Please complete testing before assigning device.</mat-error>
+                    }
+                    @else if (getFormControl(i).hasError('deviceAlreadyAssigned')) {
+                        <mat-error>This device is already assigned.  Please try assigning another device</mat-error>
+                    }
+                </mat-form-field>
+            </div>
+        </div>
+        @if (!last) {
+            <div class="vehicle-separator"></div>
+        }
+    }
+</div>

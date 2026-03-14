@@ -9,6 +9,7 @@ import { DeviceLotStatusDescription } from 'src/app/shared/data/lot-management/c
 import { LotDetailActionsService } from './services/lot-detail-actions.service';
 import { DeviceDetailsStateService, DeviceLotStateService } from '../../services';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NotificationBannerService } from 'src/app/shared/notifications/notification-banner/notification-banner.service';
 
 enum ActionItems {
     ActivateLot = 'activate-lot',
@@ -24,6 +25,7 @@ enum ActionItems {
     styleUrls: ['./lot-details.component.scss'],
 })
 export class LotDetailsComponent implements OnDestroy {
+    private readonly notificationService = inject(NotificationBannerService);
     private readonly deviceLotState = inject(DeviceLotStateService);
     private readonly deviceDetailsState = inject(DeviceDetailsStateService);
     private readonly destroyRef = inject(DestroyRef);
@@ -72,21 +74,39 @@ export class LotDetailsComponent implements OnDestroy {
         switch ($event.id) {
             case ActionItems.ActivateLot:
                 this.lotDetailActionsService
-                    .activateLot(lot.lotSeqID, lot.name)
+                    .activateLot(lot.lotSeqID, lot.typeCode, lot.name)
                     .pipe(takeUntilDestroyed(this.destroyRef))
-                    .subscribe();
+                    .subscribe({
+                        next: (confirmed) => {
+                            if(confirmed){
+                                this.notificationService.success('Activate Lot Successful');
+                            }
+                        }
+                    });
                 break;
             case ActionItems.DeactivateLot:
                 this.lotDetailActionsService
-                    .deactivateLot(lot.lotSeqID, lot.name)
+                    .deactivateLot(lot.lotSeqID, lot.typeCode, lot.name)
                     .pipe(takeUntilDestroyed(this.destroyRef))
-                    .subscribe();
+                    .subscribe({
+                        next: (confirmed) => {
+                            if(confirmed){
+                                this.notificationService.success('Deactivate Lot Successful');
+                            }
+                        }
+                    });
                 break;
             case ActionItems.UpdateLotStatus:
                 this.lotDetailActionsService
                     .updateLotStatus(lot.lotSeqID, lot.typeCode, lot.name)
                     .pipe(takeUntilDestroyed(this.destroyRef))
-                    .subscribe();
+                    .subscribe({
+                        next: (confirmed) => {
+                            if(confirmed){
+                                this.notificationService.success('Update Lot Status Successful');
+                            }
+                        }
+                    });
                 break;
             default:
                 console.warn('Unknown action:', $event.id);

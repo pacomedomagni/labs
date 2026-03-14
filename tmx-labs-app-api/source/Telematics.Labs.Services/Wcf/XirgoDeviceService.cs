@@ -21,8 +21,10 @@ namespace Progressive.Telematics.Labs.Services.Wcf
         Task<ResetDeviceResponse> ResetDevice(string serialNumber);
         Task<GetDevicesByLotResponse> GetDevicesByLot(int lotSeqId, DeviceLotType lotType);
         Task<GetDeviceBySerialNumberResponse> GetDeviceBySerialNumber(string serialNumber);
-        Task<GetDeviceBySimResponse> GetDeviceBySim(string sim);    
+        Task<GetDeviceBySimResponse> GetDeviceBySim(string sim);
         Task<UpdateDeviceResponse> UpdateXirgoDevice(int deviceSeqId, DeviceStatus status, DeviceLocation location);
+        Task<UpdateDeviceBySerialNumberResponse> UpdateXirgoDevice(string deviceSerialNumber, DeviceStatus status, Business.Resources.Enums.DeviceLocation location,
+                    bool isDataCollectionAllowed, bool isCommunicationAllowed);
         Task<UpdateDeviceResponse> UpdateAsync(UpdateDeviceRequest updateDeviceRequest);
     }
 
@@ -168,6 +170,24 @@ namespace Progressive.Telematics.Labs.Services.Wcf
                     DeviceSeqID = deviceSeqId,
                     StatusCode = (int)status,
                     LocationCode = (int)location
+                }
+            }), logger);
+            return response;
+        }
+
+        public async Task<UpdateDeviceBySerialNumberResponse> UpdateXirgoDevice(string deviceSerialNumber, DeviceStatus status, Business.Resources.Enums.DeviceLocation location,
+            bool isDataCollectionAllowed, bool isCommunicationAllowed)
+        {
+            using var client = CreateClient();
+            var response = await client.HandledCall(() => client.UpdateBySerialNumberAsync(new UpdateDeviceBySerialNumberRequest
+            {
+                Device = new XirgoDevice
+                {
+                    DeviceSerialNumber = deviceSerialNumber,
+                    StatusCode = (int)status,
+                    LocationCode = (int)location,
+                    IsDataCollectionAllowed = isDataCollectionAllowed,
+                    IsCommunicationAllowed = isCommunicationAllowed
                 }
             }), logger);
             return response;

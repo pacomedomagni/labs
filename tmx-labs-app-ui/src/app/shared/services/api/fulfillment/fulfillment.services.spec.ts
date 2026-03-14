@@ -203,7 +203,10 @@ describe('FulfillmentService', () => {
       service.getProcessedOrdersCount().subscribe();
 
       expect(apiServiceSpy.get).toHaveBeenCalledWith({
-        uri: '/Fulfillment/ProcessedOrderCount'
+        uri: '/Fulfillment/ProcessedOrderCount',
+        options: jasmine.objectContaining({
+          context: jasmine.any(Object)
+        })
       });
     });
 

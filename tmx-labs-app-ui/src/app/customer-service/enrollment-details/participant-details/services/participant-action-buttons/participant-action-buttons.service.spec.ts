@@ -10,6 +10,8 @@ import { UserInfoService } from 'src/app/shared/services/user-info/user-info.ser
 describe('ParticipantActionButtonsService', () => {
     let service: ParticipantActionButtonsService;
 
+    let userInfoService: UserInfoService;
+
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
@@ -26,6 +28,15 @@ describe('ParticipantActionButtonsService', () => {
             ]
         });
         service = TestBed.inject(ParticipantActionButtonsService);
+        userInfoService = TestBed.inject(UserInfoService);
+        
+        // Default to non-admin user for tests
+        userInfoService.userInfo.next({ 
+            isLabsAdmin: false, 
+            isLabsUser: true, 
+            lanId: 'testuser', 
+            name: 'Test User' 
+        } as any);
     });
 
     it('should be created', () => {
@@ -58,6 +69,14 @@ describe('ParticipantActionButtonsService', () => {
         });
 
         it('should include plug-in actions when conditions are met', () => {
+            // Set user as admin to see plug-in actions
+            userInfoService.userInfo.next({ 
+                isLabsAdmin: true, 
+                isLabsUser: true, 
+                lanId: 'admin', 
+                name: 'Admin User' 
+            } as any);
+
             const context: ActionVisibilityContext = {
                 participant: {
                     participantStatusCode: 1, // Enrolled
@@ -88,6 +107,14 @@ describe('ParticipantActionButtonsService', () => {
         });
 
         it('should include opt-out action within general group when conditions are met', () => {
+            // Set user as admin to see opt-out action
+            userInfoService.userInfo.next({ 
+                isLabsAdmin: true, 
+                isLabsUser: true, 
+                lanId: 'admin', 
+                name: 'Admin User' 
+            } as any);
+
             const context: ActionVisibilityContext = {
                 participant: {
                     participantSeqID: 123,
@@ -110,6 +137,14 @@ describe('ParticipantActionButtonsService', () => {
         });
 
         it('should create buttons with correct ids and labels', () => {
+            // Set user as admin to see all actions
+            userInfoService.userInfo.next({ 
+                isLabsAdmin: true, 
+                isLabsUser: true, 
+                lanId: 'admin', 
+                name: 'Admin User' 
+            } as any);
+
             const context: ActionVisibilityContext = {
                 participant: {
                     participantStatusCode: 1,

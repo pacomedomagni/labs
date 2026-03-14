@@ -8,8 +8,8 @@
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Processed By</mat-label>
         <mat-select multiple
-                    [value]="selectedProcessedBy()"
-                    (selectionChange)="selectedProcessedBy.set($event.value)">
+                    [value]="unappliedProcessedBy()"
+                    (selectionChange)="unappliedProcessedBy.set($event.value)">
           @for (user of availableProcessedBy(); track user.userID) {
             <mat-option [value]="user.userID">{{ user.displayName }}</mat-option>
           }
@@ -21,7 +21,7 @@
     <div class="filter-section">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Start Date</mat-label>
-        <input matInput [matDatepicker]="startPicker" [value]="startDate()" (dateChange)="onStartDateChange($event.value)">
+        <input matInput [matDatepicker]="startPicker" [value]="unappliedStartDate()" (dateChange)="onStartDateChange($event.value)">
         <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
         <mat-datepicker #startPicker></mat-datepicker>
       </mat-form-field>
@@ -31,18 +31,25 @@
     <div class="filter-section">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>End Date</mat-label>
-        <input matInput [matDatepicker]="endPicker" [value]="endDate()" [min]="startDate()" (dateChange)="onEndDateChange($event.value)">
+        <input matInput [matDatepicker]="endPicker" [value]="unappliedEndDate()" [min]="unappliedStartDate()" (dateChange)="onEndDateChange($event.value)">
         <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
         <mat-datepicker #endPicker></mat-datepicker>
       </mat-form-field>
     </div>
 
-    <!-- Clear Button -->
-    <div class="clear-button-container">
+    <!-- Action Buttons -->
+    <div class="action-buttons-container">
+      <button mat-flat-button
+              color="primary"
+              (click)="applyFilters()"
+              [disabled]="!hasUnappliedChanges()"
+              class="apply-button">
+        APPLY
+      </button>
       <button mat-flat-button
               color="primary"
               (click)="clearFilters()"
-              [disabled]="isFilterDefault()"
+              [disabled]="isUnappliedFilterDefault() && isAppliedFilterDefault()"
               class="clear-button">
         CLEAR
       </button>
@@ -139,7 +146,7 @@
 <div class="print-only">
   <h2>Processed Orders</h2>
   <p class="print-subheader">
-    Date Range: {{ startDate() | date:'M/d/yyyy' }} - {{ endDate() | date:'M/d/yyyy' }}
+    Date Range: {{ appliedStartDate() | date:'M/d/yyyy' }} - {{ appliedEndDate() | date:'M/d/yyyy' }}
     | Processed By: {{ selectedProcessedByNames() }}
     | Total: {{ completedOrderCount() }}
   </p>

@@ -2,7 +2,8 @@ import {
     Component,
     computed,
     DestroyRef,
-    inject
+    inject,
+    signal
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCard } from '@angular/material/card';
@@ -42,15 +43,26 @@ export class DeviceStagingHubSearchComponent {
     private readonly deviceLotState = inject(DeviceLotStateService);
     private readonly destroyRef = inject(DestroyRef);
 
+    isLoading = signal(false);
+
     initialState = computed(() => !this.deviceLotState.hasDeviceLot());
+    lotLoadedAnnouncement = computed(() => {
+        if(this.isLoading()){
+            return '';
+        }
+        const lot = this.deviceLotState.deviceLot();
+        return lot?.name ? `Lot ${lot.name} loaded` : '';
+    });
 
     searchQuery = new FormControl('', [
         Validators.required,
+        Validators.maxLength(50),
         SearchValidators.validLotIDOrSerialNumber(),
     ]);
 
     private findByLotName(searchTerm: string): void {
         // Try to find by lot name first, then by device serial number
+        this.isLoading.set(true);
         this.lotManagementService
             .getDeviceLot(searchTerm)
             .pipe(takeUntilDestroyed(this.destroyRef))
@@ -58,6 +70,7 @@ export class DeviceStagingHubSearchComponent {
                 next: (response: DeviceLot) => {
                     if (response && response.name) {
                         this.deviceLotState.setDeviceLot(response);
+                        this.isLoading.set(false);
                     } else {
                         // Try finding by serial number
                         this.findBySerialNumber(searchTerm);
@@ -73,16 +86,17 @@ export class DeviceStagingHubSearchComponent {
 
     private findBySerialNumber(serialNumber: string): void {
         this.lotManagementService
-            .findLot(serialNumber)
+            .getLotByDeviceSerialNumber(serialNumber)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (response: DeviceLot) => {
                     if (response) {
-                        this.deviceLotState.setDeviceLot(response);
+                        this.deviceLotState.setDeviceLot(response, serialNumber);
                     } else {
                         this.deviceLotState.setDeviceLot(null);
                         this.showNoResultsError();
                     }
+                    this.isLoading.set(false);
                 },
                 error: () => {
                     this.showNoResultsError();

@@ -1,4 +1,4 @@
-import { Component, ViewChild, AfterViewInit, computed, signal, effect, input, output } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, computed, effect, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -9,7 +9,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { DeviceOrder } from '../../../shared/data/fulfillment/resources';
+import { OrderFilterService } from '../../services/order-filter.service';
 
 @Component({
   selector: 'tmx-pending-orders',
@@ -24,7 +27,9 @@ import { DeviceOrder } from '../../../shared/data/fulfillment/resources';
     MatCheckboxModule,
     MatFormFieldModule,
     MatButtonModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatIconModule,
+    MatTooltipModule
   ],
   templateUrl: './pending-orders.component.html',
   styleUrl: './pending-orders.component.scss'
@@ -33,17 +38,29 @@ export class PendingOrdersComponent implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
+  private orderFilterService = inject(OrderFilterService);
+  private filterState = this.orderFilterService.createPendingOrderFilterState();
+
   orders = input<DeviceOrder[]>([]);
   orderSelected = output<DeviceOrder>();
 
   displayedColumns: string[] = ['orderNumber', 'orderDate', 'state', 'deviceCount', 'deviceType', 'status'];
   dataSource = new MatTableDataSource<DeviceOrder>();
 
-  // Filter state signals
-  selectedStates = signal<string[]>([]);
-  selectedDeviceType = signal<string>('all');
-  selectedSnapshotVersion = signal<string>('all');
-  selectedStatuses = signal<string[]>(['Pending Assignment', 'Ready to Print']);
+  // Expose filter state from service
+  unappliedStates = this.filterState.unappliedStates;
+  unappliedDeviceType = this.filterState.unappliedDeviceType;
+  unappliedSnapshotVersion = this.filterState.unappliedSnapshotVersion;
+  unappliedStatuses = this.filterState.unappliedStatuses;
+  appliedStates = this.filterState.appliedStates;
+  appliedDeviceType = this.filterState.appliedDeviceType;
+  appliedSnapshotVersion = this.filterState.appliedSnapshotVersion;
+  appliedStatuses = this.filterState.appliedStatuses;
+  allUnappliedStatusesSelected = this.filterState.allUnappliedStatusesSelected;
+  allAppliedStatusesSelected = this.filterState.allAppliedStatusesSelected;
+  isUnappliedFilterDefault = this.filterState.isUnappliedFilterDefault;
+  isAppliedFilterDefault = this.filterState.isAppliedFilterDefault;
+  hasUnappliedChanges = this.filterState.hasUnappliedChanges;
 
   // Computed: available states from unfiltered data
   availableStates = computed(() => {
@@ -51,47 +68,33 @@ export class PendingOrdersComponent implements AfterViewInit {
     return [...stateSet].sort();
   });
 
-  // Computed: whether all statuses are selected
-  allStatusesSelected = computed(() => {
-    const selected = this.selectedStatuses();
-    return selected.includes('Pending Assignment') && selected.includes('Ready to Print');
-  });
-
-  // Computed: whether filters are at their default values
-  isFilterDefault = computed(() => {
-    return this.selectedStates().length === 0
-      && this.selectedDeviceType() === 'all'
-      && this.selectedSnapshotVersion() === 'all'
-      && this.allStatusesSelected();
-  });
-
   // Computed: filtered orders based on all active filters
   filteredOrders = computed(() => {
     let result = this.orders();
 
     // State filter
-    const states = this.selectedStates();
+    const states = this.appliedStates();
     if (states.length > 0) {
       result = result.filter(o => states.includes(o.state?.trim()));
     }
 
     // Snapshot version filter
-    const version = this.selectedSnapshotVersion();
+    const version = this.appliedSnapshotVersion();
     if (version !== 'all') {
       result = result.filter(o => o.snapshotVersion === version);
     }
 
     // Device type filter
-    const deviceType = this.selectedDeviceType();
+    const deviceType = this.appliedDeviceType();
     if (deviceType !== 'all') {
       result = result.filter(o => this.matchesDeviceType(o, deviceType));
     }
 
     // Order status filter
-    const statuses = this.selectedStatuses();
+    const statuses = this.appliedStatuses();
     if (statuses.length === 0) {
       result = [];
-    } else if (!this.allStatusesSelected()) {
+    } else if (!this.allAppliedStatusesSelected()) {
       result = result.filter(o => statuses.includes(o.deviceOrderStatusDescription));
     }
 
@@ -145,11 +148,12 @@ export class PendingOrdersComponent implements AfterViewInit {
     return diffDays > 5;
   }
 
+  applyFilters(): void {
+    this.filterState.applyFilters();
+  }
+
   clearFilters(): void {
-    this.selectedStates.set([]);
-    this.selectedDeviceType.set('all');
-    this.selectedSnapshotVersion.set('all');
-    this.selectedStatuses.set(['Pending Assignment', 'Ready to Print']);
+    this.filterState.clearFilters();
   }
 
   onOrderClick(event: Event, order: DeviceOrder): void {
@@ -158,19 +162,19 @@ export class PendingOrdersComponent implements AfterViewInit {
   }
 
   onStatusToggle(status: string, checked: boolean): void {
-    const current = this.selectedStatuses();
+    const current = this.unappliedStatuses();
     if (checked) {
-      this.selectedStatuses.set([...current, status]);
+      this.unappliedStatuses.set([...current, status]);
     } else {
-      this.selectedStatuses.set(current.filter(s => s !== status));
+      this.unappliedStatuses.set(current.filter(s => s !== status));
     }
   }
 
   onSelectAllStatuses(checked: boolean): void {
     if (checked) {
-      this.selectedStatuses.set(['Pending Assignment', 'Ready to Print']);
+      this.unappliedStatuses.set(['Pending Assignment', 'Ready to Print']);
     } else {
-      this.selectedStatuses.set([]);
+      this.unappliedStatuses.set([]);
     }
   }
 

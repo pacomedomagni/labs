@@ -8,7 +8,6 @@ import { MatButtonModule } from "@angular/material/button";
 import { NotificationBannerService } from "../shared/notifications/notification-banner/notification-banner.service";
 import { UserInfo } from "../shared/data/application/resources";
 import { UserInfoService } from "../shared/services/user-info/user-info.service";
-import { pipe } from "rxjs";
 
 @Component({
 	selector: "tmx-role-testing",
@@ -31,10 +30,21 @@ export class RoleTestingComponent implements OnInit {
 
 	constructor(private userInfoService: UserInfoService, private notification: NotificationBannerService) { }
 
-	ngOnInit(): void {
-		this.reset();
-		this.properties = Object.keys(this.userInfo).filter(x => x !== "name" && x !== "lanId");
-	}
+		       ngOnInit(): void {
+			       const loaded = sessionStorage.getItem('tmx-role-testing-loaded');
+			       if (!loaded) {
+				       this.reset();
+				       sessionStorage.setItem('tmx-role-testing-loaded', 'true');
+			       } else {
+				       const userInfo = this.userInfoService.userInfo.value;
+				       if (userInfo && userInfo.lanId) {
+					       this.userInfo = { ...this.defaultUserModel(), ...userInfo };
+					       this.properties = Object.keys(this.userInfo).filter(x => x !== "name" && x !== "lanId");
+				       } else {
+					       this.reset();
+				       }
+			       }
+		       }
 
 	onRoleChange(access: string, checked: boolean): void {
 		this.userInfo[access] = checked;
@@ -52,12 +62,14 @@ export class RoleTestingComponent implements OnInit {
 		this.notification.success("User info updated");
 	}
 
-	reset(): void {
-		this.userInfoService.getUserInfo().subscribe(pipe(ui => {
-			this.userInfoService.userInfo.next(ui);
-		}));
-		this.userInfo = { ...this.defaultUserModel(), ...this.userInfoService.userInfo.value };
-	}
+			       reset(): void {
+				       this.userInfoService.getUserInfo().subscribe(ui => {
+					       this.userInfoService.userInfo.next(ui);
+					       this.userInfo = { ...this.defaultUserModel(), ...ui };
+					       this.properties = Object.keys(this.userInfo).filter(x => x !== "name" && x !== "lanId");
+					       sessionStorage.setItem('tmx-role-testing-loaded', 'true');
+				       });
+			       }
 
 	private defaultUserModel(): UserInfo {
 		return {

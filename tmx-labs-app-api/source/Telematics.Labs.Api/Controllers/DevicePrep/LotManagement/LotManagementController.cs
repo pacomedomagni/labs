@@ -71,18 +71,18 @@ namespace Progressive.Telematics.Labs.Api.Controllers.DevicePrep.LotManagement
         /// </summary>
         /// <param name="deviceSerialNumber">Device serial number</param>
         /// <returns>Device lot information</returns>
-        [HttpGet("FindLot/{deviceSerialNumber}")]
+        [HttpGet("GetLotByDeviceSerialNumber/{deviceSerialNumber}")]
         [ProducesResponseType(typeof(DeviceLot), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<DeviceLot>> FindLot([FromRoute] string deviceSerialNumber)
+        public async Task<ActionResult<DeviceLot>> GetLotByDeviceSerialNumber([FromRoute] string deviceSerialNumber)
         {
             if (string.IsNullOrWhiteSpace(deviceSerialNumber))
             {
                 return BadRequest("Device serial number is required");
             }
 
-            var lot = await Orchestrator.FindLot(deviceSerialNumber);
+            var lot = await Orchestrator.GetLotByDeviceSerialNumber(deviceSerialNumber);
 
             if (lot == null || string.IsNullOrEmpty(lot.Name))
             {
@@ -184,7 +184,7 @@ namespace Progressive.Telematics.Labs.Api.Controllers.DevicePrep.LotManagement
                 return BadRequest("Valid lot sequence ID is required");
             }
 
-            var result = await Orchestrator.UpdateLotActivationStatus(request.LotSeqId, request.Action);
+            var result = await Orchestrator.UpdateLotActivationStatus(request.LotSeqId, request.LotType, request.Action);
 
             if (result.HasErrorCode("NotFound"))
             {
@@ -229,6 +229,7 @@ namespace Progressive.Telematics.Labs.Api.Controllers.DevicePrep.LotManagement
         /// Activation action (Activate or Deactivate)
         /// </summary>
         public ActivationAction Action { get; set; }
+        public DeviceLotType LotType { get; set; }
     }
 
     /// <summary>

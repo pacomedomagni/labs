@@ -32,6 +32,7 @@ import { ResetDeviceService } from './services/reset-device/reset-device.service
 import { OptOutService } from './services/opt-out/opt-out.service';
 import { AccountSummary, AccountVehicleSummary } from 'src/app/shared/data/participant/resources';
 import { provideHttpClient } from '@angular/common/http';
+import { UserInfoService } from 'src/app/shared/services/user-info/user-info.service';
 
 class ParticipantNicknameServiceStub {
     openEditNicknameDialog() {
@@ -241,6 +242,7 @@ describe('EnrollmentParticipantDetailsComponent', () => {
     };
 
     let fixture: ComponentFixture<ParticipantDetailsComponent>;
+    let userInfoService: UserInfoService;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -276,6 +278,15 @@ describe('EnrollmentParticipantDetailsComponent', () => {
                 provideHttpClientTesting(),
             ],
         }).compileComponents();
+
+        userInfoService = TestBed.inject(UserInfoService);
+        // Default to admin user for tests
+        userInfoService.userInfo.next({
+            isLabsAdmin: true,
+            isLabsUser: true,
+            lanId: 'testadmin',
+            name: 'Test Admin'
+        } as any);
     });
 
     const setupComponent = (account: AccountSummary): ParticipantDetailsComponent => {
@@ -318,6 +329,7 @@ describe('EnrollmentParticipantDetailsComponent', () => {
         expect(generalMenu?.children?.map((child) => child.label)).toEqual([
             'Edit Nickname',
             'Edit Vehicle',
+            'Exclude Trips',
             'Opt Out',
             'View Trips'
         ]);
@@ -409,7 +421,8 @@ describe('EnrollmentParticipantDetailsComponent', () => {
             'Reset Device',
             'Mark Abandoned',
             'Mark Defective',
-            'Ping Device'
+            'Ping Device',
+            'Manage Audio'
         ]);
     });
 
@@ -433,7 +446,8 @@ describe('EnrollmentParticipantDetailsComponent', () => {
             'Reset Device',
             'Mark Abandoned',
             'Mark Defective',
-            'Ping Device'
+            'Ping Device',
+            'Manage Audio'
         ]);
 
         swapService.candidates = previousCandidates;
