@@ -1,28 +1,102 @@
-# Introduction
+# TMX Labs API
 
-This repository is dedicated to proving the mechanisms that will be used to create, develop, build and deploy NVP Desktop API projects.
+ASP.NET Core 8 API for telematics lab management system.
 
-# Getting Started
+## Architecture Overview
 
-The following sections will be filled in as the process becomes more clear and the required actions and objects are identified.
+```
+Telematics.Labs.Api/                    # Controllers, Request/Response Models, Mappers
+    ??? Controllers/{Feature}/
+    ??? RequestModels/{Feature}/
+    ??? ResponseModels/{Feature}/
+    ??? Mappers/
 
-1. Installation process
-2. Software dependencies
-3. Latest releases
-4. API references
+Telematics.Labs.Business/               # Orchestrators, Business Mappers
+    ??? Orchestrators/{Feature}/
+    ??? Mappers/
 
-# Build and Test
+Telematics.Labs.Business.Resources/     # Domain Models, Enums
+    ??? Domain/{Feature}/
+    ??? Resources/{Feature}/            # Legacy response models
+    ??? Enums/
 
-TODO: Describe and show how to build your code and run the tests.
+Telematics.Labs.Services/               # Data Access, External Services
+    ??? Database/
+    ?   ??? Models/{Feature}/           # DAL Entities
+    ??? Wcf/
+    ??? Api/
 
-# Contribute
+Telematics.Labs.Shared/                 # Cross-cutting Concerns
+```
 
-TODO: Explain how other users and developers can contribute to make your code better.
+## Model Organization Pattern
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://www.visualstudio.com/en-us/docs/git/create-a-readme). You can also seek inspiration from the below readme files:
+The API uses a **full separation pattern** between API contracts and domain models:
 
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+| Layer | Location | Naming Convention |
+|-------|----------|-------------------|
+| API Request | `Api/RequestModels/` | `*Request` |
+| API Response | `Api/ResponseModels/` | `*Response` (extends `Resource`) |
+| Domain | `Business.Resources/Domain/` | No suffix |
+| DAL | `Services/Database/Models/` | `*Entity`, `*DataModel` |
+
+### Data Flow
+
+```
+READ:   Database ? DAL Entity ? Domain Model ? API Response ? Client
+WRITE:  Client ? API Request ? Domain Model ? DAL Params ? Database
+```
+
+### Quick Example
+
+```csharp
+[HttpPost("SaveDeviceAssignments")]
+public async Task<ActionResult<SaveDeviceAssignmentsResponse>> SaveDeviceAssignments(
+    [FromBody] SaveDeviceAssignmentsRequest request)
+{
+    var command = request.ToDeviceAssignmentCommand();           // API ? Domain
+    var result = await _orchestrator.SaveDeviceAssignmentsV2(command);  // Business logic
+    var response = result.ToSaveDeviceAssignmentsResponse();     // Domain ? API
+    return Ok(response);
+}
+```
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [`.github/copilot-instructions.md`](.github/copilot-instructions.md) | AI coding assistant instructions with patterns and conventions |
+| [`Business.Resources/MODEL_ORGANIZATION.md`](Telematics.Labs.Business.Resources/MODEL_ORGANIZATION.md) | Detailed model organization strategy and migration guide |
+
+## Getting Started
+
+### Prerequisites
+
+- .NET 8 SDK
+- Visual Studio 2022 or VS Code with C# extension
+
+### Build
+
+```bash
+dotnet build
+```
+
+### Run
+
+```bash
+dotnet run --project Telematics.Labs.Api
+```
+
+## Key Conventions
+
+- **Service Registration**: Use `[ScopedService]`, `[SingletonService]`, `[TransientService]` attributes
+- **Error Handling**: Use `response.AddMessage(MessageCode.Error, message)` via `Resource` base class
+- **Logging**: Use centralized `LoggingEvents` with EventIDs
+
+## Contributing
+
+See the [copilot instructions](.github/copilot-instructions.md) for coding patterns and conventions.
+
+
 
 

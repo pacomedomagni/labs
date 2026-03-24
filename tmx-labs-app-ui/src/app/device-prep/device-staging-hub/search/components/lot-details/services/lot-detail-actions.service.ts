@@ -10,6 +10,8 @@ import { LotManagementService } from 'src/app/shared/services/api/lot-management
 import { DialogService } from 'src/app/shared/services/dialogs/primary/dialog.service';
 import { DeviceDetailsStateService, DeviceLotStateService } from '../../../services';
 import { NotificationBannerService } from 'src/app/shared/notifications/notification-banner/notification-banner.service';
+import { DeviceStatus, DeviceStatusValue } from 'src/app/shared/data/device/enums';
+import { Resource } from 'src/app/shared/data/application/resources';
 
 @Injectable({
     providedIn: 'root',
@@ -27,15 +29,23 @@ export class LotDetailActionsService {
                 if (!confirmed) {
                     return of(false);
                 }
-                return this.lotService.activateAllDevicesInLot(lotSeqId, lotType).pipe(
-                    tap(() => {
-                        this.deviceState.updateFieldForAllDevices('isSimActive', true);
+                return this.lotService.activateAllDevicesInLot(lotSeqId, lotType, true).pipe(
+                    catchError((e: {error: Resource}) => {
+                        console.log(e);
+                        this.notificationBannerService.error(e.error?.messages?.error || 'Failed to activate lot');
+                        return of(null);
                     }),
-                    map(() => true),
-                    catchError(() => {
-                        this.notificationBannerService.error('Failed to activate lot');
-                        return of(false);
+                    tap((result) => {         
+                        if(result) {
+                            this.deviceState.updateFieldForAllDevices('isSimActive', true);
+                            this.deviceState.updateFieldForAllDevices('statusCode', DeviceStatusValue.get(DeviceStatus.ReadyForPrep));
+                            if(this.lotState.deviceLot().statusCode === DeviceLotStatus.ShippedToDistributor) {
+                                this.lotState.updateDeviceLotField('statusCode', DeviceLotStatus.ShipmentReceivedByDistributor);
+                            }
+                            this.notificationBannerService.success('Activate Lot Successful');
+                        }      
                     }),
+                    map((result) => !!result),
                 );
             }),
         );
@@ -51,14 +61,18 @@ export class LotDetailActionsService {
                     return of(false);
                 }
                 return this.lotService.deactivateAllDevicesInLot(lotSeqId, lotType).pipe(
-                    tap(() => {
-                        this.deviceState.updateFieldForAllDevices('isSimActive', false);
+                    catchError((e: {error: Resource}) => {
+                        this.notificationBannerService.error(e.error?.messages?.error || 'Failed to deactivate lot');
+                        return of(null);
                     }),
-                    map(() => true),
-                    catchError(() => {
-                        this.notificationBannerService.error('Failed to deactivate lot');
-                        return of(false);
+                    tap((result) => {
+                        if(result) {
+                            this.deviceState.updateFieldForAllDevices('isSimActive', false);
+                            this.deviceState.updateFieldForAllDevices('statusCode', DeviceStatusValue.get(DeviceStatus.ReadyForPrep));
+                            this.notificationBannerService.success('Deactivate Lot Successful');
+                        }
                     }),
+                    map((result) => !!result),
                 );
             }),
         );
@@ -83,15 +97,16 @@ export class LotDetailActionsService {
                     return this.lotService
                         .updateLotStatus(lotSeqId, lotType, DeviceLotStatus.ShipmentReceivedByDistributor)
                         .pipe(
-                            tap(() => {
-                                this.lotState.updateDeviceLotField('statusCode', DeviceLotStatus.ShipmentReceivedByDistributor);
-                                this.notificationBannerService.success('Update Lot Status Successful');
-                            }),
-                            map(() => true),
                             catchError(() => {
-                                this.notificationBannerService.error('Failed to update lot status');
-                                return of(false);
+                                return of(null);
                             }),
+                            tap((result) => {
+                                if(result) {
+                                    this.lotState.updateDeviceLotField('statusCode', DeviceLotStatus.ShipmentReceivedByDistributor);
+                                    this.notificationBannerService.success('Update Lot Status Successful');
+                                }
+                            }),
+                            map((result) => !!result),
                         );
                 }),
             );

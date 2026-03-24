@@ -53,6 +53,7 @@ namespace Progressive.Telematics.Labs.Services.Database
             dataTable.Columns.Add("DeviceSeqID", typeof(int));
             dataTable.Columns.Add("IsCommunicationAllowed", typeof(bool));
             dataTable.Columns.Add("StatusCode", typeof(byte));
+            dataTable.Columns.Add("LocationCode", typeof(int));
             dataTable.Columns.Add("ReportedVIN", typeof(string));
             dataTable.Columns.Add("WTFStateInfo", typeof(string));
             dataTable.Columns.Add("ReportedProtocolCode", typeof(int));
@@ -64,6 +65,7 @@ namespace Progressive.Telematics.Labs.Services.Database
                     device.DeviceSeqID,
                     device.IsCommunicationAllowed ?? (object)DBNull.Value,
                     device.StatusCode ?? (object)DBNull.Value,
+                    device.LocationCode ?? (object)DBNull.Value,
                     device.ReportedVIN ?? (object)DBNull.Value,
                     device.WTFStateInfo ?? (object)DBNull.Value,
                     device.ReportedProtocolCode ?? (object)DBNull.Value,

@@ -7,8 +7,8 @@ import { NotificationBannerService } from 'src/app/shared/notifications/notifica
 import { EnrollmentDetailService } from '../enrollment-details/enrollment-details.service';
 import { ParticipantDetailsFormattingService } from '../participant-details-formatting/participant-details-formatting.service';
 import { AccountVehicleSummary } from 'src/app/shared/data/participant/resources';
-import { Resource } from 'src/app/shared/data/application/resources';
-import { MessageCode } from 'src/app/shared/data/application/enums';
+import { Resource, ResourceMessage } from 'src/app/shared/data/application/resources';
+import { ResourceMessageService } from 'src/app/shared/services/resources/resource-message.service';
 
 interface DialogOptions {
     title: string;
@@ -44,12 +44,18 @@ class EnrollmentDetailServiceStub {
     refreshEnrollmentDetails = jasmine.createSpy('refreshEnrollmentDetails');
 }
 
+class ResourceMessageServiceStub {
+    getFirstString = jasmine.createSpy('getFirstString');
+    getString = jasmine.createSpy('getString');
+}
+
 describe('ReplaceDeviceService', () => {
     let service: ReplaceDeviceService;
     let dialogService: DialogServiceStub;
     let deviceService: DeviceServiceStub;
     let notifications: NotificationBannerServiceStub;
     let enrollmentDetailService: EnrollmentDetailServiceStub;
+    let resourceMessageService: ResourceMessageServiceStub;
 
     const vehicle: AccountVehicleSummary = {
         year: 2024,
@@ -75,6 +81,7 @@ describe('ReplaceDeviceService', () => {
                 { provide: DeviceService, useClass: DeviceServiceStub },
                 { provide: NotificationBannerService, useClass: NotificationBannerServiceStub },
                 { provide: EnrollmentDetailService, useClass: EnrollmentDetailServiceStub },
+                { provide: ResourceMessageService, useClass: ResourceMessageServiceStub },
             ],
         });
 
@@ -82,6 +89,7 @@ describe('ReplaceDeviceService', () => {
         deviceService = TestBed.inject(DeviceService) as unknown as DeviceServiceStub;
         notifications = TestBed.inject(NotificationBannerService) as unknown as NotificationBannerServiceStub;
         enrollmentDetailService = TestBed.inject(EnrollmentDetailService) as unknown as EnrollmentDetailServiceStub;
+        resourceMessageService = TestBed.inject(ResourceMessageService) as unknown as ResourceMessageServiceStub;
     });
 
     it('does not call replace when dialog is cancelled', () => {
@@ -100,15 +108,13 @@ describe('ReplaceDeviceService', () => {
         dialogService.result = true;
         const errorResource: Resource = {
             extenders: [],
-            messages: [
-                {
-                    key: MessageCode.ErrorDetails,
-                    value: 'SIM deactivation did not succeed',
-                },
-            ],
+            messages: {
+                errorDetails: 'SIM deactivation did not succeed',
+            } as ResourceMessage,
         };
 
         deviceService.replaceDevice.and.returnValue(of(errorResource));
+        resourceMessageService.getFirstString.and.returnValue('SIM deactivation did not succeed');
 
         const results: boolean[] = [];
         service.openReplaceDeviceDialog(createContext()).subscribe((value) => results.push(value));
@@ -124,15 +130,12 @@ describe('ReplaceDeviceService', () => {
         dialogService.result = true;
         const successResource: Resource = {
             extenders: [],
-            messages: [
-                {
-                    key: MessageCode.StatusDescription,
-                    value: 'Device replacement initiated',
-                },
-            ],
+            messages: {statusDescription: 'Device replacement initiated'} as ResourceMessage,
         };
 
         deviceService.replaceDevice.and.returnValue(of(successResource));
+        resourceMessageService.getFirstString.and.returnValue(null);
+        resourceMessageService.getString.and.returnValue('Device replacement initiated');
 
         const results: boolean[] = [];
         service.openReplaceDeviceDialog(createContext()).subscribe((value) => results.push(value));

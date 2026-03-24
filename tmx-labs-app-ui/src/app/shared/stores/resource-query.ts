@@ -12,9 +12,9 @@ export class ResourceQuery {
 	updateSearchError(resource: Resource | Resource[]): void {
 		const adj = Array.isArray(resource) ? resource[0] : resource;
 		const hasError = adj === undefined ? false :
-			(adj?.messages === undefined ? false : adj?.messages["Error"] !== undefined);
+			(adj?.messages === undefined ? false : adj?.messages["error"] !== undefined);
 		if (hasError) {
-			this.searchError.next(adj.messages["Error"]);
+			this.searchError.next(adj.messages["error"]);
 		}
 		else {
 			this.searchError.next(undefined);

@@ -52,6 +52,7 @@ namespace Progressive.Telematics.Labs.Api
                 .Configure<HttpRetryConfig>(Configuration.GetSection("RetryOptions"))
                 .Configure<VinPicklistConfig>(Configuration.GetSection("VinPicklistOptions"))
                 .Configure<LabConfigSettings>(Configuration.GetSection("LabConfigSettings"))
+                .Configure<Progressive.Telematics.Labs.Business.Configuration.LabelPrintingOptions>(Configuration.GetSection("LabelPrinting"))
                 .AddTransient<IRetryPolicyProvider, RetryPolicyProvider>();
 
             services.AddHealthChecks();

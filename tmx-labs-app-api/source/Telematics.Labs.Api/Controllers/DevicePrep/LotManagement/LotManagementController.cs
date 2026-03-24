@@ -186,6 +186,10 @@ namespace Progressive.Telematics.Labs.Api.Controllers.DevicePrep.LotManagement
 
             var result = await Orchestrator.UpdateLotActivationStatus(request.LotSeqId, request.LotType, request.Action);
 
+            if(result.Messages.Any(t => t.Key == MessageCode.Error))
+            {
+                return BadRequest(result);
+            }
             if (result.HasErrorCode("NotFound"))
             {
                 return NotFound(result);

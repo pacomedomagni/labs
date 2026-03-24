@@ -76,37 +76,19 @@ export class LotDetailsComponent implements OnDestroy {
                 this.lotDetailActionsService
                     .activateLot(lot.lotSeqID, lot.typeCode, lot.name)
                     .pipe(takeUntilDestroyed(this.destroyRef))
-                    .subscribe({
-                        next: (confirmed) => {
-                            if(confirmed){
-                                this.notificationService.success('Activate Lot Successful');
-                            }
-                        }
-                    });
+                    .subscribe();
                 break;
             case ActionItems.DeactivateLot:
                 this.lotDetailActionsService
                     .deactivateLot(lot.lotSeqID, lot.typeCode, lot.name)
                     .pipe(takeUntilDestroyed(this.destroyRef))
-                    .subscribe({
-                        next: (confirmed) => {
-                            if(confirmed){
-                                this.notificationService.success('Deactivate Lot Successful');
-                            }
-                        }
-                    });
+                    .subscribe();
                 break;
             case ActionItems.UpdateLotStatus:
                 this.lotDetailActionsService
                     .updateLotStatus(lot.lotSeqID, lot.typeCode, lot.name)
                     .pipe(takeUntilDestroyed(this.destroyRef))
-                    .subscribe({
-                        next: (confirmed) => {
-                            if(confirmed){
-                                this.notificationService.success('Update Lot Status Successful');
-                            }
-                        }
-                    });
+                    .subscribe();
                 break;
             default:
                 console.warn('Unknown action:', $event.id);

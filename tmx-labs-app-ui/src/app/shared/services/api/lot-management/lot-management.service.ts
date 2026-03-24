@@ -11,6 +11,8 @@ import {
     DeviceLotStatus,
 } from 'src/app/shared/data/lot-management/resources';
 import { Resource } from 'src/app/shared/data/application/resources';
+import { SKIP_ERROR_HANDLING } from '../../http-interceptors/error-interceptor';
+import { HttpContext } from '@angular/common/http';
 
 @Injectable({
     providedIn: 'root',
@@ -52,7 +54,7 @@ export class LotManagementService {
         });
     }
 
-    activateAllDevicesInLot(lotSeqId: number, lotType: DeviceLotType): Observable<Resource> {
+    activateAllDevicesInLot(lotSeqId: number, lotType: DeviceLotType, skipErrorHandling = false): Observable<Resource> {
         return this.api.post<Resource>({
             uri: `${this.controller}/ActivateLot`,
             payload: {
@@ -60,10 +62,13 @@ export class LotManagementService {
                 lotType: lotType,
                 action: DeviceActivationAction.Activate,
             },
+            options: {
+                context: new HttpContext().set(SKIP_ERROR_HANDLING, skipErrorHandling)
+            }
         });
     }
 
-    deactivateAllDevicesInLot(lotSeqId: number, lotType: DeviceLotType): Observable<Resource> {
+    deactivateAllDevicesInLot(lotSeqId: number, lotType: DeviceLotType, skipErrorHandling = false): Observable<Resource> {
         return this.api.post<Resource>({
             uri: `${this.controller}/ActivateLot`,
             payload: {
@@ -71,6 +76,10 @@ export class LotManagementService {
                 lotType: lotType,   
                 action: DeviceActivationAction.Deactivate,
             },
+            options: {
+                context: new HttpContext().set(SKIP_ERROR_HANDLING, skipErrorHandling)
+            }
+
         });
     }
 

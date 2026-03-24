@@ -120,7 +120,7 @@ describe('EditVehicleService', () => {
         it('should return success outcome with vehicle when no error messages', () => {
             const response: UpdateVehicleResponse = {
                 changedVehicle: mockVehicle,
-                messages: [],
+                messages: {},
                 extenders: [],
             };
 
@@ -133,7 +133,7 @@ describe('EditVehicleService', () => {
         it('should return error outcome when error messages exist', () => {
             const response: UpdateVehicleResponse = {
                 changedVehicle: null,
-                messages: [{ key: MessageCode.ErrorCode, value: 'Test error' }],
+                messages: { errorCode: 'Test error' },
                 extenders: [],
             };
             resourceMessageService.getFirstString.and.returnValue('Test error');
@@ -149,7 +149,7 @@ describe('EditVehicleService', () => {
             const responseVehicle = { ...mockVehicle, vehicleSeqID: null };
             const response: UpdateVehicleResponse = {
                 changedVehicle: responseVehicle,
-                messages: [],
+                messages: {},
                 extenders: [],
             };
 
@@ -162,7 +162,7 @@ describe('EditVehicleService', () => {
         it('should use requestedVehicle when response.changedVehicle is null', () => {
             const response: UpdateVehicleResponse = {
                 changedVehicle: null,
-                messages: [],
+                messages: {},
                 extenders: [],
             };
             resourceMessageService.getFirstString.and.returnValue(null);
@@ -194,7 +194,7 @@ describe('EditVehicleService', () => {
         it('should extract success message when available', () => {
             const response: UpdateVehicleResponse = {
                 changedVehicle: mockVehicle,
-                messages: [{ key: MessageCode.StatusDescription, value: 'Success!' }],
+                messages: { statusDescription: 'Success!' },
                 extenders: [],
             };
             resourceMessageService.getFirstString.and.returnValue(null);
@@ -209,10 +209,10 @@ describe('EditVehicleService', () => {
         it('should check multiple error message types', () => {
             const response: UpdateVehicleResponse = {
                 changedVehicle: null,
-                messages: [
-                    { key: MessageCode.ErrorCode, value: 'Error 1' },
-                    { key: MessageCode.Error, value: 'Error 2' },
-                ],
+                messages: {
+                    errorCode: 'Error 1',
+                    error: 'Error 2',
+                },
                 extenders: [],
             };
             resourceMessageService.getFirstString.and.returnValue('Error 1');

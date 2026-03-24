@@ -102,7 +102,7 @@ export class ActionHandlerService {
             .openMarkDefectiveDialog(
                 context.deviceResource().deviceSerialNumber!,
                 context.participantResource().participantSeqID!,
-                context.vehicleResource(),
+                context.displayVehicle(),
                 this.resolveNickname(context),
             )
             .subscribe({
@@ -117,7 +117,7 @@ export class ActionHandlerService {
             .openMarkAbandonedDialog(
                 context.deviceResource().deviceSerialNumber!,
                 context.participantResource().participantSeqID!,
-                context.vehicleResource(),
+                context.displayVehicle(),
                 this.resolveNickname(context),
             )
             .subscribe({
@@ -139,7 +139,7 @@ export class ActionHandlerService {
                 if (updatedNickname !== null && updatedNickname !== undefined) {
                     const formattedNickname =
                         this.participantDetailsFormattingService.formatVehicleNickname(
-                            context.vehicleResource(),
+                            context.displayVehicle(),
                             updatedNickname,
                         );
                     context.onNicknameUpdate(formattedNickname);
@@ -161,6 +161,7 @@ export class ActionHandlerService {
                         year: updatedVehicle.year,
                         make: updatedVehicle.make,
                         model: updatedVehicle.model,
+                        vin: updatedVehicle.vin,
                         vehicleSeqID: updatedVehicle.vehicleSeqID,
                     };
                     context.onVehicleUpdate(vehicleSummary);
@@ -180,7 +181,7 @@ export class ActionHandlerService {
             .openReplaceDeviceDialog({
                 participantSeqId,
                 deviceSerialNumber,
-                vehicle: context.vehicleResource(),
+                vehicle: context.displayVehicle(),
                 nickname: this.resolveNickname(context),
             })
             .subscribe({
@@ -202,7 +203,7 @@ export class ActionHandlerService {
             .openSwapDevicesDialog({
                 participantSeqId,
                 deviceSerialNumber,
-                vehicle: context.vehicleResource(),
+                vehicle: context.displayVehicle(),
                 nickname: this.resolveNickname(context),
             })
             .subscribe({
@@ -222,7 +223,7 @@ export class ActionHandlerService {
         this.pingDeviceService
             .openPingDeviceDialog(
                 deviceSerialNumber,
-                context.vehicleResource(),
+                context.displayVehicle(),
                 this.resolveNickname(context),
             )
             .subscribe({
@@ -244,7 +245,7 @@ export class ActionHandlerService {
         const features = device.features ?? [];
         const isIoT = features.includes('AWSIot');
 
-        const vehicle = context.vehicleResource();
+        const vehicle = context.displayVehicle();
         const nickname = this.resolveNickname(context);
 
         const currentAudioStatus = this.readDeviceAudioStatus(device);
@@ -270,7 +271,7 @@ export class ActionHandlerService {
             .openResetDeviceDialog(
                 deviceSerialNumber,
                 participantSeqId,
-                context.vehicleResource(),
+                context.displayVehicle(),
                 this.resolveNickname(context),
             )
             .subscribe({
@@ -291,7 +292,7 @@ export class ActionHandlerService {
             .openOptOutDialog(
                 participantSeqId,
                 context.deviceResource().deviceSerialNumber ?? null,
-                context.vehicleResource(),
+                context.displayVehicle(),
                 this.resolveNickname(context),
             )
             .subscribe({

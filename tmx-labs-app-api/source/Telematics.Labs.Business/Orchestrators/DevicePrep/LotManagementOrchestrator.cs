@@ -8,6 +8,7 @@ using Progressive.Telematics.Labs.Business.Resources;
 using Progressive.Telematics.Labs.Business.Resources.DevicePrep;
 using Progressive.Telematics.Labs.Business.Resources.Enums;
 using Progressive.Telematics.Labs.Business.Resources.Shared;
+using Progressive.Telematics.Labs.Services;
 using Progressive.Telematics.Labs.Services.Database;
 using Progressive.Telematics.Labs.Services.Database.Models;
 using Progressive.Telematics.Labs.Services.Wcf;
@@ -39,8 +40,10 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
         private readonly ILotManagementDAL _lotManagementDAL;
         private readonly IDeviceLotService _deviceLotService;
         private readonly IXirgoDeviceService _xirgoDeviceService;
+        private readonly IXirgoDeviceDAL _xirgoDeviceDAL;
         private readonly IConfigValuesDAL _configValuesDAL;
         private readonly ISimManagementDAL _simManagementDAL;
+        private readonly IDeviceActivationService _deviceActivationService;
         private readonly IMapper _mapper;
 
         public LotManagementOrchestrator(
@@ -48,16 +51,20 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
             ILotManagementDAL lotManagementDAL,
             IDeviceLotService deviceLotService,
             IXirgoDeviceService xirgoDeviceService,
+            IXirgoDeviceDAL xirgoDeviceDAL,
             IConfigValuesDAL configValuesDAL,
             ISimManagementDAL simManagementDAL,
+            IDeviceActivationService deviceActivationService,
             IMapper mapper)
         {
             _logger = logger;
             _lotManagementDAL = lotManagementDAL;
             _deviceLotService = deviceLotService;
             _xirgoDeviceService = xirgoDeviceService;
+            _xirgoDeviceDAL = xirgoDeviceDAL;
             _configValuesDAL = configValuesDAL;
             _simManagementDAL = simManagementDAL;
+            _deviceActivationService = deviceActivationService;
             _mapper = mapper;
         }
 
@@ -200,7 +207,6 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
         public async Task<Resource> UpdateLotActivationStatus(int lotSeqId, DeviceLotType lotType, ActivationAction action)
         {
             var resource = new Resource();
-            var actionCode = action == ActivationAction.Activate ? 1 : 0;
 
             var devicesResponse = await _xirgoDeviceService.GetDevicesByLot(lotSeqId, lotType);
 
@@ -211,30 +217,28 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.DevicePrep
                 return resource;
             }
 
-            var deviceCount = devicesResponse.Devices.Length;
-            var effectiveDate = DateTime.UtcNow;
-
-            var simRecords = devicesResponse.Devices
-                .Where(d => !string.IsNullOrEmpty(d.SIM))
-                .Select(d => new SimManagementRecord
-                {
-                    SIM = d.SIM,
-                    EffectiveDate = effectiveDate,
-                    Action = actionCode,
-                    NewRecordStatus = "New"
-                });
-
             try
             {
-                await _simManagementDAL.ActivateOrDeactivateLot(simRecords);
-                _logger.LogInformation("Updated SIM management records for lot {LotSeqId} with action {Action}", lotSeqId, action);
+                var result = await _deviceActivationService.ActivateOrDeactivateLotDevices(
+                    lotSeqId,
+                    devicesResponse.Devices,
+                    action);
 
-                resource.AddMessage(MessageCode.StatusDescription,
-                    $"Successfully updated device(s) in lot {lotSeqId} for {(action == ActivationAction.Activate ? "activation" : "deactivation")}");
+                foreach (var device in result.AssignedDevices)
+                {
+                    resource.AddMessage(MessageCode.Error,
+                        $"Device {device.DeviceSerialNumber} is currently assigned to a customer");
+                }
+
+                if (result.Success)
+                {
+                    resource.AddMessage(MessageCode.StatusDescription,
+                        $"Successfully updated device(s) in lot {lotSeqId} for {(action == ActivationAction.Activate ? "activation" : "deactivation")}");
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to bulk update SIM management records for lot {LotSeqId}", lotSeqId);
+                _logger.LogError(ex, "Failed to bulk update SIM management records and devices for lot {LotSeqId}", lotSeqId);
                 throw;
             }
 

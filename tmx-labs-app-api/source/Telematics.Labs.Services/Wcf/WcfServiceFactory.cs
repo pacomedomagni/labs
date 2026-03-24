@@ -29,46 +29,55 @@ using WCFDeviceOrderSummaryService;
 using WCFMobileDeviceOrderService;
 using DeviceOrderClient = WCFDeviceOrderService.DeviceOrderServiceClient;
 using AppConfigClient = WCFAppConfigService.AppConfigServiceClient;
+using WCFShippingLabelService;
+using WCFTrackingNumberService;
+using WCFReturnLabelService;
+using AddressServiceClient = WCFAddressService.AddressServiceClient;
 
 namespace Progressive.Telematics.Labs.Services.Wcf
 {
-    [SingletonService]
-    public interface IWcfServiceFactory
-    {
-        DeviceActivityServiceClient CreateDeviceActivityClient();
-        DeviceLotServiceClient CreateDeviceLotClient();
-        EligibleZipCodesServiceClient CreateEligibleZipCodesClient();
-        GetDrivingDailyAggregateServiceClient CreateDrivingDailyAggregateClient();
-        IncidentResolutionServiceClient CreateIncidentResolutionClient();
-        IneligibleVehiclesServiceClient CreateIneligibleVehiclesClient();
-        ParticipantServiceClient CreateParticipantClient();
-        PolicyServiceClient CreatePolicyServiceClient();
-        WcfTransactionAuditLogService.TransactionAuditLogServiceClient CreateTransactionAuditLogServiceClient();
-        EntityServiceClient CreateUserManagementServiceClient();
-        ValueCalculatorClient CreateValueCalculatorClient();
-        XirgoServiceClient CreateXirgoServiceClient();
-        SimManagementServiceClient CreateSimManagementServiceClient();
-        XirgoSessionServiceClient CreateXirgoSessionServiceClient();
-        VinPicklistServiceClient CreateVinPicklistServiceClient();
-        ParticipantGroupServiceClient CreateParticipantGroupServiceClient();
-        BenchTestBoardServiceClient CreateBenchTestBoardServiceClient();
-        BenchTestServiceClient CreateBenchTestServiceClient();
-        AppConfigClient CreateWCFAppConfigServiceClient();
-        BusinessDeviceOrderServiceClient CreateWCFBusinessDeviceOrderServiceClient();
-        DeviceOrderClient CreateWCFDeviceOrderServiceClient();
-        DeviceOrderSummaryServiceClient CreateWCFDeviceOrderSummaryServiceClient();
-        MobileDeviceOrderServiceClient CreateWCFMobileDeviceOrderServiceClient();
-    }
-    public class WcfServiceFactory : IWcfServiceFactory
-    {
-        ServicesConfig _config;
-        readonly IConfiguration _configuration;
+	[SingletonService]
+	public interface IWcfServiceFactory
+	{
+		DeviceActivityServiceClient CreateDeviceActivityClient();
+		DeviceLotServiceClient CreateDeviceLotClient();
+		EligibleZipCodesServiceClient CreateEligibleZipCodesClient();
+		GetDrivingDailyAggregateServiceClient CreateDrivingDailyAggregateClient();
+		IncidentResolutionServiceClient CreateIncidentResolutionClient();
+		IneligibleVehiclesServiceClient CreateIneligibleVehiclesClient();
+		ParticipantServiceClient CreateParticipantClient();
+		PolicyServiceClient CreatePolicyServiceClient();
+		WcfTransactionAuditLogService.TransactionAuditLogServiceClient CreateTransactionAuditLogServiceClient();
+		EntityServiceClient CreateUserManagementServiceClient();
+		ValueCalculatorClient CreateValueCalculatorClient();
+		XirgoServiceClient CreateXirgoServiceClient();
+		SimManagementServiceClient CreateSimManagementServiceClient();
+		XirgoSessionServiceClient CreateXirgoSessionServiceClient();
+		VinPicklistServiceClient CreateVinPicklistServiceClient();
+		ParticipantGroupServiceClient CreateParticipantGroupServiceClient();
+		BenchTestBoardServiceClient CreateBenchTestBoardServiceClient();
+		BenchTestServiceClient CreateBenchTestServiceClient();
+		AppConfigClient CreateWCFAppConfigServiceClient();
+		BusinessDeviceOrderServiceClient CreateWCFBusinessDeviceOrderServiceClient();
+		DeviceOrderClient CreateWCFDeviceOrderServiceClient();
+		DeviceOrderSummaryServiceClient CreateWCFDeviceOrderSummaryServiceClient();
+		MobileDeviceOrderServiceClient CreateWCFMobileDeviceOrderServiceClient();
+		ShippingLabelServiceClient CreateWCFShippingLabelServiceClient();
+		TrackingNumberServiceClient CreateWCFTrackingNumberServiceClient();
+		ReturnLabelServiceClient CreateWCFReturnLabelServiceClient();
+		AddressServiceClient CreateWCFAddressServiceClient();
+	}
 
-        public WcfServiceFactory(IOptions<ServicesConfig> config, IConfiguration configuration)
-        {
-            _config = config.Value;
-            _configuration = configuration;
-        }
+	public class WcfServiceFactory : IWcfServiceFactory
+	{
+		ServicesConfig _config;
+		readonly IConfiguration _configuration;
+
+		public WcfServiceFactory(IOptions<ServicesConfig> config, IConfiguration configuration)
+		{
+			_config = config.Value;
+			_configuration = configuration;
+		}
 
         public DeviceActivityServiceClient CreateDeviceActivityClient()
         {
@@ -269,8 +278,6 @@ namespace Progressive.Telematics.Labs.Services.Wcf
             return client;
         }
 
-
-
         public DeviceOrderClient CreateWCFDeviceOrderServiceClient()
         {
             var endpoint = new EndpointAddress(_config.WcfServices["WCFDeviceOrder"].FormatServiceUrl());
@@ -286,35 +293,95 @@ namespace Progressive.Telematics.Labs.Services.Wcf
             return client;
         }
 
-        public DeviceOrderSummaryServiceClient CreateWCFDeviceOrderSummaryServiceClient()
-        {
-            var endpoint = new EndpointAddress(_config.WcfServices["WCFDeviceOrderSummary"].FormatServiceUrl());
-            var binding = new WSHttpBinding
-            {
-                ReaderQuotas = XmlDictionaryReaderQuotas.Max,
-                MaxReceivedMessageSize = int.MaxValue,
-                AllowCookies = true,
-                Security = { Mode = SecurityMode.None }
-            };
-            var client = new DeviceOrderSummaryServiceClient(binding, endpoint);
-            client.Endpoint.AddTokenEndpoint(_configuration);
-            return client;
-        }
+		public DeviceOrderSummaryServiceClient CreateWCFDeviceOrderSummaryServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["WCFDeviceOrderSummary"].FormatServiceUrl());
+			var binding = new WSHttpBinding
+			{
+				ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true,
+				Security = { Mode = SecurityMode.None }
+			};
+			var client = new DeviceOrderSummaryServiceClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
 
-        public MobileDeviceOrderServiceClient CreateWCFMobileDeviceOrderServiceClient()
-        {
-            var endpoint = new EndpointAddress(_config.WcfServices["WCFMobileDeviceOrder"].FormatServiceUrl());
-            var binding = new WSHttpBinding
-            {
-                ReaderQuotas = XmlDictionaryReaderQuotas.Max,
-                MaxReceivedMessageSize = int.MaxValue,
-                AllowCookies = true,
-                Security = { Mode = SecurityMode.None }
-            };
-            var client = new MobileDeviceOrderServiceClient(binding, endpoint);
-            client.Endpoint.AddTokenEndpoint(_configuration);
-            return client;
-        }
-    }
+		public MobileDeviceOrderServiceClient CreateWCFMobileDeviceOrderServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["WCFMobileDeviceOrder"].FormatServiceUrl());
+			var binding = new WSHttpBinding
+			{
+				ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true,
+				Security = { Mode = SecurityMode.None }
+			};
+			var client = new MobileDeviceOrderServiceClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
+
+		public ShippingLabelServiceClient CreateWCFShippingLabelServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["WCFShippingLabel"].FormatServiceUrl());
+			var binding = new WSHttpBinding
+			{
+				ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true,
+				Security = { Mode = SecurityMode.None }
+			};
+			var client = new ShippingLabelServiceClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
+
+		public TrackingNumberServiceClient CreateWCFTrackingNumberServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["WCFTrackingNumber"].FormatServiceUrl());
+			var binding = new WSHttpBinding
+			{
+				ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true,
+				Security = { Mode = SecurityMode.None }
+			};
+			var client = new TrackingNumberServiceClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
+
+		public ReturnLabelServiceClient CreateWCFReturnLabelServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["WCFReturnLabel"].FormatServiceUrl());
+			var binding = new WSHttpBinding
+			{
+				ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true,
+				Security = { Mode = SecurityMode.None }
+			};
+			var client = new ReturnLabelServiceClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
+
+		public AddressServiceClient CreateWCFAddressServiceClient()
+		{
+			var endpoint = new EndpointAddress(_config.WcfServices["WCFAddress"].FormatServiceUrl());
+			var binding = new BasicHttpBinding
+			{
+				MaxBufferSize = int.MaxValue,
+				ReaderQuotas = XmlDictionaryReaderQuotas.Max,
+				MaxReceivedMessageSize = int.MaxValue,
+				AllowCookies = true
+			};
+			var client = new AddressServiceClient(binding, endpoint);
+			client.Endpoint.AddTokenEndpoint(_configuration);
+			return client;
+		}
+	}
 }
 

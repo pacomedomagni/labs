@@ -16,7 +16,7 @@ import { ConfirmationDialogComponent } from 'src/app/shared/components/dialogs/c
 function createMockResource(overrides?: Partial<Resource>): Resource {
     return {
         extenders: [],
-        messages: [],
+        messages: {},
         ...overrides,
     };
 }

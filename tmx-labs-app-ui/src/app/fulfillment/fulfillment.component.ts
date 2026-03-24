@@ -15,7 +15,7 @@ import { PendingOrdersComponent } from './components/pending-orders/pending-orde
 import { CompletedOrdersComponent } from './components/completed-orders/completed-orders.component';
 import { PrinterInfoComponent } from './components/printer-info/printer-info.component';
 import { FulfillmentService } from '../shared/services/api/fulfillment/fulfillment.services';
-import { DeviceOrder, CompletedOrdersList, CompletedDeviceOrder } from '../shared/data/fulfillment/resources';
+import { DeviceOrder, CompletedOrdersList } from '../shared/data/fulfillment/resources';
 import { OrderActionsService } from './services/order-actions.service';
 import { DeviceOrderReloadService } from './services/device-order-reload.service';
 
@@ -57,11 +57,13 @@ export class CustomerServiceFulfillmentComponent implements OnInit {
   // Completed orders
   completedOrderData = signal<CompletedOrdersList | null>(null);
   allCompletedOrders: CompletedOrdersList | null = null; // Store all completed orders for filtering
+  completedOrderSearchDate = signal<Date | null>(null);
 
   selectedTab = signal(0);
   searchType = 'orderNumber';
   searchValue = '';
   searchError = '';
+  screenReaderAnnouncement = signal('');
 
   ngOnInit() {
     // Check for deviceOrderSeqId query param to auto-open Device Order modal
@@ -132,12 +134,12 @@ export class CustomerServiceFulfillmentComponent implements OnInit {
     this.selectedTab.set(index);
   }
 
-  onPendingOrderSelected(order: DeviceOrder) {
-    this.orderActionsService.openPendingDeviceOrder(order);
+  onPendingOrderSelected(event: { order: DeviceOrder; filteredOrders: DeviceOrder[] }) {
+    this.orderActionsService.openPendingDeviceOrder(event.order, event.filteredOrders);
   }
 
-  onCompletedOrderSelected(order: CompletedDeviceOrder) {
-    this.orderActionsService.openCompletedDeviceOrder(order);
+  onCompletedOrderSelected(event: { order: DeviceOrder; filteredOrders: DeviceOrder[] }) {
+    this.orderActionsService.openCompletedDeviceOrder(event.order, event.filteredOrders);
   }
 
   onSearchTypeChange() {
@@ -155,13 +157,6 @@ export class CustomerServiceFulfillmentComponent implements OnInit {
     this.searchError = '';
 
     if (this.searchType === 'orderNumber') {
-      // const orderNumber = parseInt(this.searchValue.trim(), 10);
-      
-      // if (isNaN(orderNumber)) {
-      //   this.searchError = 'Order number must be a valid number';
-      //   return;
-      // }
-
       this.fulfillmentService.getPendingOrderByNumber(this.searchValue.trim())
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
@@ -169,6 +164,7 @@ export class CustomerServiceFulfillmentComponent implements OnInit {
             this.pendingOrderData.set([order]);
             this.completedOrderData.set(this.allCompletedOrders);
             this.selectedTab.set(0);
+            this.screenReaderAnnouncement.set('Order found: 1 result displayed');
           },
           error: () => {
             this.fulfillmentService.getCompletedOrderByNumber(this.searchValue.trim())
@@ -184,12 +180,20 @@ export class CustomerServiceFulfillmentComponent implements OnInit {
                     this.completedOrderData.set(filteredList);
                   }
                   this.pendingOrderData.set(this.allPendingOrders);
+                  if (completedOrder.processedDateTime) {
+                    const orderDate = new Date(completedOrder.processedDateTime);
+                    const startDate = new Date(orderDate.getFullYear(), orderDate.getMonth(), orderDate.getDate());
+                    startDate.setDate(startDate.getDate() - 10);
+                    this.completedOrderSearchDate.set(startDate);
+                  }
                   this.selectedTab.set(1);
+                  this.screenReaderAnnouncement.set('Order found: 1 completed result displayed');
                 },
                 error: () => {
-                  this.searchError = 'Order Number was not found';
+                  this.searchError = 'No orders found for the given Order Number';
                   this.pendingOrderData.set(this.allPendingOrders);
                   this.completedOrderData.set(this.allCompletedOrders);
+                  this.completedOrderSearchDate.set(null);
                 }
               });
           }
@@ -202,17 +206,45 @@ export class CustomerServiceFulfillmentComponent implements OnInit {
         .subscribe({
           next: (orders) => {
             if (orders && orders.length > 0) {
-              this.pendingOrderData.set(orders);
-              this.completedOrderData.set(this.allCompletedOrders);
-              this.selectedTab.set(0);
+              const completedOrders = orders.filter((o) => o.processedDateTime);
+              const pendingOrders = orders.filter((o) => !o.processedDateTime);
+
+              if (pendingOrders.length > 0) {
+                // Has pending orders — show pending tab
+                this.pendingOrderData.set(pendingOrders);
+                this.completedOrderData.set(this.allCompletedOrders);
+                this.completedOrderSearchDate.set(null);
+                this.selectedTab.set(0);
+                this.screenReaderAnnouncement.set(`Found ${pendingOrders.length} pending order${pendingOrders.length !== 1 ? 's' : ''} for email address`);
+              } else {
+                // All orders are completed — show completed tab with date filter
+                if (this.allCompletedOrders) {
+                  const filteredList: CompletedOrdersList = {
+                    orders: completedOrders,
+                    totalCount: completedOrders.length,
+                    processedByUsers: this.allCompletedOrders.processedByUsers
+                  };
+                  this.completedOrderData.set(filteredList);
+                }
+                this.pendingOrderData.set(this.allPendingOrders);
+                const mostRecentOrder = completedOrders.reduce((latest, o) =>
+                  new Date(o.processedDateTime!) > new Date(latest.processedDateTime!) ? o : latest
+                );
+                const orderDate = new Date(mostRecentOrder.processedDateTime!);
+                const startDate = new Date(orderDate.getFullYear(), orderDate.getMonth(), orderDate.getDate());
+                startDate.setDate(startDate.getDate() - 10);
+                this.completedOrderSearchDate.set(startDate);
+                this.selectedTab.set(1);
+                this.screenReaderAnnouncement.set(`Found ${completedOrders.length} completed order${completedOrders.length !== 1 ? 's' : ''} for email address`);
+              }
             } else {
-              this.searchError = 'Email Address was not found';
+              this.searchError = 'No orders found for the given Email Address';
               this.pendingOrderData.set(this.allPendingOrders);
               this.completedOrderData.set(this.allCompletedOrders);
             }
           },
           error: () => {
-            this.searchError = 'Email Address was not found';
+            this.searchError = 'No orders found for the given Email Address';
             this.pendingOrderData.set(this.allPendingOrders);
             this.completedOrderData.set(this.allCompletedOrders);
           }
@@ -223,22 +255,38 @@ export class CustomerServiceFulfillmentComponent implements OnInit {
       this.fulfillmentService.getOrderByDeviceSerialNumber(serialNumber)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
-          next: (completedOrder) => {
-            if (this.allCompletedOrders) {
-              const filteredList: CompletedOrdersList = {
-                orders: [completedOrder],
-                totalCount: 1,
-                processedByUsers: this.allCompletedOrders.processedByUsers
-              };
-              this.completedOrderData.set(filteredList);
+          next: (order) => {
+            if (order.processedDateTime) {
+              // Completed order — open Completed Orders tab with date filter
+              if (this.allCompletedOrders) {
+                const filteredList: CompletedOrdersList = {
+                  orders: [order],
+                  totalCount: 1,
+                  processedByUsers: this.allCompletedOrders.processedByUsers
+                };
+                this.completedOrderData.set(filteredList);
+              }
+              this.pendingOrderData.set(this.allPendingOrders);
+              const orderDate = new Date(order.processedDateTime);
+              const startDate = new Date(orderDate.getFullYear(), orderDate.getMonth(), orderDate.getDate());
+              startDate.setDate(startDate.getDate() - 10);
+              this.completedOrderSearchDate.set(startDate);
+              this.selectedTab.set(1);
+              this.screenReaderAnnouncement.set('Device found in completed orders: 1 result displayed');
+            } else {
+              // Pending order — open Pending Orders tab showing the found record
+              this.pendingOrderData.set([order]);
+              this.completedOrderData.set(this.allCompletedOrders);
+              this.completedOrderSearchDate.set(null);
+              this.selectedTab.set(0);
+              this.screenReaderAnnouncement.set('Device found in pending orders: 1 result displayed');
             }
-            this.pendingOrderData.set(this.allPendingOrders);
-            this.selectedTab.set(1);
           },
           error: () => {
-            this.searchError = 'Device Serial Number was not found';
+            this.searchError = 'No orders found for the given Device Serial Number';
             this.pendingOrderData.set(this.allPendingOrders);
             this.completedOrderData.set(this.allCompletedOrders);
+            this.completedOrderSearchDate.set(null);
           }
         });
     }
@@ -247,8 +295,10 @@ export class CustomerServiceFulfillmentComponent implements OnInit {
   clearSearch() {
     this.searchValue = '';
     this.searchError = '';
+    this.completedOrderSearchDate.set(null);
     this.pendingOrderData.set(this.allPendingOrders);
     this.completedOrderData.set(this.allCompletedOrders);
+    this.screenReaderAnnouncement.set('');
   }
 
   searchPattern(): string {
@@ -261,9 +311,6 @@ export class CustomerServiceFulfillmentComponent implements OnInit {
   }
 
   searchMaxLength(): number {
-    if (this.searchType === 'email') {
-      return 100; // Email can be longer
-    }
     return 50;
   }
 

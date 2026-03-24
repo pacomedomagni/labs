@@ -42,7 +42,7 @@ export class PendingOrdersComponent implements AfterViewInit {
   private filterState = this.orderFilterService.createPendingOrderFilterState();
 
   orders = input<DeviceOrder[]>([]);
-  orderSelected = output<DeviceOrder>();
+  orderSelected = output<{ order: DeviceOrder; filteredOrders: DeviceOrder[] }>();
 
   displayedColumns: string[] = ['orderNumber', 'orderDate', 'state', 'deviceCount', 'deviceType', 'status'];
   dataSource = new MatTableDataSource<DeviceOrder>();
@@ -105,7 +105,7 @@ export class PendingOrdersComponent implements AfterViewInit {
   filteredPendingCount = computed(() => this.filteredOrders().length);
 
   filteredDevicesNeeded = computed(() =>
-    this.filteredOrders().reduce((sum, o) => sum + o.nbrDevicesNeeded, 0)
+    this.filteredOrders().reduce((sum, o) => sum + o.deviceCount, 0)
   );
 
   constructor() {
@@ -158,7 +158,7 @@ export class PendingOrdersComponent implements AfterViewInit {
 
   onOrderClick(event: Event, order: DeviceOrder): void {
     event.preventDefault();
-    this.orderSelected.emit(order);
+    this.orderSelected.emit({ order, filteredOrders: this.filteredOrders() });
   }
 
   onStatusToggle(status: string, checked: boolean): void {

@@ -1,12 +1,41 @@
 <cui-vertical-stepper #stepper [linear]="true">
     <cui-step class="flex justify-end" label="Assign Devices" aria-label="Step 1 of 2: Assign Devices" [stepControl]="deviceAssignmentForm.stepControl" [summary]="vehicleYMMSN()" [editable]="false">
-        <tmx-assign-devices #deviceAssignmentForm [(vehicles)]="vehicles" (lastRowValidated)="lastDeviceAssigned()"></tmx-assign-devices>
+        <tmx-assign-devices #deviceAssignmentForm [(vehicles)]="vehicles" (lastRowValidated)="lastDeviceAssigned($event)"></tmx-assign-devices>
         <div class="flex justify-end pt-4">
-            <button mat-flat-button matStepperNext color="primary" [disabled]="!deviceAssignmentForm.valid()">
+            <button mat-flat-button matStepperNext (click)="nextButtonClick()" color="primary" [disabled]="!deviceAssignmentForm.valid()">
                 <mat-icon>arrow_forward</mat-icon>
                 <span>Next</span>
             </button>
         </div>
     </cui-step>
-    <cui-step label="Print Shipping Label" aria-label="Step 2 of 2: Print Shipping Label" [editable]="false"> To be completed in Product Backlog Item 6982228</cui-step>
+    <cui-step label="Print Shipping Label" aria-label="Step 2 of 2: Print Shipping Label" [editable]="false">
+        <div class="flex flex-col gap-4">
+            <p>Confirm order details, print the shipping label, and select 'Next Order' to continue processing, or select 'Finish' to return to the Pending Orders list.</p>
+            
+            <!-- Customer Address -->
+            <div class="customer-address">
+                <h3 class="font-semibold mb-2">Customer Address</h3>
+                <p>{{ customerName() }}</p>
+                <p>{{ streetAddress() }}</p>
+                <p>{{ cityStateZip() }}</p>
+            </div>
+            
+            <div class="pt-2">
+                <button 
+                    mat-flat-button 
+                    color="primary" 
+                    [disabled]="isProcessingLabel() || labelProcessed() || !isAddressValid()"
+                    (click)="printOrDownloadLabel()">
+                    {{ isProcessingLabel() ? 'PROCESSING...' : (getPrinterName() === 'ToFile-TEST' ? 'DOWNLOAD TEST FILE' : 'PRINT LABEL') }}
+                </button>
+            </div>
+            
+            <div class="flex justify-end gap-3 pt-4">
+                <button mat-stroked-button color="primary" (click)="finish()">FINISH</button>
+                <button mat-flat-button color="primary" [disabled]="!labelProcessed() || isLoadingNextOrder() || !hasNextOrder()" (click)="loadNextOrder()">
+                    {{ isLoadingNextOrder() ? 'LOADING...' : 'NEXT ORDER' }}
+                </button>
+            </div>
+        </div>
+    </cui-step>
 </cui-vertical-stepper>

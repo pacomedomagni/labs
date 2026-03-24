@@ -57,6 +57,10 @@ namespace Progressive.Telematics.Labs.Shared
         public static EventId DeviceFulfillmentOrchestrator_GetCompletedOrders_Error = 4026;
         public static EventId DeviceFulfillmentOrchestrator_GetPendingOrders_Error = 4027;
         public static EventId DeviceFulfillmentOrchestrator_ConfirmDeviceAssignment_Error = 4028;
+        public static EventId DeviceFulfillmentOrchestrator_SaveDeviceAssignments_PartialFailure = 4029;
+        public static EventId DeviceFulfillmentOrchestrator_SaveDeviceAssignments_Warning = 4030;
+        public static EventId DeviceFulfillmentOrchestrator_SaveDeviceAssignments_Error = 4031;
+        public static EventId DeviceFulfillmentOrchestrator_GetAllOrders_Error = 4032;
     }
 }
 

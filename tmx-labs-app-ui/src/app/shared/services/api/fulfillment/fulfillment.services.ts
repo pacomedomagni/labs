@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { HttpContext } from '@angular/common/http';
 import { ApiService } from '../api.service';
 
-import { OrderListDetails, OrderDetails, AssingDeviceRequest, CompletedOrdersList, DeviceOrder, CompletedDeviceOrder, ValidateDeviceForFulfillmentRequest, ValidateDeviceForFulfillmentResponse } from '../../../data/fulfillment/resources';
+import { OrderListDetails, OrderDetails, AssingDeviceRequest, CompletedOrdersList, DeviceOrder, ValidateDeviceForFulfillmentRequest, ValidateDeviceForFulfillmentResponse } from '../../../data/fulfillment/resources';
 import { OrderVehicleDetails } from 'src/app/shared/data/vehicle/resources';
 import { SKIP_LOADING } from '../../http-interceptors/loading-interceptor';
 
@@ -67,8 +67,8 @@ export class FulfillmentService {
         });
     }
 
-    getCompletedOrderByNumber(orderNumber: string): Observable<CompletedDeviceOrder> {
-        return this.apiService.get<CompletedDeviceOrder>({
+    getCompletedOrderByNumber(orderNumber: string): Observable<DeviceOrder> {
+        return this.apiService.get<DeviceOrder>({
             uri: `${this.controller}/GetCompletedOrderByNumber?orderNumber=${orderNumber}`,
         });
     }
@@ -79,8 +79,8 @@ export class FulfillmentService {
         });
     }
 
-    getOrderByDeviceSerialNumber(serialNumber: string): Observable<CompletedDeviceOrder> {
-        return this.apiService.get<CompletedDeviceOrder>({
+    getOrderByDeviceSerialNumber(serialNumber: string): Observable<DeviceOrder> {
+        return this.apiService.get<DeviceOrder>({
             uri: `${this.controller}/GetOrderByDeviceSerialNumber?serialNumber=${encodeURIComponent(serialNumber)}`,
         });
     }
@@ -98,12 +98,30 @@ export class FulfillmentService {
         });
     }
 
-    saveDeviceAssignments(deviceOrderSeqId: number, vehicles: OrderVehicleDetails[]): Observable<void> {
+    saveDeviceAssignments(deviceOrderSeqId: number, vehicles: OrderVehicleDetails[], userId: string): Observable<void> {
         return this.apiService.post<void>({
             uri: `${this.controller}/SaveDeviceAssignments`,
             payload: {
                 deviceOrderSeqId: deviceOrderSeqId,
-                vehicles: vehicles
+                vehicles: vehicles,
+                fulfilledByUserID: userId
+            }
+        });
+    }
+
+    printLabel(printer: string, deviceOrder: DeviceOrder): Observable<boolean> {
+        return this.apiService.post<boolean>({
+            uri: `${this.controller}/PrintLabel?printer=${encodeURIComponent(printer)}`,
+            payload: deviceOrder
+        });
+    }
+
+    downloadLabel(deviceOrder: DeviceOrder): Observable<Blob> {
+        return this.apiService.post<Blob>({
+            uri: `${this.controller}/DownloadLabel`,
+            payload: deviceOrder,
+            options: {
+                responseType: 'blob' as 'json'
             }
         });
     }

@@ -118,6 +118,7 @@ export class ParticipantDetailsComponent {
         (): ActionHandlerContext => ({
             participantResource: this.participantResource,
             vehicleResource: this.vehicleResource,
+            displayVehicle: this.displayVehicle,
             deviceResource: this.deviceResource,
             driverResource: this.driverResource,
             displayNickname: this.displayNickname,
@@ -201,7 +202,7 @@ export class ParticipantDetailsComponent {
 
     nicknameContext = computed<ParticipantNicknameDialogContext>(() => {
         const fallback = this.participantDetailsFormattingService.formatVehicleNickname(
-            this.vehicleResource(),
+            this.displayVehicle(),
             null,
         );
         return {

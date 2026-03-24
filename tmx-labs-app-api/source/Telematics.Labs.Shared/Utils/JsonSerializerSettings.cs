@@ -26,7 +26,7 @@ namespace Progressive.Telematics.Labs.Shared
         public static void SetDefaultJsonSerializerOptions(this JsonSerializerOptions options)
         {
             options.WriteIndented = DefaultOptions.WriteIndented;
-            options.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: true));
+            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: true));
             options.Converters.Add(new TimeSpanConverter());
             options.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
         }

@@ -21,9 +21,9 @@
     <div class="filter-section">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Start Date</mat-label>
-        <input matInput [matDatepicker]="startPicker" [value]="unappliedStartDate()" (dateChange)="onStartDateChange($event.value)">
-        <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
-        <mat-datepicker #startPicker></mat-datepicker>
+        <input matInput [matDatepicker]="startPicker" [value]="unappliedStartDate()" (dateChange)="onStartDateChange($event.value)" aria-label="Start date">
+        <mat-datepicker-toggle matIconSuffix [for]="startPicker" aria-label="Open start date calendar"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker aria-label="Start date picker"></mat-datepicker>
       </mat-form-field>
     </div>
 
@@ -31,10 +31,11 @@
     <div class="filter-section">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>End Date</mat-label>
-        <input matInput [matDatepicker]="endPicker" [value]="unappliedEndDate()" [min]="unappliedStartDate()" (dateChange)="onEndDateChange($event.value)">
-        <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
-        <mat-datepicker #endPicker></mat-datepicker>
+        <input matInput [matDatepicker]="endPicker" [value]="unappliedEndDate()" [min]="unappliedStartDate()" (dateChange)="onEndDateChange($event.value)" aria-label="End date">
+        <mat-datepicker-toggle matIconSuffix [for]="endPicker" aria-label="Open end date calendar"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker aria-label="End date picker"></mat-datepicker>
       </mat-form-field>
+      <div class="date-range-error" role="alert" [style.visibility]="endDateInvalid() ? 'visible' : 'hidden'">End date must be later than start date.</div>
     </div>
 
     <!-- Action Buttons -->
@@ -42,7 +43,7 @@
       <button mat-flat-button
               color="primary"
               (click)="applyFilters()"
-              [disabled]="!hasUnappliedChanges()"
+              [disabled]="!hasUnappliedChanges() || endDateInvalid()"
               class="apply-button">
         APPLY
       </button>
@@ -75,7 +76,7 @@
 
     <!-- Table -->
     <div class="table-container">
-      <table mat-table [dataSource]="dataSource" matSort class="cui-table orders-table">
+      <table mat-table [dataSource]="dataSource" matSort matSortActive="processedDateTime" matSortDirection="desc" class="cui-table orders-table">
         <!-- Order Number Column -->
         <ng-container matColumnDef="orderNumber">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Order #</th>

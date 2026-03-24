@@ -746,21 +746,41 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Device
             if (string.IsNullOrWhiteSpace(request?.DeviceSerialNumber))
             {
                 resource.AddMessage(MessageCode.ErrorCode, "InvalidRequest");
-                resource.AddMessage(MessageCode.ErrorDetails, "Device serial number is required");
+                resource.AddMessage(MessageCode.Error, "Device serial number is required");
                 return resource;
             }
 
             var deviceResponse = await deviceService.GetDeviceBySerialNumber(request.DeviceSerialNumber);
-            
+
+
             if (deviceResponse?.Device == null)
             {
-                resource.AddMessage(MessageCode.ErrorCode, "NotFound");
-                resource.AddMessage(MessageCode.ErrorDetails, $"Device not found for serial number {request.DeviceSerialNumber}");
+                resource.AddMessage(MessageCode.StatusCode, "NotFound");
+                resource.AddMessage(MessageCode.StatusDescription, $"Device not found for serial number {request.DeviceSerialNumber}");
+                return resource;
+            }
+
+            else if (deviceResponse.Device.ProgramCode != null)
+            {
+                resource.AddMessage(MessageCode.ErrorCode, "ProgramCodeSet");
+                resource.AddMessage(MessageCode.Error, $"Program code is set for this device. Try another device.");
                 return resource;
             }
 
             var device = deviceResponse.Device;
+            // Send activation request for SIM management
             await deviceService.ActivateXirgoDevice(device.DeviceSerialNumber, device.SIM, true);
+
+            // Update device location and status
+            await deviceService.UpdateAsync(new UpdateDeviceRequest
+            {
+                Device = new XirgoDevice
+                {
+                    DeviceSeqID = device.DeviceSeqID,
+                    LocationCode = (int)DeviceLocation.Distributor,
+                    StatusCode = (int)DeviceStatus.ReadyForPrep
+                }
+            });
 
             resource.AddMessage(MessageCode.StatusDescription, $"Activated device {request.DeviceSerialNumber}");
             return resource;
@@ -788,6 +808,16 @@ namespace Progressive.Telematics.Labs.Business.Orchestrators.Device
 
             var device = deviceResponse.Device;
             await deviceService.ActivateXirgoDevice(device.DeviceSerialNumber, device.SIM, false);
+
+            // Update device status
+            await deviceService.UpdateAsync(new UpdateDeviceRequest
+            {
+                Device = new XirgoDevice
+                {
+                    DeviceSeqID = device.DeviceSeqID,
+                    StatusCode = (int)DeviceStatus.ReadyForPrep
+                }
+            });
 
             resource.AddMessage(MessageCode.StatusDescription, $"Deactivated device {request.DeviceSerialNumber}");
             return resource;

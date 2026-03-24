@@ -1,27 +1,27 @@
 
 export interface DeviceOrder {
     deviceOrderSeqID: number;
-    nbrDevicesNeeded: number;
-    name: string;
-    email: string;
     orderNumber: string;
-    orderDate: string;
-    state: string;
-    deviceType: string;
-    snapshotVersion: string;
-    deviceOrderStatusDescription: string;
-}
 
-export interface CompletedDeviceOrder {
-    deviceOrderSeqID: number;
-    orderNumber: string;
-    processedDateTime: string;
-    shipDateTime: string;
-    processedBy: string;
-    processedByUserID: string;
-    state: string;
-    deviceCount: number;
-    deviceSerialNumbers: string[];
+    name?: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    orderDate?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    zipCode?: string;
+    state?: string;
+    deviceType?: string;
+    snapshotVersion?: string;
+    deviceOrderStatusDescription?: string;
+    processedDateTime?: string;
+    shipDateTime?: string;
+    processedBy?: string;
+    processedByUserID?: string;
+    deviceCount?: number;
+    deviceSerialNumbers?: string[];
 }
 
 export interface OrderListDetails {
@@ -82,7 +82,7 @@ export interface AssingDeviceRequest {
 }
 
 export interface CompletedOrdersList {
-    orders: CompletedDeviceOrder[];
+    orders: DeviceOrder[];
     totalCount: number;
     processedByUsers: ProcessedByUser[];
 }
@@ -102,6 +102,7 @@ export interface ValidateDeviceForFulfillmentRequest {
 }
 
 export interface ValidateDeviceForFulfillmentResponse {
+    isAvailable: boolean;
     isValid: boolean;
     isExistent: boolean;
     isBenchtested: boolean;

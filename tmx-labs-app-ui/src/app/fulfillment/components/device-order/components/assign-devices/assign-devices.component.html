@@ -13,14 +13,15 @@
                     <input
                         #deviceInput
                         matInput
+                        (keydown.enter)="handleBarcodeHotkey(deviceInput)"
+                        (keydown.tab)="handleBarcodeHotkey(deviceInput)"
+                        (blur)="formBlurred(i, last)"
                         [formControl]="getFormControl(i)"
-                        (keydown.enter)="deviceInput.blur()"
-                        (blur)="handleInput(i, last)"
                     />
-                    @if (getFormControl(i).hasError('required')) {
+                    @if (getFormControl(i).hasError('required') && getFormControl(i).touched) {
                         <mat-error>Device serial number is required</mat-error>
                     }
-                    @else if (getFormControl(i).hasError('minlength')) {
+                    @else if (getFormControl(i).hasError('minlength') && getFormControl(i).touched) {
                         <mat-error>Must be at least 3 characters</mat-error>
                     }
                     @else if (getFormControl(i).hasError('deviceDuplicate')) {
@@ -34,6 +35,9 @@
                     }
                     @else if (getFormControl(i).hasError('deviceAlreadyAssigned')) {
                         <mat-error>This device is already assigned.  Please try assigning another device</mat-error>
+                    }
+                    @else if (getFormControl(i).hasError('deviceNotAvailable')) {
+                        <mat-error>This device is not in the Available status code. Please try assigning another device.</mat-error>
                     }
                 </mat-form-field>
             </div>

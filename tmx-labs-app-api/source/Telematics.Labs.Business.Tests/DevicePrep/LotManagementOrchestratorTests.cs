@@ -20,8 +20,10 @@ namespace Progressive.Telematics.Labs.Business.Tests.DevicePrep
                 Databases.LotManagement.Object,
                 Services.DeviceLot.Object,
                 Services.XirgoDevice.Object,
+                Databases.XirgoDeviceDAL.Object,
                 Databases.ConfigValues.Object,
                 Services.SimManagementDAL.Object,
+                Services.DeviceActivation.Object,
                 Mapper);
         }
 

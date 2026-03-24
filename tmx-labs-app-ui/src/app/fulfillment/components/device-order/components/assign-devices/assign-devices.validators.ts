@@ -24,6 +24,9 @@ export class AssignDevicesValidators {
             if (response.isAssigned) {
               errors['deviceAlreadyAssigned'] = { value: control.value };
             }
+            if(!response.isAvailable){
+              errors['deviceNotAvailable'] = { value: control.value };
+            }
             
             return errors;
           }

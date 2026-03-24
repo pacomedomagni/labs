@@ -39,11 +39,17 @@ namespace Progressive.Telematics.Labs.Services.Database
         /// <returns>List of vehicles associated with the order</returns>
         Task<IEnumerable<OrderVehicle>> GetVehiclesByDeviceOrderSeqId(int deviceOrderSeqId);
 
-        /// <summary>
+    /// <summary>
         /// Get fulfillment orders by status codes (cross-database query to LabsMyScore + LabsHomebase)
         /// </summary>
         /// <param name="statusCodes">Status codes to filter by (e.g. 1,2 for pending; 3 for completed)</param>
         Task<IEnumerable<FulfillmentOrderDataModel>> GetFulfillmentOrdersByStatus(int[] statusCodes);
+
+        /// <summary>
+        /// Get fulfillment orders by status codes using new entity model
+        /// </summary>
+        /// <param name="statusCodes">Status codes to filter by</param>
+        Task<IEnumerable<FulfillmentOrderEntity>> GetFulfillmentOrderEntitiesByStatus(int[] statusCodes);
 
         /// <summary>
         /// Updates a device order record
@@ -136,6 +142,16 @@ namespace Progressive.Telematics.Labs.Services.Database
                 .Parameter("@Parm_StatusCodes", string.Join(",", statusCodes));
 
             return await ExecuteStoredProcedureAsync<FulfillmentOrderDataModel>(storedProc, parms);
+        }
+
+        public async Task<IEnumerable<FulfillmentOrderEntity>> GetFulfillmentOrderEntitiesByStatus(int[] statusCodes)
+        {
+            const string storedProc = "dbo.usp_FulfillmentOrder_SelectByStatus";
+
+            var parms = new DynamicParameters()
+                .Parameter("@Parm_StatusCodes", string.Join(",", statusCodes));
+
+            return await ExecuteStoredProcedureAsync<FulfillmentOrderEntity>(storedProc, parms);
         }
 
         public async Task UpdateDeviceOrder(

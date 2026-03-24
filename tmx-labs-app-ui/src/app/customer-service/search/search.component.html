@@ -49,7 +49,7 @@
                 [dataArray]="customerResults()"
                 (viewParticipant)="viewParticipant($event)"
             ></tmx-enrollment-results>
-        } @else if (enrollmentDetails(); as detail) {
+        } @else if (enrollmentDetailService.details(); as detail) {
             <tmx-enrollment-details [details]="detail"></tmx-enrollment-details>
         }
     }

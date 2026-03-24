@@ -89,12 +89,7 @@ export class EditVehicleService {
                                     if (context.participantSeqID && outcome.vehicle) {
                                         this.enrollmentDetailService.updateParticipantVehicle(
                                             context.participantSeqID,
-                                            {
-                                                year: outcome.vehicle.year,
-                                                make: outcome.vehicle.make,
-                                                model: outcome.vehicle.model,
-                                                vehicleSeqID: outcome.vehicle.vehicleSeqID,
-                                            }
+                                            outcome.vehicle
                                         );
                                     }
                                 }

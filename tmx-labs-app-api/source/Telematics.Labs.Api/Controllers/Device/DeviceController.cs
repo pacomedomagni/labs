@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Progressive.Telematics.Labs.Business.Orchestrators.Device;
 using Progressive.Telematics.Labs.Business.Resources;
+using Progressive.Telematics.Labs.Business.Resources.Enums;
 using Progressive.Telematics.Labs.Business.Resources.Resources.Device;
+using Progressive.Telematics.Labs.Business.Resources.Shared;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Progressive.Telematics.Labs.Api.Controllers.Device
@@ -65,9 +68,16 @@ namespace Progressive.Telematics.Labs.Api.Controllers.Device
         }
 
         [HttpPost("Activate")]
-        public async Task<Resource> Activate([FromBody] Progressive.Telematics.Labs.Business.Resources.Resources.Device.ActivateDeviceRequest request)
+        public async Task<ActionResult<Resource>> Activate([FromBody] Progressive.Telematics.Labs.Business.Resources.Resources.Device.ActivateDeviceRequest request)
         {
-            return await Orchestrator.ActivateDevice(request);
+            var result = await Orchestrator.ActivateDevice(request);
+
+            // Any errors besides "not found" errors return BadRequest
+            if (result.Messages.Any(t => t.Key == MessageCode.Error))
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
         }
 
         [HttpPost("Deactivate")]

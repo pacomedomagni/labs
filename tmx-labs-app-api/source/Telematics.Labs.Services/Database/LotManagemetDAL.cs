@@ -14,7 +14,7 @@ namespace Progressive.Telematics.Labs.Services.Database
     public interface ILotManagementDAL
     {
         Task<IEnumerable<DeviceLotDataModel>> GetLotsForMarkBenchTestComplete();
-        Task UpdateLot(int lotSeqId, string name, int? statusCode, int? typeCode);
+        Task UpdateLot(int lotSeqId, string? name, int? statusCode, int? typeCode);
     }
 
     public class LotManagementDAL : DbContext, ILotManagementDAL

@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using Progressive.Telematics.Labs.Business.Resources.Domain.Fulfillment;
 
 namespace Progressive.Telematics.Labs.Business.Resources.Resources.FulFillment;
 
 public class CompletedOrdersList : Resource
 {
-    public List<CompletedDeviceOrder> Orders { get; set; } = new();
+    public List<DeviceOrderInfo> Orders { get; set; } = new();
     public int TotalCount { get; set; }
     public List<ProcessedByUser> ProcessedByUsers { get; set; } = new();
 }

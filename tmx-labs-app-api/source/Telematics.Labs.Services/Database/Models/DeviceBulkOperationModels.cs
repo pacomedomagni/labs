@@ -19,6 +19,7 @@ namespace Progressive.Telematics.Labs.Services.Database.Models
         public int DeviceSeqID { get; set; }
         public bool? IsCommunicationAllowed { get; set; }
         public byte? StatusCode { get; set; }
+        public int? LocationCode { get; set; }
         public string ReportedVIN { get; set; }
         public string WTFStateInfo { get; set; }
         public int? ReportedProtocolCode { get; set; }

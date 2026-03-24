@@ -1,15 +1,3 @@
-import { MessageCode } from "./enums";
-
-export interface Resource {
-    extenders: Map<string, unknown>[];
-    messages: KeyValuePair<MessageCode, unknown>[];
-}
-
-export interface KeyValuePair<TKey, TValue> {
-	key: TKey;
-	value: TValue;
-}
-
 export interface UserInfo {
 	lanId: string;
 	name: string;
@@ -128,7 +116,14 @@ export interface TimeSpan {
 
 export interface Resource {
     extenders: Map<string, unknown>[];
-    messages: KeyValuePair<MessageCode, unknown>[];
+    messages: ResourceMessage;
+}
+
+export interface ResourceMessage {
+    error?: string;
+    statusDescription?: string;
+    errorCode?: string | null;
+    errorDetails?: string | null;
 }
 
 export interface KeyValuePair<TKey, TValue> {

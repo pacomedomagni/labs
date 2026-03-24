@@ -17,7 +17,7 @@
     </div>
     @if (shouldDisplaySubtitle()) {
         <tmx-dialog-subtitle 
-            [leftContent]="data.subtitle" 
+            [leftContent]="getSubtitle()" 
             dialog-sub-header>
         </tmx-dialog-subtitle>
     }

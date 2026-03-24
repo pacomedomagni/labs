@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Progressive.Telematics.Labs.Business.Mappers;
+using Progressive.Telematics.Labs.Services;
 using Progressive.Telematics.Labs.Services.Api;
 using Progressive.Telematics.Labs.Services.Wcf;
 using Progressive.Telematics.Labs.Services.Database;
@@ -26,6 +27,7 @@ namespace Progressive.Telematics.Labs.Business.Tests
         public Mock<IBenchTestBoardService> BenchTestBoard { get; set; }
         public Mock<IBenchTestService> BenchTest { get; set; }
         public Mock<ISimManagementDAL> SimManagementDAL { get; set; }
+        public Mock<IDeviceActivationService> DeviceActivation { get; set; }
     }
 
     public class Apis
@@ -103,7 +105,8 @@ namespace Progressive.Telematics.Labs.Business.Tests
                 XirgoSession = new Mock<IXirgoSessionService>(),
                 BenchTestBoard = new Mock<IBenchTestBoardService>(),
                 BenchTest = new Mock<IBenchTestService>(),
-                SimManagementDAL = new Mock<ISimManagementDAL>()
+                SimManagementDAL = new Mock<ISimManagementDAL>(),
+                DeviceActivation = new Mock<IDeviceActivationService>()
             };
         }
 

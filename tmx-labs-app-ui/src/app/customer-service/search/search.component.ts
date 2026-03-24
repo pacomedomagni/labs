@@ -62,7 +62,7 @@ export class CustomerServiceSearchComponent implements OnDestroy, AfterViewInit,
     private route = inject(ActivatedRoute);
     private customerSearchService = inject(CustomerSearchService);
     private cdr = inject(ChangeDetectorRef);
-    private enrollmentDetailService = inject(EnrollmentDetailService);
+    readonly enrollmentDetailService = inject(EnrollmentDetailService);
     private accountService = inject(AccountService);
 
     private _destroySubject$ = new Subject<void>();
@@ -77,7 +77,6 @@ export class CustomerServiceSearchComponent implements OnDestroy, AfterViewInit,
     recordCount: WritableSignal<number> = signal(0);
     shouldAnnounceInitialStatus: WritableSignal<boolean> = signal(false);
     showDetails: WritableSignal<boolean> = signal(false);
-    enrollmentDetails: WritableSignal<EnrollmentDetails | null> = signal(null);
 
     private readonly LAST_NAME_EMAIL = 'Last Name/Email';
     private readonly DEVICE_ID = 'Device ID';
@@ -168,7 +167,6 @@ export class CustomerServiceSearchComponent implements OnDestroy, AfterViewInit,
         };
 
         this.enrollmentDetailService.updateEnrollmentDetails(baseDetails);
-        this.enrollmentDetails.set(baseDetails);
         this.showDetails.set(true);
         
         const participantGroupSeqId = customer.participantGroup?.participantGroupSeqID ?? null;
@@ -191,7 +189,6 @@ export class CustomerServiceSearchComponent implements OnDestroy, AfterViewInit,
                         accounts: response.accounts ?? [],
                     };
                     this.enrollmentDetailService.updateEnrollmentDetails(updatedDetails);
-                    this.enrollmentDetails.set(updatedDetails);
                 },
                 error: () => {
                     if (this.currentParticipantGroupId === participantGroupSeqId) {
@@ -200,7 +197,6 @@ export class CustomerServiceSearchComponent implements OnDestroy, AfterViewInit,
                             accounts: [],
                         };
                         this.enrollmentDetailService.updateEnrollmentDetails(errorDetails);
-                        this.enrollmentDetails.set(errorDetails);
                     }
                 },
             });

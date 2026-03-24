@@ -10,7 +10,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { CompletedDeviceOrder, CompletedOrdersList, ProcessedByUser } from '../../../shared/data/fulfillment/resources';
+import { DeviceOrder, CompletedOrdersList, ProcessedByUser } from '../../../shared/data/fulfillment/resources';
 import { OrderFilterService } from '../../services/order-filter.service';
 
 @Component({
@@ -40,10 +40,11 @@ export class CompletedOrdersComponent implements AfterViewInit {
   private filterState = this.orderFilterService.createCompletedOrderFilterState();
 
   orderData = input<CompletedOrdersList | null>(null);
-  orderSelected = output<CompletedDeviceOrder>();
+  searchResultStartDate = input<Date | null>(null);
+  orderSelected = output<{ order: DeviceOrder; filteredOrders: DeviceOrder[] }>();
 
   displayedColumns: string[] = ['orderNumber', 'processedDateTime', 'shipDateTime', 'processedBy', 'state', 'deviceCount', 'devices'];
-  dataSource = new MatTableDataSource<CompletedDeviceOrder>();
+  dataSource = new MatTableDataSource<DeviceOrder>();
 
   // Expose filter state from service
   unappliedProcessedBy = this.filterState.unappliedProcessedBy;
@@ -55,6 +56,9 @@ export class CompletedOrdersComponent implements AfterViewInit {
   isUnappliedFilterDefault = this.filterState.isUnappliedFilterDefault;
   isAppliedFilterDefault = this.filterState.isAppliedFilterDefault;
   hasUnappliedChanges = this.filterState.hasUnappliedChanges;
+
+  // True when the unapplied end date is before the unapplied start date
+  endDateInvalid = computed(() => this.unappliedEndDate() < this.unappliedStartDate());
 
   // Computed: available processed-by users from API response
   availableProcessedBy = computed<ProcessedByUser[]>(() => {
@@ -112,18 +116,21 @@ export class CompletedOrdersComponent implements AfterViewInit {
         this.paginator.firstPage();
       }
     });
+
+    effect(() => {
+      const date = this.searchResultStartDate();
+      if (date) {
+        this.unappliedStartDate.set(date);
+        this.appliedStartDate.set(date);
+      }
+    });
   }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
 
-    // Default sort: processedDateTime descending
-    this.sort.active = 'processedDateTime';
-    this.sort.direction = 'desc';
-    this.sort.sortChange.emit({ active: 'processedDateTime', direction: 'desc' });
-
-    this.dataSource.sortingDataAccessor = (item: CompletedDeviceOrder, property: string) => {
+    this.dataSource.sortingDataAccessor = (item: DeviceOrder, property: string) => {
       switch (property) {
         case 'processedDateTime': return item.processedDateTime ? new Date(item.processedDateTime).getTime() : 0;
         case 'shipDateTime': return item.shipDateTime ? new Date(item.shipDateTime).getTime() : 0;
@@ -155,9 +162,9 @@ export class CompletedOrdersComponent implements AfterViewInit {
     this.filterState.clearFilters();
   }
 
-  onOrderClick(event: Event, order: CompletedDeviceOrder): void {
+  onOrderClick(event: Event, order: DeviceOrder): void {
     event.preventDefault();
-    this.orderSelected.emit(order);
+    this.orderSelected.emit({ order, filteredOrders: this.filteredOrders() });
   }
 
   downloadCsv(): void {

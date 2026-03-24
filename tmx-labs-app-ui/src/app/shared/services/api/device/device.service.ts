@@ -2,6 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { Observable } from 'rxjs/internal/Observable';
 import { Resource } from 'src/app/shared/data/application/resources';
+import { SKIP_ERROR_HANDLING } from '../../http-interceptors/error-interceptor';
+import { HttpContext } from '@angular/common/http';
 
 @Injectable({
     providedIn: 'root',
@@ -10,25 +12,27 @@ export class DeviceService {
     private readonly controller = '/Device';
     private api = inject(ApiService);
 
-    activateDevice(
-        deviceSerialNumber: string
-    ): Observable<Resource> {
+    activateDevice(deviceSerialNumber: string, skipErrorHandling = true): Observable<Resource> {
         return this.api.post<Resource>({
             uri: `${this.controller}/Activate`,
             payload: {
-              deviceSerialNumber: deviceSerialNumber
+                deviceSerialNumber: deviceSerialNumber,
             },
+            options: {
+                context: new HttpContext().set(SKIP_ERROR_HANDLING, skipErrorHandling)
+            }
         });
     }
 
-    deactivateDevice(
-        deviceSerialNumber: string
-    ): Observable<Resource> {
+    deactivateDevice(deviceSerialNumber: string, skipErrorHandling = true): Observable<Resource> {
         return this.api.post<Resource>({
             uri: `${this.controller}/Deactivate`,
             payload: {
-              deviceSerialNumber: deviceSerialNumber
+                deviceSerialNumber: deviceSerialNumber,
             },
+            options: {
+                context: new HttpContext().set(SKIP_ERROR_HANDLING, skipErrorHandling)
+            }
         });
     }
 

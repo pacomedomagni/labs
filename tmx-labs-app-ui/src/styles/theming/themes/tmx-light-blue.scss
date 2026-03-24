@@ -31,6 +31,11 @@ $modified-theme: map.merge(light-blue.$theme, light-blue.$theme-extensions);
 
 :root {
   --mat-form-field-outlined-focus-label-text-color: #{mat.m2-get-color-from-palette($primary, 900)};
+  // #717171 (Angular Material default) gives 4.47:1 on #f5f5f5 (bg-gray-100), failing WCAG AA 4.5:1.
+  // #6F6F6F gives 4.61:1 on #f5f5f5 and 5.02:1 on white — passes everywhere.
+  --mdc-outlined-text-field-label-text-color: #6F6F6F;
+  --mdc-filled-text-field-label-text-color: #6F6F6F;
+  --mat-form-field-label-text-color: #6F6F6F;
 }
 
 .mat-mdc-radio-button.mat-accent .mat-radio-inner-circle,

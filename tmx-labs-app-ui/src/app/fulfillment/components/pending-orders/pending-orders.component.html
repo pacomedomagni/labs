@@ -22,7 +22,8 @@
       <div class="filter-label">Snapshot Version</div>
       <mat-button-toggle-group [value]="unappliedSnapshotVersion()"
                                (change)="unappliedSnapshotVersion.set($event.value)"
-                               class="snapshot-toggle-group">
+                               class="snapshot-toggle-group"
+                               aria-label="Snapshot Version">
         <mat-button-toggle value="all">All Snapshot Versions</mat-button-toggle>
         <mat-button-toggle value="3.0">Snapshot 3.0</mat-button-toggle>
         <mat-button-toggle value="4.0">Snapshot 4.0</mat-button-toggle>
@@ -35,7 +36,9 @@
       <div class="filter-label">Device Type</div>
       <mat-radio-group [value]="unappliedDeviceType()"
                        (change)="unappliedDeviceType.set($event.value)"
-                       class="radio-group">
+                       color="primary"
+                       class="radio-group"
+                       aria-label="Device Type">
         <mat-radio-button value="all">All Devices</mat-radio-button>
         <mat-radio-button value="w8w9">W8/W9</mat-radio-button>
         <mat-radio-button value="wx">WX</mat-radio-button>
@@ -47,16 +50,19 @@
     <div class="filter-section">
       <div class="filter-label">Order Status</div>
       <div class="checkbox-group">
-        <mat-checkbox [checked]="allUnappliedStatusesSelected()"
+        <mat-checkbox color="primary"
+                      [checked]="allUnappliedStatusesSelected()"
                       [indeterminate]="unappliedStatuses().length === 1"
                       (change)="onSelectAllStatuses($event.checked)">
           Select All
         </mat-checkbox>
-        <mat-checkbox [checked]="unappliedStatuses().includes('Pending Assignment')"
+        <mat-checkbox color="primary"
+                      [checked]="unappliedStatuses().includes('Pending Assignment')"
                       (change)="onStatusToggle('Pending Assignment', $event.checked)">
           Pending Assignment
         </mat-checkbox>
-        <mat-checkbox [checked]="unappliedStatuses().includes('Ready to Print')"
+        <mat-checkbox color="primary"
+                      [checked]="unappliedStatuses().includes('Ready to Print')"
                       (change)="onStatusToggle('Ready to Print', $event.checked)">
           Ready to Print
         </mat-checkbox>
@@ -124,7 +130,7 @@
         <!-- Device Count Column -->
         <ng-container matColumnDef="deviceCount">
           <th mat-header-cell *matHeaderCellDef>Device Count</th>
-          <td mat-cell *matCellDef="let order">{{ order.nbrDevicesNeeded }}</td>
+          <td mat-cell *matCellDef="let order">{{ order.deviceCount }}</td>
         </ng-container>
 
         <!-- Device Type Column -->
@@ -142,7 +148,7 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"
             tabindex="0"
-            [attr.aria-label]="'Order ' + row.orderNumber + ', ' + row.state + ', ' + row.nbrDevicesNeeded + ' devices, ' + row.deviceOrderStatusDescription">
+            [attr.aria-label]="'Order ' + row.orderNumber + ', ' + row.state + ', ' + row.deviceCount + ' devices, ' + row.deviceOrderStatusDescription">
         </tr>
       </table>
     </div>

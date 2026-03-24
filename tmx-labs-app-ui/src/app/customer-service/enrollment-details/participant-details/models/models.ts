@@ -6,6 +6,7 @@ import { ParticipantNicknameDialogContext } from "../services/participant-nickna
 export interface ActionHandlerContext {
     participantResource: Signal<AccountParticipantSummary>;
     vehicleResource: Signal<AccountVehicleSummary>;
+    displayVehicle: Signal<AccountVehicleSummary>;
     deviceResource: Signal<AccountDeviceSummary>;
     driverResource: Signal<AccountDriverSummary>;
     displayNickname: Signal<string | null>;

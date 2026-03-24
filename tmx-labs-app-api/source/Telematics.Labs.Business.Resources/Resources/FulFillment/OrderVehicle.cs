@@ -9,10 +9,16 @@ public class OrderVehicle
     public short Year { get; set; }
     public string Make { get; set; }
     public string Model { get; set; }
+    public string Message { get; set; }
     public DateTime CreateDateTime { get; set; }
     public string VehicleExternalId { get; set; }
     public int DeviceOrderSeqId { get; set; }
     public int DeviceOrderDetailSeqId { get; set; }
+    public int? DeviceSeqID { get; set; }
     public int ParticipantSeqId { get; set; }
     public string DeviceSerialNumber { get; set; }
+    public int DeviceTypeSelected { get; set; }
+    public string InstallByDate { get; set; }
+    public string DeviceFee { get; set; }
+    public string CableType { get; set; }
 }

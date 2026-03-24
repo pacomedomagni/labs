@@ -8,6 +8,7 @@ import { DialogComponent } from "@pgr-cla/core-ui-components"
 import { HelpTextIconComponent } from "../../help-text-icon/help-text-icon.component";
 import { MatButtonModule } from "@angular/material/button"
 import { DialogSubtitleComponent } from "../../layout/dialog-subtitle/dialog-subtitle.component";
+import { OrderSubtitleService } from "../../../services/order-subtitle.service";
 
 export const FORM_DIALOG_CONTENT = new InjectionToken<string>("app.formDiag.content");
 
@@ -48,6 +49,7 @@ export class FormDialogComponent implements AfterViewInit  {
 	}>(MAT_DIALOG_DATA, { optional: true });
 	private dialogRef = inject(MatDialogRef<FormDialogComponent>);
 	public injector = inject(Injector);
+	private orderSubtitleService = inject(OrderSubtitleService, { optional: true });
 
 	ngAfterViewInit(): void {
 		this.clonedModel = clone(this.data.formModel);
@@ -67,7 +69,11 @@ export class FormDialogComponent implements AfterViewInit  {
 	}
 
 	shouldDisplaySubtitle(): boolean {
-		return this.data.subtitle ? true : false;
+		return this.data.subtitle || this.orderSubtitleService?.orderSubtitle() ? true : false;
+	}
+
+	getSubtitle(): string {
+		return this.orderSubtitleService?.orderSubtitle() || this.data.subtitle || '';
 	}
 
 	shouldShowFooter(): boolean {

@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogService } from '../../../shared/services/dialogs/primary/dialog.service';
 import { LabelPrinterService } from '../../../shared/services/api/labelprinter/labelprinter.service';
 import { SetPrinterFormComponent, PrinterFormModel } from './set-printer-dialog/set-printer-form.component';
+import { PrinterSelectionService } from '../../services/printer-selection.service';
 
 @Component({
   selector: 'tmx-printer-info',
@@ -15,11 +16,11 @@ import { SetPrinterFormComponent, PrinterFormModel } from './set-printer-dialog/
 export class PrinterInfoComponent implements OnInit {
   private dialogService = inject(DialogService);
   private labelPrinterService = inject(LabelPrinterService);
+  private printerSelectionService = inject(PrinterSelectionService);
   private destroyRef = inject(DestroyRef);
-  private readonly PRINTER_STORAGE_KEY = 'defaultPrinterName';
   private readonly NO_PRINTER_SELECTED = 'NONE';
-  
-  printerName = signal<string>(this.NO_PRINTER_SELECTED);
+
+  printerName = this.printerSelectionService.printerName;
   workstationId = signal<string>('');
   availablePrinters = signal<string[]>([]);
 
@@ -29,10 +30,7 @@ export class PrinterInfoComponent implements OnInit {
   }
 
   private loadSavedPrinter(): void {
-    const savedPrinter = localStorage.getItem(this.PRINTER_STORAGE_KEY);
-    if (savedPrinter) {
-      this.printerName.set(savedPrinter);
-    }
+    // Printer is now managed by PrinterSelectionService
   }
 
   private loadPrinterInfo(): void {
@@ -47,9 +45,11 @@ export class PrinterInfoComponent implements OnInit {
           const savedPrinter = this.printerName();
           if (savedPrinter !== this.NO_PRINTER_SELECTED && !printerNames.includes(savedPrinter)) {
             // Printer from storage is no longer available, clear it
-            localStorage.removeItem(this.PRINTER_STORAGE_KEY);
-            this.printerName.set(this.NO_PRINTER_SELECTED);
+            this.printerSelectionService.setPrinter(this.NO_PRINTER_SELECTED);
+            localStorage.removeItem('defaultPrinterName');
           }
+
+
         },
         error: (error) => {
           console.error('Error loading printer info:', error);
@@ -75,8 +75,7 @@ export class PrinterInfoComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result: PrinterFormModel | undefined) => {
         if (result && result.selectedPrinter) {
-          this.printerName.set(result.selectedPrinter);
-          localStorage.setItem(this.PRINTER_STORAGE_KEY, result.selectedPrinter);
+          this.printerSelectionService.setPrinter(result.selectedPrinter);
         }
       });
   }

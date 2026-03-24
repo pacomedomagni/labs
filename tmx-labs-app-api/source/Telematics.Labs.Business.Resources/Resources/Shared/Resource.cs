@@ -7,12 +7,18 @@ namespace Progressive.Telematics.Labs.Business.Resources
 {
     public class Resource : IResource
     {
+        /// <summary>
+        /// Status of the operation - used to determine HTTP response status code
+        /// </summary>
+        public OperationStatus Status { get; set; }
+
         public Dictionary<string, object> Extenders { get; set; }
         public Dictionary<MessageCode, object> Messages { get; set; }
     }
 
     public interface IResource
     {
+        OperationStatus Status { get; set; }
         Dictionary<string, object> Extenders { get; set; }
         Dictionary<MessageCode, object> Messages { get; set; }
     }
