@@ -665,10 +665,11 @@ public class DeviceFulfillmentOrchestrator : IDeviceFulfillmentOrchestrator
         foreach (var desc in descriptions)
         {
             var trimmed = desc.Trim();
-            var match = Regex.Match(trimmed, @"Wireless\s+([A-Z])");
+            // Case-insensitive match to handle varying description formats
+            var match = Regex.Match(trimmed, @"Wireless\s+([A-Za-z])", RegexOptions.IgnoreCase);
             if (match.Success)
             {
-                letters.Add(match.Groups[1].Value);
+                letters.Add(match.Groups[1].Value.ToUpper());
             }
         }
 

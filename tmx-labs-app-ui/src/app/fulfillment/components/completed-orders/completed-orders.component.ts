@@ -178,7 +178,7 @@ export class CompletedOrdersComponent implements AfterViewInit {
       o.shipDateTime ? new Date(o.shipDateTime).toLocaleDateString() : '',
       o.processedBy,
       o.state,
-      o.deviceCount.toString(),
+      (o.deviceCount ?? 0).toString(),
       (o.deviceSerialNumbers ?? []).join('; ')
     ]);
 

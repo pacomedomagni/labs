@@ -130,9 +130,10 @@ export class EnrollNewUserComponent implements AfterViewInit {
         this.setState(EnrollmentState.Initial);
         this.emailForm.reset();
 
-        this.router.navigate(['/DeviceOrder/PendingOrders'], {
+        const seqIDs = this.deviceOrderSeqIDs();
+        this.router.navigate(['/OrderFulfillment'], {
             queryParams: {
-                deviceOrderSeqIDs: this.deviceOrderSeqIDs(),
+                deviceOrderSeqId: seqIDs.length > 0 ? seqIDs[0] : undefined,
             },
         });
     }

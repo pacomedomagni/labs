@@ -75,14 +75,18 @@
       </div>
 
       <!-- Tabs -->
-      <mat-tab-group [selectedIndex]="selectedTab()" (selectedIndexChange)="onTabChange($event)" class="flex-1 w-full fulfillment-tabs" aria-label="Order fulfillment">
-        <mat-tab label="PENDING ORDERS"></mat-tab>
-        <mat-tab label="COMPLETED ORDERS"></mat-tab>
-      </mat-tab-group>
+      <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="flex-1 w-full fulfillment-tabs" aria-label="Order fulfillment">
+        <button mat-tab-link
+          [active]="selectedTab() === 0"
+          (click)="onTabChange(0)">PENDING ORDERS</button>
+        <button mat-tab-link
+          [active]="selectedTab() === 1"
+          (click)="onTabChange(1)">COMPLETED ORDERS</button>
+      </nav>
     </div>
 
     <!-- Tab Content -->
-    <div class="tab-content" [ngSwitch]="selectedTab()">
+    <div class="tab-content" [ngSwitch]="selectedTab()" mat-tab-nav-panel #tabPanel>
       <div *ngSwitchCase="0">
         <tmx-pending-orders [orders]="pendingOrderData()" (orderSelected)="onPendingOrderSelected($event)"></tmx-pending-orders>
       </div>

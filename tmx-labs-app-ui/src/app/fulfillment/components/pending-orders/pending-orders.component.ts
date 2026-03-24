@@ -105,7 +105,7 @@ export class PendingOrdersComponent implements AfterViewInit {
   filteredPendingCount = computed(() => this.filteredOrders().length);
 
   filteredDevicesNeeded = computed(() =>
-    this.filteredOrders().reduce((sum, o) => sum + o.deviceCount, 0)
+    this.filteredOrders().reduce((sum, o) => sum + (o.deviceCount ?? 0), 0)
   );
 
   constructor() {
